@@ -312,7 +312,7 @@ public abstract class BaseTheme {
     graphics.drawString("sc: " + scale, leftX + 2, bottomY + 30 * scale);
   }
 
-  protected void drawExternal(
+  protected ExternalDrawData drawExternal(
       Graphics2D graphics,
       int width,
       int height,
@@ -320,18 +320,19 @@ public abstract class BaseTheme {
       Nameplate nameplate,
       Point anchor,
       boolean isHovered) {
-    ExternalDrawData externalDrawData = new ExternalDrawData();
+    var externalDrawData = new ExternalDrawData();
+    var actor = nameplate.getActor();
 
-    // TODO: Remove this conditional when the RL team add NPC.getOverheadIcon()
-    if (nameplate.getActor() instanceof Player) {
-      drawOverheads(graphics, width, height, scale, nameplate, anchor, externalDrawData);
-    }
-
-    if (nameplate.getActor() instanceof Player) {
+    if (actor instanceof Player) {
       drawSkullIcon(graphics, width, height, scale, nameplate, anchor, externalDrawData);
     }
 
-    if (nameplate.getActor() instanceof NPC && ((NPCNameplate) nameplate).isNoLoot()) {
+    // TODO: Remove this conditional when the RL team add NPC.getOverheadIcon()
+    if (actor instanceof Player) {
+      drawOverheads(graphics, width, height, scale, nameplate, anchor, externalDrawData);
+    }
+
+    if (actor instanceof NPC && ((NPCNameplate) nameplate).isNoLoot()) {
       drawNoLootIcon(graphics, width, height, scale, nameplate, anchor, externalDrawData);
     }
 
@@ -339,7 +340,14 @@ public abstract class BaseTheme {
       drawHoverIndicator(graphics, width, height, scale, nameplate, anchor, externalDrawData);
     }
 
+    var client = plugin.getClient();
+    if ((actor instanceof NPC && client.getHintArrowNpc() == actor) || (actor instanceof Player && client.getHintArrowPlayer() == actor)) {
+      drawHintArrow(graphics, width, height, scale, nameplate, anchor, externalDrawData);
+    }
+
     // drawDebugData(graphics, width, height, scale, nameplate, anchor);
+
+    return externalDrawData;
   }
 
   protected abstract void drawNoLootIcon(
@@ -369,25 +377,44 @@ public abstract class BaseTheme {
       Point anchor,
       ExternalDrawData externalDrawData);
 
-  public void drawNameplate(
+  protected abstract void drawHintArrow(
+      Graphics2D graphics,
+      int width,
+      int height,
+      float scale,
+      Nameplate nameplate,
+      Point anchor,
+      ExternalDrawData externalDrawData);
+
+  public int drawNameplate(
       Graphics2D graphics, Nameplate nameplate, Point anchor, float scale, boolean isHovered) {
     int width = getWidth(graphics, scale, nameplate);
     int height = getHeight(graphics, scale, nameplate);
-    if (width <= 0 || height <= 0) {
-      return;
+    if (width > 0 && height > 0) {
+      BufferedImage plate = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+      Graphics2D plateGraphics = plate.createGraphics();
+      drawBasePlate(plateGraphics, width, height, scale, nameplate);
+      drawOverlay(plateGraphics, width, height, scale, nameplate);
+      plateGraphics.dispose();
+
+      //        Composite oldComposite = graphics.getComposite();
+      //        graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f));
+      //        graphics.setComposite(oldComposite);
+
+      graphics.drawImage(plate, anchor.getX() - width / 2, anchor.getY() - height, null);
     }
 
-    BufferedImage plate = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-    Graphics2D plateGraphics = plate.createGraphics();
-    drawBasePlate(plateGraphics, width, height, scale, nameplate);
-    drawOverlay(plateGraphics, width, height, scale, nameplate);
-    plateGraphics.dispose();
-    drawExternal(graphics, width, height, scale, nameplate, anchor, isHovered);
+    if (shouldDrawExternal(width, height)) {
+      var externalDrawData = drawExternal(graphics, width, height, scale, nameplate, anchor, isHovered);
 
-    //        Composite oldComposite = graphics.getComposite();
-    //        graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f));
-    graphics.drawImage(plate, anchor.getX() - width / 2, anchor.getY() - height, null);
-    //        graphics.setComposite(oldComposite);
+      height += externalDrawData.getTopOffset();
+    }
+
+    return height;
+  }
+
+  protected boolean shouldDrawExternal(int width, int height) {
+    return width > 0 && height > 0;
   }
 
   protected int getWidth(Graphics2D graphics, float scale, Nameplate nameplate) {

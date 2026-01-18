@@ -415,7 +415,7 @@ public class DefaultTheme extends BaseTheme {
     BufferedImage overheadImage = overheadIcon.getImage();
     graphics.drawImage(
         overheadImage.getScaledInstance(
-            overheadSize, overheadSize, Image.SCALE_SMOOTH), // TODO: optimise this
+            overheadSize, overheadSize, Image.SCALE_REPLICATE), // TODO: optimise this
         rightX + rightPadding,
         topY,
         overheadSize,
@@ -446,6 +446,27 @@ public class DefaultTheme extends BaseTheme {
 
   @Override
   protected void drawHoverIndicator(
+      Graphics2D graphics,
+      int width,
+      int height,
+      float scale,
+      Nameplate nameplate,
+      Point anchor,
+      ExternalDrawData externalDrawData) {
+    int padding = (int) (6 * scale);
+    int leftX = anchor.getX() - width / 2 - externalDrawData.getLeftOffset();
+    int centerY = anchor.getY() - height / 2;
+    externalDrawData.addLeftOffset(hoverIndicator.getWidth() + padding);
+
+    graphics.drawImage(
+        hoverIndicator,
+        null,
+        leftX - hoverIndicator.getWidth() - padding,
+        centerY - hoverIndicator.getHeight() / 2);
+  }
+
+  @Override
+  protected void drawHintArrow(
       Graphics2D graphics,
       int width,
       int height,

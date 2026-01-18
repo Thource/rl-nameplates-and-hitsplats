@@ -4,7 +4,6 @@ plugins {
 }
 
 repositories {
-	mavenLocal()
 	maven {
 		url = 'https://repo.runelite.net'
 	}
@@ -27,7 +26,8 @@ dependencies {
 group = 'dev.thource.runelite.improvedcontextmenu'
 version = '1.0.0'
 //noinspection GroovyUnusedAssignment
-sourceCompatibility = '1.8'
+sourceCompatibility = '11'
+targetCompatibility = JavaVersion.VERSION_11
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = 'UTF-8'
@@ -50,7 +50,7 @@ spotless {
 		// don't need to set target, it is inferred from java
 
 		// apply a specific flavor of google-java-format
-		googleJavaFormat('1.8').reflowLongStrings()//.skipJavadocFormatting()
+		googleJavaFormat('11').reflowLongStrings()//.skipJavadocFormatting()
 		// fix formatting of type annotations
 		formatAnnotations()
 		// make sure every file has the following copyright header.

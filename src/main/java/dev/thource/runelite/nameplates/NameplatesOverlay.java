@@ -46,13 +46,14 @@ public class NameplatesOverlay extends Overlay {
     WorldView topLevelWorldView = client.getTopLevelWorldView();
 
     Player localPlayer = client.getLocalPlayer();
-    if (plugin.getAlwaysDrawName(localPlayer) || plugin.shouldDrawFor(localPlayer)) {
+    var theme = plugin.getConfig().theme();
+    if (theme == Themes.OSRS || plugin.getAlwaysDrawName(localPlayer) || plugin.shouldDrawFor(localPlayer)) {
       map.computeIfAbsent(localPlayer.getLocalLocation(), (k) -> new ArrayList<>())
           .add(localPlayer);
     }
     Stream.of(topLevelWorldView.players(), topLevelWorldView.npcs())
         .flatMap(IndexedObjectSet::stream)
-        .filter((actor) -> plugin.getAlwaysDrawName(actor) || plugin.shouldDrawFor(actor))
+        .filter((actor) -> theme == Themes.OSRS || plugin.getAlwaysDrawName(actor) || plugin.shouldDrawFor(actor))
         .filter((actor) -> actor != localPlayer)
         .forEach(
             (actor) ->
@@ -79,34 +80,32 @@ public class NameplatesOverlay extends Overlay {
             (entry) -> {
               List<Actor> actors = entry.getValue();
 
-              // TODO: set stackHeight initial value back to 0 and remove the addition below when RL
-              // addsupport for overriding overhead and skull sprites
-              // This is just to make the nameplates show up higher than any potential skull or
-              // overhead icons
-              int stackHeight = actors.stream().anyMatch(a -> a instanceof Player) ? 28 : 0;
-              if (actors.stream()
-                  .filter(a -> a instanceof Player)
-                  .anyMatch(a -> ((Player) a).getOverheadIcon() != null)) {
-                stackHeight += 30;
+              int stackHeight = 0;
+
+              for (Actor actor : actors) {
+                if (actor.getOverheadCycle() > 0) {
+                  stackHeight += 8;
+                  break;
+                }
               }
 
               int firstActorHeight = actors.get(0).getLogicalHeight();
               for (Actor actor : actors) {
-                Point point = actor.getCanvasTextLocation(graphics, " ", firstActorHeight);
+                Point point = actor.getCanvasTextLocation(graphics, " ", firstActorHeight + 15);
                 if (point == null) {
-                  return;
+                  continue;
                 }
 
                 Nameplate nameplate = plugin.getNameplateForActor(actor);
                 if (nameplate == null) {
-                  return;
+                  continue;
                 }
 
                 stackHeight +=
                     renderNameplate(
                             graphics,
                             nameplate,
-                            new Point(point.getX(), point.getY() - 16 - stackHeight),
+                            new Point(point.getX(), point.getY() - stackHeight),
                             actor.getLocalLocation().distanceTo(cameraPoint),
                             actor,
                             finalHoveredActor == actor)
@@ -178,6 +177,7 @@ public class NameplatesOverlay extends Overlay {
     return null;
   }
 
+  // returns rendered nameplate height
   private int renderNameplate(
       Graphics2D graphics,
       Nameplate nameplate,
@@ -190,12 +190,11 @@ public class NameplatesOverlay extends Overlay {
     float scale = 1;
 
     BaseTheme theme = getTheme(actor);
-    theme.drawNameplate(graphics, nameplate, point, scale, isHovered);
-    return theme.getHeight(graphics, scale, nameplate);
+    return theme.drawNameplate(graphics, nameplate, point, scale, isHovered);
   }
 
   private BaseTheme getTheme(Actor actor) {
-    return Themes.DEFAULT.getTheme();
+    return this.plugin.getConfig().theme().getTheme();
   }
 
   private MenuEntry getHoveredMenuEntry(final MenuEntry[] menuEntries) {

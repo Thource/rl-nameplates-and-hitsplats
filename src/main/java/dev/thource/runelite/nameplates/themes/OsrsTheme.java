@@ -1,20 +1,50 @@
 package dev.thource.runelite.nameplates.themes;
 
 import dev.thource.runelite.nameplates.Nameplate;
+import dev.thource.runelite.nameplates.NameplateHeadIcon;
+import dev.thource.runelite.nameplates.NameplateSkullIcon;
+import dev.thource.runelite.nameplates.NameplatesPlugin;
 import dev.thource.runelite.nameplates.PoisonStatus;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import net.runelite.api.Player;
 import net.runelite.api.Point;
 import net.runelite.api.SpriteID;
 import net.runelite.api.SpritePixels;
+import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.itemstats.StatChange;
 
 public class OsrsTheme extends BaseTheme {
+  private BufferedImage hintArrowImage;
+
+  @Override
+  public void setPlugin(NameplatesPlugin plugin) {
+    super.setPlugin(plugin);
+
+    plugin
+        .getClientThread()
+        .invoke(
+            () -> {
+              SpriteManager spriteManager = plugin.getSpriteManager();
+              hintArrowImage = spriteManager.getSprite(441, 1);
+            });
+  }
+
+  @Override
+  protected boolean shouldDrawExternal(int width, int height) {
+    return true;
+  }
+
   @Override
   protected void drawBasePlate(
       Graphics2D graphics, int width, int height, float scale, Nameplate nameplate) {
     SpritePixels healthbarBackSprite = getHealthbarBackSprite(nameplate.getHealthScale());
+    if (!shouldDrawBars(nameplate)) {
+      return;
+    }
+
     if (healthbarBackSprite != null) {
       graphics.drawImage(healthbarBackSprite.toBufferedImage(), null, 0, 0);
     } else {
@@ -171,7 +201,27 @@ public class OsrsTheme extends BaseTheme {
       float scale,
       Nameplate nameplate,
       Point anchor,
-      ExternalDrawData externalDrawData) {}
+      ExternalDrawData externalDrawData) {
+    NameplateHeadIcon overheadIcon =
+            NameplateHeadIcon.get(((Player) nameplate.getActor()).getOverheadIcon());
+    if (overheadIcon == null) {
+      return;
+    }
+
+    BufferedImage overheadImage = overheadIcon.getImage();
+    int rightX = anchor.getX() - overheadImage.getWidth() / 2;
+    int topY = anchor.getY() - height - externalDrawData.getTopOffset() - overheadImage.getHeight() - 4;
+
+    externalDrawData.addTopOffset(overheadImage.getHeight() + 4);
+
+    graphics.drawImage(
+            overheadImage,
+            rightX,
+            topY,
+            overheadImage.getWidth(),
+            overheadImage.getHeight(),
+            null);
+  }
 
   @Override
   protected void drawNoLootIcon(
@@ -191,7 +241,49 @@ public class OsrsTheme extends BaseTheme {
       float scale,
       Nameplate nameplate,
       Point anchor,
-      ExternalDrawData externalDrawData) {}
+      ExternalDrawData externalDrawData) {
+    var icon = NameplateSkullIcon.get(((Player) nameplate.getActor()).getSkullIcon());
+    if (icon == null) {
+      return;
+    }
+
+    var image = icon.getImage();
+    var rightX = anchor.getX() - image.getWidth() / 2;
+    var topY = anchor.getY() - height - externalDrawData.getTopOffset() - image.getHeight() - 4;
+
+    externalDrawData.addTopOffset(image.getHeight() + 4);
+
+    graphics.drawImage(
+            image,
+            rightX,
+            topY,
+            image.getWidth(),
+            image.getHeight(),
+            null);
+  }
+
+  @Override
+  protected void drawHintArrow(
+      Graphics2D graphics,
+      int width,
+      int height,
+      float scale,
+      Nameplate nameplate,
+      Point anchor,
+      ExternalDrawData externalDrawData) {
+    var rightX = anchor.getX() - hintArrowImage.getWidth() / 2;
+    var topY = anchor.getY() - height - externalDrawData.getTopOffset() - hintArrowImage.getHeight() - 4;
+
+    externalDrawData.addTopOffset(hintArrowImage.getHeight() + 4);
+
+    graphics.drawImage(
+            hintArrowImage,
+            rightX,
+            topY,
+            hintArrowImage.getWidth(),
+            hintArrowImage.getHeight(),
+            null);
+  }
 
   @Override
   protected void drawHoverIndicator(
@@ -289,6 +381,10 @@ public class OsrsTheme extends BaseTheme {
 
   @Override
   public int getHeight(Graphics2D graphics, float scale, Nameplate nameplate) {
+    if (!shouldDrawBars(nameplate)) {
+      return 0;
+    }
+
     return 7;
   }
 }
