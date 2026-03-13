@@ -43,12 +43,12 @@ public abstract class BaseTheme {
       healthString += "~";
     }
 
-    boolean forcePercentage =
-        (nameplate.getActor() instanceof Player
-                && !config.lookupPlayerHp()
-                && nameplate.getActor() != plugin.getClient().getLocalPlayer())
-            || (nameplate instanceof NPCNameplate
-                && ((NPCNameplate) nameplate).isPercentageHealth());
+    boolean forcePercentage = nameplate.drawHealthAsPercentage();
+//        (nameplate.getActor() instanceof Player
+//                && !config.lookupPlayerHp()
+//                && nameplate.getActor() != plugin.getClient().getLocalPlayer())
+//            || (nameplate instanceof NPCNameplate
+//                && ((NPCNameplate) nameplate).isPercentageHealth());
 
     HitpointsDisplayStyle displayStyle = config.hitpointsDisplayStyle();
     if (forcePercentage || displayStyle != HitpointsDisplayStyle.HITPOINTS) {
@@ -340,8 +340,7 @@ public abstract class BaseTheme {
       drawHoverIndicator(graphics, width, height, scale, nameplate, anchor, externalDrawData);
     }
 
-    var client = plugin.getClient();
-    if ((actor instanceof NPC && client.getHintArrowNpc() == actor) || (actor instanceof Player && client.getHintArrowPlayer() == actor)) {
+    if (nameplate.hasHintArrow()) {
       drawHintArrow(graphics, width, height, scale, nameplate, anchor, externalDrawData);
     }
 
@@ -458,7 +457,7 @@ public abstract class BaseTheme {
       return false;
     }
 
-    return plugin.shouldDrawFor(nameplate.getActor());
+    return plugin.shouldDrawFor(nameplate);
   }
 
   protected boolean shouldDrawPrayerBar(Actor actor) {

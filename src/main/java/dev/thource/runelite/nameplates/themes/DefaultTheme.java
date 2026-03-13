@@ -115,9 +115,11 @@ public class DefaultTheme extends BaseTheme {
                     .getStringBounds(String.valueOf(nameplate.getCombatLevel()), graphics)
                     .getHeight()
                 * 0.9f);
-    graphics.setColor(
-        getLevelColor(
-            plugin.getClient().getLocalPlayer().getCombatLevel(), nameplate.getCombatLevel()));
+    var localLevel = 126;
+    if (plugin.getClient().getLocalPlayer() != null) {
+      localLevel = plugin.getClient().getLocalPlayer().getCombatLevel();
+    }
+    graphics.setColor(getLevelColor(localLevel, nameplate.getCombatLevel()));
     graphics.drawString(combatLevelString, (int) (width - combatLevelBounds.getWidth()), textLineY);
   }
 
@@ -396,7 +398,7 @@ public class DefaultTheme extends BaseTheme {
       ExternalDrawData externalDrawData) {
     NameplateHeadIcon overheadIcon =
         NameplateHeadIcon.get(((Player) nameplate.getActor()).getOverheadIcon());
-    if (overheadIcon == null) {
+    if (overheadIcon == null || overheadIcon == NameplateHeadIcon.NONE) {
       return;
     }
 
@@ -497,7 +499,7 @@ public class DefaultTheme extends BaseTheme {
       ExternalDrawData externalDrawData) {
     NameplateSkullIcon skullIcon =
         NameplateSkullIcon.get(((Player) nameplate.getActor()).getSkullIcon());
-    if (skullIcon == null) {
+    if (skullIcon == null || skullIcon == NameplateSkullIcon.NONE) {
       return;
     }
 

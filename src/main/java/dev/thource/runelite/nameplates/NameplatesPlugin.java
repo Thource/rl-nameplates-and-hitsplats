@@ -1,7 +1,11 @@
 package dev.thource.runelite.nameplates;
 
+import com.google.gson.Gson;
 import com.google.inject.Provides;
+import dev.thource.runelite.nameplates.panel.NameplatesPluginPanel;
 import dev.thource.runelite.nameplates.themes.Themes;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.Icon;
+import java.awt.Component;
 import java.awt.image.BufferedImage;
 import java.time.Duration;
 import java.time.Instant;
@@ -13,6 +17,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.inject.Inject;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Actor;
@@ -37,9 +43,7 @@ import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.HitsplatApplied;
 import net.runelite.api.events.NpcDespawned;
-import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.events.PlayerDespawned;
-import net.runelite.api.events.PlayerSpawned;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
@@ -57,6 +61,8 @@ import net.runelite.client.plugins.itemstats.Effect;
 import net.runelite.client.plugins.itemstats.ItemStatChanges;
 import net.runelite.client.plugins.itemstats.StatChange;
 import net.runelite.client.plugins.itemstats.stats.Stats;
+import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageUtil;
 
@@ -70,10 +76,12 @@ public class NameplatesPlugin extends Plugin {
 
   private static final int NORMAL_HP_REGEN_TICKS = 100;
   @Getter @Inject private Client client;
+  @Getter @Inject private Gson gson;
   @Getter @Inject private ClientThread clientThread;
+  @Inject private ClientToolbar clientToolbar;
   @Getter @Inject private NameplatesConfig config;
   @Inject private OverlayManager overlayManager;
-  @Inject private NameplatesOverlay nameplatesOverlay;
+  @Getter @Inject private NameplatesOverlay nameplatesOverlay;
   @Inject private ItemStatChanges statChanges;
   @Getter @Inject private NPCManager npcManager;
   @Getter @Inject private SpriteManager spriteManager;
@@ -82,6 +90,9 @@ public class NameplatesPlugin extends Plugin {
   @Getter private final HashMap<Integer, HpCacheEntry> hpCache = new HashMap<>();
   @Getter private final HashMap<Integer, Nameplate> nameplates = new HashMap<>();
   @Getter private final HashMap<Integer, SpritePixels> overriddenSprites = new HashMap<>();
+
+  private NameplatesPluginPanel panel;
+  private NavigationButton navButton;
 
   private static final int[] spritesToHide = {
     SpriteID.HEALTHBAR_DEFAULT_FRONT_30PX,
@@ -198,6 +209,14 @@ public class NameplatesPlugin extends Plugin {
   private int ticksSinceHPRegen;
   @Getter private Instant nextPoisonTick;
 
+
+
+  // TODO: make a plugin panel where the user can view the themes for nameplates and hitsplats and easily define their own
+  //   the panel will show a preview by rendering a fake nameplate and fake hitsplats
+  //   plus a dono button lolol
+
+
+
   private void overrideSprites() {
     Map<Integer, SpritePixels> overrides = client.getSpriteOverrides();
     boolean anySpriteOverridden = false;
@@ -234,8 +253,38 @@ public class NameplatesPlugin extends Plugin {
     clientThread.invokeLater(client::resetHealthBarCaches);
   }
 
+  public static boolean getConfirmation(Component parentComponent, String text,
+                                        String confirmText, int messageType) {
+    int result = JOptionPane.CANCEL_OPTION;
+
+    try {
+      result =
+              JOptionPane.showConfirmDialog(parentComponent, text, confirmText,
+                      JOptionPane.OK_CANCEL_OPTION, messageType);
+    } catch (Exception err) {
+      log.warn("Unexpected exception occurred while check for confirm required", err);
+    }
+
+    return result == JOptionPane.OK_OPTION;
+  }
+
   @Override
   protected void startUp() {
+    if (panel == null) {
+      // edt
+      SwingUtilities.invokeLater(() -> {
+        panel = new NameplatesPluginPanel(this);
+
+        navButton = NavigationButton.builder()
+                .tooltip("Nameplates & Hitsplats")
+                .icon(ImageUtil.loadImageResource(getClass(), "icon-28.png"))
+                .panel(panel)
+                .priority(8)
+                .build();
+        clientToolbar.addNavigation(navButton);
+      });
+    }
+
     clientThread.invoke(
         () -> {
           for (NameplateHeadIcon icon : NameplateHeadIcon.values()) {
@@ -244,6 +293,8 @@ public class NameplatesPlugin extends Plugin {
           for (NameplateSkullIcon icon : NameplateSkullIcon.values()) {
             icon.loadImage(spriteManager);
           }
+
+          Icon.initImages(spriteManager);
         });
 
     for (Themes theme : Themes.values()) {
@@ -257,10 +308,18 @@ public class NameplatesPlugin extends Plugin {
     }
 
     overlayManager.add(nameplatesOverlay);
+
+    if (navButton != null) {
+      clientToolbar.addNavigation(navButton);
+    }
   }
 
   @Override
   protected void shutDown() {
+    if (navButton != null) {
+      clientToolbar.removeNavigation(navButton);
+    }
+
     overlayManager.remove(nameplatesOverlay);
 
     restoreSprites();
@@ -617,6 +676,10 @@ public class NameplatesPlugin extends Plugin {
   }
 
   public NameplateDisplayMode getDisplayMode(Actor actor) {
+    if (actor.getHash() == -123L) {
+      return NameplateDisplayMode.ALWAYS;
+    }
+
     if (actor instanceof Player) {
       if (actor == client.getLocalPlayer()) {
         return config.ownNameplateDisplayMode();
@@ -640,8 +703,8 @@ public class NameplatesPlugin extends Plugin {
     return config.alwaysDrawNPCNames();
   }
 
-  public boolean shouldDrawFor(Actor actor) {
-    return getDisplayMode(actor).shouldDraw(client, getNameplateForActor(actor));
+  public boolean shouldDrawFor(Nameplate nameplate) {
+    return getDisplayMode(nameplate.getActor()).shouldDraw(client, nameplate);
   }
 
   @Provides

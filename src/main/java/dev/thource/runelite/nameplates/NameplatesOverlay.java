@@ -2,6 +2,8 @@ package dev.thource.runelite.nameplates;
 
 import dev.thource.runelite.nameplates.themes.BaseTheme;
 import dev.thource.runelite.nameplates.themes.Themes;
+import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkTheme;
+import dev.thource.runelite.nameplates.themes.nameplates.NameplateTheme;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
@@ -13,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 import javax.inject.Inject;
+import lombok.Getter;
 import net.runelite.api.Actor;
 import net.runelite.api.Client;
 import net.runelite.api.IndexedObjectSet;
@@ -30,6 +33,7 @@ public class NameplatesOverlay extends Overlay {
   @Inject private Client client;
   @Inject private NameplatesPlugin plugin;
   private long lastRender;
+  @Getter private Actor hoveredActor;
 
   @Inject
   NameplatesOverlay() {
@@ -47,13 +51,13 @@ public class NameplatesOverlay extends Overlay {
 
     Player localPlayer = client.getLocalPlayer();
     var theme = plugin.getConfig().theme();
-    if (theme == Themes.OSRS || plugin.getAlwaysDrawName(localPlayer) || plugin.shouldDrawFor(localPlayer)) {
+    if (theme == Themes.OSRS || plugin.getAlwaysDrawName(localPlayer) || plugin.shouldDrawFor(plugin.getNameplateForActor(localPlayer))) {
       map.computeIfAbsent(localPlayer.getLocalLocation(), (k) -> new ArrayList<>())
           .add(localPlayer);
     }
     Stream.of(topLevelWorldView.players(), topLevelWorldView.npcs())
         .flatMap(IndexedObjectSet::stream)
-        .filter((actor) -> theme == Themes.OSRS || plugin.getAlwaysDrawName(actor) || plugin.shouldDrawFor(actor))
+        .filter((actor) -> theme == Themes.OSRS || plugin.getAlwaysDrawName(actor) || plugin.shouldDrawFor(plugin.getNameplateForActor(actor)))
         .filter((actor) -> actor != localPlayer)
         .forEach(
             (actor) ->
@@ -64,12 +68,13 @@ public class NameplatesOverlay extends Overlay {
 
   @Override
   public Dimension render(Graphics2D graphics) {
+    updateHoveredActor();
+
     long deltaMs = System.currentTimeMillis() - lastRender;
 
     LocalPoint cameraPoint =
         new LocalPoint(client.getCameraX(), client.getCameraY(), client.getTopLevelWorldView());
 
-    Actor finalHoveredActor = getHoveredActor();
     getLocalPointActorMap().entrySet().stream()
         .sorted(
             Comparator.comparingInt(
@@ -106,9 +111,7 @@ public class NameplatesOverlay extends Overlay {
                             graphics,
                             nameplate,
                             new Point(point.getX(), point.getY() - stackHeight),
-                            actor.getLocalLocation().distanceTo(cameraPoint),
-                            actor,
-                            finalHoveredActor == actor)
+                            actor.getLocalLocation().distanceTo(cameraPoint))
                         + 4;
                 nameplate.getHpAnimationData().progressBy(deltaMs);
               }
@@ -119,17 +122,19 @@ public class NameplatesOverlay extends Overlay {
     return null;
   }
 
-  private Actor getHoveredActor() {
+  private void updateHoveredActor() {
     MenuEntry[] menuEntries = client.getMenuEntries();
     if (menuEntries.length == 0) {
-      return null;
+      hoveredActor = null;
+      return;
     }
 
     HoverIndicatorMode hoverIndicatorMode = plugin.getConfig().hoverIndicatorMode();
     if ((hoverIndicatorMode == HoverIndicatorMode.RIGHT_CLICK
             || hoverIndicatorMode == HoverIndicatorMode.BUSY_RIGHT_CLICK)
         && !client.isMenuOpen()) {
-      return null;
+      hoveredActor = null;
+      return;
     }
 
     if (hoverIndicatorMode == HoverIndicatorMode.BUSY
@@ -142,7 +147,8 @@ public class NameplatesOverlay extends Overlay {
               .count();
 
       if (uniqueActors <= 1) {
-        return null;
+        hoveredActor = null;
+        return;
       }
     }
 
@@ -169,28 +175,45 @@ public class NameplatesOverlay extends Overlay {
       case PLAYER_SEVENTH_OPTION:
       case PLAYER_EIGHTH_OPTION:
       case RUNELITE_PLAYER:
-        return entry.getActor();
+        hoveredActor = entry.getActor();
+        return;
       default:
         break;
     }
 
-    return null;
+    hoveredActor = null;
   }
 
   // returns rendered nameplate height
-  private int renderNameplate(
+  public int renderNameplate(
       Graphics2D graphics,
       Nameplate nameplate,
       Point point,
-      int distance,
-      Actor actor,
-      boolean isHovered) {
+      int distance) {
     //        float scale = Math.min(Math.max(8f / (distance / 300f), 0.5f), 1);
     //        scale = Math.max(scale * ((float) Math.pow(client.get3dZoom(), 0.6f) / 50f), 1f);
     float scale = 1;
 
+    var actor = nameplate.getActor();
     BaseTheme theme = getTheme(actor);
-    return theme.drawNameplate(graphics, nameplate, point, scale, isHovered);
+//    int nameplateHeight = theme.drawNameplate(graphics, nameplate, point, scale, isHovered);
+
+    var fdt = new FlatDarkTheme();
+    fdt.setPlugin(plugin);
+    fdt.drawNameplate(graphics, nameplate, point);
+
+    return 0;
+  }
+
+  // returns rendered nameplate height
+  public int renderNameplate(
+      Graphics2D graphics,
+      Nameplate nameplate,
+      Point point,
+      NameplateTheme theme) {
+    theme.drawNameplate(graphics, nameplate, point);
+
+    return 0;
   }
 
   private BaseTheme getTheme(Actor actor) {

@@ -3,13 +3,13 @@ package dev.thource.runelite.nameplates;
 import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
+import net.runelite.api.Client;
 import net.runelite.api.NPC;
 import net.runelite.api.NPCComposition;
 import net.runelite.api.ParamID;
 
 @Getter
 public class NPCNameplate extends Nameplate {
-  @Setter private boolean noLoot;
   private boolean percentageHealth;
   private int percentageHealthOverride;
   private float firstPercentageHealth = -1f;
@@ -40,6 +40,16 @@ public class NPCNameplate extends Nameplate {
 
     this.percentageHealth = maxHealth <= 0 && percentageHealthOverride <= 0;
     this.maxHealth = this.percentageHealth ? 100 : maxHealth;
+  }
+
+  @Override
+  public boolean hasHintArrow() {
+    return plugin.getClient().getHintArrowNpc() == actor;
+  }
+
+  @Override
+  public boolean drawHealthAsPercentage() {
+    return isPercentageHealth();
   }
 
   public void recalculatePercentageHealth(NameplatesPlugin plugin) {

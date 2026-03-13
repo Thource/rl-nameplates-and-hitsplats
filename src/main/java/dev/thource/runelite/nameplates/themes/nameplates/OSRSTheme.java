@@ -1,0 +1,46 @@
+package dev.thource.runelite.nameplates.themes.nameplates;
+
+import dev.thource.runelite.nameplates.themes.nameplates.elements.HealthBar;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.HealthBarColorProvider;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.Icon;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.IconContainer;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.IconType;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.PrayerBar;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.Text;
+import java.awt.Color;
+import java.util.List;
+import net.runelite.api.coords.Direction;
+
+public class OSRSTheme extends NameplateTheme {
+    public OSRSTheme() {
+        name = "OSRS";
+        width = 30;
+        height = 4;
+        heightWithPrayerBar = 4;
+
+        elements.add(new IconContainer(
+                "Overhead skull hint",
+                new PositionProvider(OffsetAnchor.MIDDLE, 15),
+                new PositionProvider(OffsetAnchor.END, -4),
+                26,
+                4,
+                true,
+                List.of(IconType.HINT_ARROW, IconType.SKULL, IconType.OVERHEAD)
+        ));
+
+        elements.add(new HealthBar(
+                "Health bar",
+                new PositionProvider(OffsetAnchor.START, 0),
+                new PositionProvider(OffsetAnchor.START, 0),
+                30,
+                4,
+                0,
+                new PositionProvider(OffsetAnchor.START, 0),
+                new PositionProvider(OffsetAnchor.START, 0),
+                Color.WHITE,
+                Color.RED,
+                Color.GREEN,
+                new HealthBarColorProvider(Color.GREEN, Color.GREEN, Color.GREEN, Color.GREEN)
+        ));
+    }
+}
