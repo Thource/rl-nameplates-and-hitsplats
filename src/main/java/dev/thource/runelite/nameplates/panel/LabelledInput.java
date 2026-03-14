@@ -9,7 +9,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.ui.FontManager;
-import static net.runelite.client.ui.PluginPanel.PANEL_WIDTH;
 
 abstract class LabelledInput extends JPanel {
     protected final JLabel label;
@@ -22,9 +21,6 @@ abstract class LabelledInput extends JPanel {
     protected LabelledInput(String name, boolean verticalLayout) {
 //        setOpaque(false);
         setLayout(new BorderLayout());
-//        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-        setPreferredSize(new Dimension(PANEL_WIDTH, 20));
-        setMaximumSize(new Dimension(PANEL_WIDTH, 20));
         setBorder(new EmptyBorder(0, 0, 0, 0));
         setBackground(Color.BLUE);
 

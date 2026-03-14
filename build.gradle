@@ -50,7 +50,7 @@ spotless {
 		// don't need to set target, it is inferred from java
 
 		// apply a specific flavor of google-java-format
-		googleJavaFormat('11').reflowLongStrings()//.skipJavadocFormatting()
+		googleJavaFormat('1.24.0').reflowLongStrings()//.skipJavadocFormatting()
 		// fix formatting of type annotations
 		formatAnnotations()
 		// make sure every file has the following copyright header.

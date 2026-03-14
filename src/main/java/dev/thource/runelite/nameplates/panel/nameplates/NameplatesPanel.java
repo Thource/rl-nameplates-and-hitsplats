@@ -136,12 +136,14 @@ public class NameplatesPanel extends JPanel {
         scrollPane.getVerticalScrollBar().setBorder(new EmptyBorder(0, 9, 0, 0));
         scrollPane.getVerticalScrollBar().setUnitIncrement(21);
 
-        add(scrollPane);
+        add(scrollPane, BorderLayout.CENTER);
 
-//        var previewOptions = new JPanel();
-//        previewOptions.setLayout(new BoxLayout(previewOptions, BoxLayout.Y_AXIS));
+        var previewOptionsWrapper = new JPanel(new BorderLayout());
+        previewOptionsWrapper.setBackground(Color.RED);
+        scrollPanel.add(previewOptionsWrapper);
+
         var previewOptions = new CollapsiblePanel("Preview options", 224);
-        scrollPanel.add(previewOptions);
+        previewOptionsWrapper.add(previewOptions, BorderLayout.NORTH);
 
         var nameInput = new StringInput("Name", nameplate.getName(), (newName) -> {
             nameplate.setName(newName);

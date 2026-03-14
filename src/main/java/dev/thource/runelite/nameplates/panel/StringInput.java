@@ -18,8 +18,6 @@ public class StringInput extends LabelledInput {
 
     public StringInput(String name, String defaultValue, Consumer<String> onChange) {
         super(name, true);
-        setPreferredSize(new Dimension(Integer.MAX_VALUE, 32));
-        setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
 
         input = new JTextField(defaultValue);
         input.getDocument().addDocumentListener(new DocumentListener() {
