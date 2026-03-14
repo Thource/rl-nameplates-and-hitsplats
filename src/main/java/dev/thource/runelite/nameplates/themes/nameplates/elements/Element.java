@@ -10,22 +10,24 @@ import lombok.Setter;
 @Getter
 @Setter
 public abstract class Element implements Nameable {
-    protected final String elementType = getClass().getSimpleName();
-    protected String name;
-    protected final PositionProvider xPositionProvider;
-    protected final PositionProvider yPositionProvider;
+  protected final String elementType = getClass().getSimpleName();
+  protected String name;
+  protected final PositionProvider xPositionProvider;
+  protected final PositionProvider yPositionProvider;
 
-    protected Element() {
-        name = getClass().getSimpleName();
-        xPositionProvider = new PositionProvider();
-        yPositionProvider = new PositionProvider();
-    }
+  protected Element() {
+    name = getClass().getSimpleName();
+    xPositionProvider = new PositionProvider();
+    yPositionProvider = new PositionProvider();
+  }
 
-    protected Element(String name, PositionProvider xPositionProvider, PositionProvider yPositionProvider) {
-        this.name = name;
-        this.xPositionProvider = xPositionProvider;
-        this.yPositionProvider = yPositionProvider;
-    }
+  protected Element(
+      String name, PositionProvider xPositionProvider, PositionProvider yPositionProvider) {
+    this.name = name;
+    this.xPositionProvider = xPositionProvider;
+    this.yPositionProvider = yPositionProvider;
+  }
 
-    public abstract void draw(Nameplate nameplate, Graphics2D graphics, int x, int y, int plateWidth, int plateHeight);
+  public abstract void draw(
+      Nameplate nameplate, Graphics2D graphics, int x, int y, int plateWidth, int plateHeight);
 }

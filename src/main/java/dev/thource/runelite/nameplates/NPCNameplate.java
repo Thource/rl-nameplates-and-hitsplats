@@ -3,7 +3,6 @@ package dev.thource.runelite.nameplates;
 import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
-import net.runelite.api.Client;
 import net.runelite.api.NPC;
 import net.runelite.api.NPCComposition;
 import net.runelite.api.ParamID;

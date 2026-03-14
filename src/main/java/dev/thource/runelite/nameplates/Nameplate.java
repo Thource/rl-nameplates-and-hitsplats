@@ -32,8 +32,7 @@ public abstract class Nameplate {
 
   public String getHealthString() {
     String healthString = this.getCurrentHealth() + " / " + this.getMaxHealth();
-    if (this instanceof NPCNameplate
-            && ((NPCNameplate) this).getPercentageHealthOverride() > 0) {
+    if (this instanceof NPCNameplate && ((NPCNameplate) this).getPercentageHealthOverride() > 0) {
       healthString += "~";
     }
 
@@ -42,7 +41,7 @@ public abstract class Nameplate {
     HitpointsDisplayStyle displayStyle = plugin.getConfig().hitpointsDisplayStyle();
     if (forcePercentage || displayStyle != HitpointsDisplayStyle.HITPOINTS) {
       double percentage =
-              Math.ceil((float) this.getCurrentHealth() / this.getMaxHealth() * 1000f) / 10f;
+          Math.ceil((float) this.getCurrentHealth() / this.getMaxHealth() * 1000f) / 10f;
 
       if (forcePercentage || displayStyle == HitpointsDisplayStyle.PERCENTAGE) {
         healthString = percentage + "%";
@@ -103,7 +102,7 @@ public abstract class Nameplate {
 
   public abstract boolean drawHealthAsPercentage();
 
-    public boolean isHovered() {
-        return plugin.getNameplatesOverlay().getHoveredActor() == this.actor;
-    }
+  public boolean isHovered() {
+    return plugin.getNameplatesOverlay().getHoveredActor() == this.actor;
+  }
 }

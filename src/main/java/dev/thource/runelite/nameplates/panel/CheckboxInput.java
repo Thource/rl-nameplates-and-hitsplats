@@ -1,28 +1,22 @@
 package dev.thource.runelite.nameplates.panel;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.util.function.Consumer;
 import javax.swing.JCheckBox;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.border.EmptyBorder;
-import net.runelite.client.ui.ColorScheme;
-import net.runelite.client.ui.FontManager;
 
 public class CheckboxInput extends LabelledInput {
-    private final JCheckBox input;
+  private final JCheckBox input;
 
-    public CheckboxInput(String name, boolean selected, Consumer<Boolean> onChange) {
-        super(name);
+  public CheckboxInput(String name, boolean selected, Consumer<Boolean> onChange) {
+    super(name);
 
-        input = new JCheckBox();
-        input.setSelected(selected);
-        input.addChangeListener(e -> onChange.accept(input.isSelected()));
-        inputPanel.add(input, BorderLayout.EAST);
-    }
+    input = new JCheckBox();
+    input.setSelected(selected);
+    input.addChangeListener(e -> onChange.accept(input.isSelected()));
+    inputPanel.add(input, BorderLayout.EAST);
+  }
 
-    public void setValue(boolean value) {
-        input.setSelected(value);
-    }
+  public void setValue(boolean value) {
+    input.setSelected(value);
+  }
 }

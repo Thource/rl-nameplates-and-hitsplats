@@ -44,11 +44,11 @@ public abstract class BaseTheme {
     }
 
     boolean forcePercentage = nameplate.drawHealthAsPercentage();
-//        (nameplate.getActor() instanceof Player
-//                && !config.lookupPlayerHp()
-//                && nameplate.getActor() != plugin.getClient().getLocalPlayer())
-//            || (nameplate instanceof NPCNameplate
-//                && ((NPCNameplate) nameplate).isPercentageHealth());
+    //        (nameplate.getActor() instanceof Player
+    //                && !config.lookupPlayerHp()
+    //                && nameplate.getActor() != plugin.getClient().getLocalPlayer())
+    //            || (nameplate instanceof NPCNameplate
+    //                && ((NPCNameplate) nameplate).isPercentageHealth());
 
     HitpointsDisplayStyle displayStyle = config.hitpointsDisplayStyle();
     if (forcePercentage || displayStyle != HitpointsDisplayStyle.HITPOINTS) {
@@ -404,7 +404,8 @@ public abstract class BaseTheme {
     }
 
     if (shouldDrawExternal(width, height)) {
-      var externalDrawData = drawExternal(graphics, width, height, scale, nameplate, anchor, isHovered);
+      var externalDrawData =
+          drawExternal(graphics, width, height, scale, nameplate, anchor, isHovered);
 
       height += externalDrawData.getTopOffset();
     }

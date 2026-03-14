@@ -51,13 +51,19 @@ public class NameplatesOverlay extends Overlay {
 
     Player localPlayer = client.getLocalPlayer();
     var theme = plugin.getConfig().theme();
-    if (theme == Themes.OSRS || plugin.getAlwaysDrawName(localPlayer) || plugin.shouldDrawFor(plugin.getNameplateForActor(localPlayer))) {
+    if (theme == Themes.OSRS
+        || plugin.getAlwaysDrawName(localPlayer)
+        || plugin.shouldDrawFor(plugin.getNameplateForActor(localPlayer))) {
       map.computeIfAbsent(localPlayer.getLocalLocation(), (k) -> new ArrayList<>())
           .add(localPlayer);
     }
     Stream.of(topLevelWorldView.players(), topLevelWorldView.npcs())
         .flatMap(IndexedObjectSet::stream)
-        .filter((actor) -> theme == Themes.OSRS || plugin.getAlwaysDrawName(actor) || plugin.shouldDrawFor(plugin.getNameplateForActor(actor)))
+        .filter(
+            (actor) ->
+                theme == Themes.OSRS
+                    || plugin.getAlwaysDrawName(actor)
+                    || plugin.shouldDrawFor(plugin.getNameplateForActor(actor)))
         .filter((actor) -> actor != localPlayer)
         .forEach(
             (actor) ->
@@ -185,18 +191,14 @@ public class NameplatesOverlay extends Overlay {
   }
 
   // returns rendered nameplate height
-  public int renderNameplate(
-      Graphics2D graphics,
-      Nameplate nameplate,
-      Point point,
-      int distance) {
+  public int renderNameplate(Graphics2D graphics, Nameplate nameplate, Point point, int distance) {
     //        float scale = Math.min(Math.max(8f / (distance / 300f), 0.5f), 1);
     //        scale = Math.max(scale * ((float) Math.pow(client.get3dZoom(), 0.6f) / 50f), 1f);
     float scale = 1;
 
     var actor = nameplate.getActor();
     BaseTheme theme = getTheme(actor);
-//    int nameplateHeight = theme.drawNameplate(graphics, nameplate, point, scale, isHovered);
+    //    int nameplateHeight = theme.drawNameplate(graphics, nameplate, point, scale, isHovered);
 
     var fdt = new FlatDarkTheme();
     fdt.setPlugin(plugin);
@@ -207,10 +209,7 @@ public class NameplatesOverlay extends Overlay {
 
   // returns rendered nameplate height
   public int renderNameplate(
-      Graphics2D graphics,
-      Nameplate nameplate,
-      Point point,
-      NameplateTheme theme) {
+      Graphics2D graphics, Nameplate nameplate, Point point, NameplateTheme theme) {
     theme.drawNameplate(graphics, nameplate, point);
 
     return 0;

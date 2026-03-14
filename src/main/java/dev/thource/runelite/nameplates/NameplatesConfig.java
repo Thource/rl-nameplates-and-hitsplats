@@ -36,12 +36,9 @@ public interface NameplatesConfig extends Config {
 
   String CONFIG_GROUP = "nameplates";
 
-  @ConfigItem(
-      keyName = "theme",
-      name = "Theme",
-      description = "The theme.")
+  @ConfigItem(keyName = "theme", name = "Theme", description = "The theme.")
   default Themes theme() {
-  return Themes.DEFAULT;
+    return Themes.DEFAULT;
   }
 
   @ConfigItem(

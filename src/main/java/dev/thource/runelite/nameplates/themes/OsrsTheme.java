@@ -203,24 +203,20 @@ public class OsrsTheme extends BaseTheme {
       Point anchor,
       ExternalDrawData externalDrawData) {
     NameplateHeadIcon overheadIcon =
-            NameplateHeadIcon.get(((Player) nameplate.getActor()).getOverheadIcon());
+        NameplateHeadIcon.get(((Player) nameplate.getActor()).getOverheadIcon());
     if (overheadIcon == null) {
       return;
     }
 
     BufferedImage overheadImage = overheadIcon.getImage();
     int rightX = anchor.getX() - overheadImage.getWidth() / 2;
-    int topY = anchor.getY() - height - externalDrawData.getTopOffset() - overheadImage.getHeight() - 4;
+    int topY =
+        anchor.getY() - height - externalDrawData.getTopOffset() - overheadImage.getHeight() - 4;
 
     externalDrawData.addTopOffset(overheadImage.getHeight() + 4);
 
     graphics.drawImage(
-            overheadImage,
-            rightX,
-            topY,
-            overheadImage.getWidth(),
-            overheadImage.getHeight(),
-            null);
+        overheadImage, rightX, topY, overheadImage.getWidth(), overheadImage.getHeight(), null);
   }
 
   @Override
@@ -253,13 +249,7 @@ public class OsrsTheme extends BaseTheme {
 
     externalDrawData.addTopOffset(image.getHeight() + 4);
 
-    graphics.drawImage(
-            image,
-            rightX,
-            topY,
-            image.getWidth(),
-            image.getHeight(),
-            null);
+    graphics.drawImage(image, rightX, topY, image.getWidth(), image.getHeight(), null);
   }
 
   @Override
@@ -272,17 +262,13 @@ public class OsrsTheme extends BaseTheme {
       Point anchor,
       ExternalDrawData externalDrawData) {
     var rightX = anchor.getX() - hintArrowImage.getWidth() / 2;
-    var topY = anchor.getY() - height - externalDrawData.getTopOffset() - hintArrowImage.getHeight() - 4;
+    var topY =
+        anchor.getY() - height - externalDrawData.getTopOffset() - hintArrowImage.getHeight() - 4;
 
     externalDrawData.addTopOffset(hintArrowImage.getHeight() + 4);
 
     graphics.drawImage(
-            hintArrowImage,
-            rightX,
-            topY,
-            hintArrowImage.getWidth(),
-            hintArrowImage.getHeight(),
-            null);
+        hintArrowImage, rightX, topY, hintArrowImage.getWidth(), hintArrowImage.getHeight(), null);
   }
 
   @Override

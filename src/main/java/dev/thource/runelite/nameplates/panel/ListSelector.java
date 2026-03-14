@@ -19,87 +19,86 @@ import javax.swing.border.LineBorder;
 import net.runelite.client.ui.ColorScheme;
 
 public class ListSelector<T extends Nameable> extends LabelledInput {
-    private final JList<T> list;
-    private final JPanel buttonContainer;
+  private final JList<T> list;
+  private final JPanel buttonContainer;
 
-    public ListSelector(String name, T defaultValue, List<T> values) {
-        super(name, true);
+  public ListSelector(String name, T defaultValue, List<T> values) {
+    super(name, true);
 
-        setPreferredSize(new Dimension(Integer.MAX_VALUE, 132));
-        setMaximumSize(new Dimension(Integer.MAX_VALUE, 132));
+    setPreferredSize(new Dimension(Integer.MAX_VALUE, 132));
+    setMaximumSize(new Dimension(Integer.MAX_VALUE, 132));
 
-        @SuppressWarnings("unchecked")
-        var array = (T[]) values.toArray(new Nameable[0]);
-        list = new JList<>(array);
-        list.setSelectedValue(defaultValue, true);
-        list.setCellRenderer(new DefaultListCellRenderer() {
+    @SuppressWarnings("unchecked")
+    var array = (T[]) values.toArray(new Nameable[0]);
+    list = new JList<>(array);
+    list.setSelectedValue(defaultValue, true);
+    list.setCellRenderer(
+        new DefaultListCellRenderer() {
 
-            public Component getListCellRendererComponent(JList<?> list,
-                                                          Object value,
-                                                          int index,
-                                                          boolean isSelected,
-                                                          boolean cellHasFocus) {
+          public Component getListCellRendererComponent(
+              JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 
-//        noinspection unchecked
-                return super.getListCellRendererComponent(list, ((T) value).getName(), index, isSelected, cellHasFocus);
-            }
-
+            //        noinspection unchecked
+            return super.getListCellRendererComponent(
+                list, ((T) value).getName(), index, isSelected, cellHasFocus);
+          }
         });
-        var scrollPane = new JScrollPane(list);
-        inputPanel.add(scrollPane, BorderLayout.CENTER);
+    var scrollPane = new JScrollPane(list);
+    inputPanel.add(scrollPane, BorderLayout.CENTER);
 
-        buttonContainer = new JPanel();
-        buttonContainer.setLayout(new BoxLayout(buttonContainer, BoxLayout.X_AXIS));
-        buttonContainer.setBorder(new EmptyBorder(0, 0, 0, 0));
-        inputPanel.add(buttonContainer, BorderLayout.SOUTH);
-    }
+    buttonContainer = new JPanel();
+    buttonContainer.setLayout(new BoxLayout(buttonContainer, BoxLayout.X_AXIS));
+    buttonContainer.setBorder(new EmptyBorder(0, 0, 0, 0));
+    inputPanel.add(buttonContainer, BorderLayout.SOUTH);
+  }
 
-    public void setValues(List<T> values) {
-        var selected = list.getSelectedValue();
+  public void setValues(List<T> values) {
+    var selected = list.getSelectedValue();
 
-        @SuppressWarnings("unchecked")
-        var array = (T[]) values.toArray(new Nameable[0]);
-        list.setListData(array);
+    @SuppressWarnings("unchecked")
+    var array = (T[]) values.toArray(new Nameable[0]);
+    list.setListData(array);
 
-        list.setSelectedValue(selected, true);
-    }
+    list.setSelectedValue(selected, true);
+  }
 
-    public void addChangeListener(Consumer<T> onChange) {
-        list.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                onChange.accept(list.getSelectedValue());
-            }
+  public void addChangeListener(Consumer<T> onChange) {
+    list.addListSelectionListener(
+        e -> {
+          if (!e.getValueIsAdjusting()) {
+            onChange.accept(list.getSelectedValue());
+          }
         });
 
-        onChange.accept(list.getSelectedValue());
-    }
+    onChange.accept(list.getSelectedValue());
+  }
 
-    public void clearButtons() {
-        EnhancedSwingUtilities.fastRemoveAll(buttonContainer);
-    }
+  public void clearButtons() {
+    EnhancedSwingUtilities.fastRemoveAll(buttonContainer);
+  }
 
-    public void addButton(String name, ImageIcon icon, Runnable onClick) {
-        var totalPadding = (26 - icon.getIconHeight());
-        var topPadding = totalPadding / 2;
-        var bottomPadding = (int) Math.ceil(totalPadding / 2f);
+  public void addButton(String name, ImageIcon icon, Runnable onClick) {
+    var totalPadding = (26 - icon.getIconHeight());
+    var topPadding = totalPadding / 2;
+    var bottomPadding = (int) Math.ceil(totalPadding / 2f);
 
-        var button = new JButton();
-        button.setIcon(icon);
-        button.setToolTipText(name);
-        button.setPreferredSize(new Dimension(26, 26));
-        button.setBorder(new CompoundBorder(
-                new LineBorder(ColorScheme.BORDER_COLOR, 1),
-                new EmptyBorder(topPadding, 0, bottomPadding, 0)
-        ));
-        button.addActionListener(e -> onClick.run());
-        buttonContainer.add(button);
-    }
+    var button = new JButton();
+    button.setIcon(icon);
+    button.setToolTipText(name);
+    button.setPreferredSize(new Dimension(26, 26));
+    button.setBorder(
+        new CompoundBorder(
+            new LineBorder(ColorScheme.BORDER_COLOR, 1),
+            new EmptyBorder(topPadding, 0, bottomPadding, 0)));
+    button.addActionListener(e -> onClick.run());
+    buttonContainer.add(button);
+  }
 
-    public void addButtonGlue() {
-        buttonContainer.add(Box.createHorizontalGlue());
-    }
+  public void addButtonGlue() {
+    buttonContainer.add(Box.createHorizontalGlue());
+  }
 
-    public void selectValue(T value) {
-        list.setSelectedValue(value, true);
-    }
+  public void selectValue(T value) {
+    list.setSelectedValue(value, true);
+  }
 }

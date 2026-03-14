@@ -4,7 +4,7 @@ import dev.thource.runelite.nameplates.Nameplate;
 import java.awt.Color;
 
 public class ColorProvider {
-    public Color getColor(Nameplate nameplate) {
-        return Color.WHITE;
-    }
+  public Color getColor(Nameplate nameplate) {
+    return Color.WHITE;
+  }
 }

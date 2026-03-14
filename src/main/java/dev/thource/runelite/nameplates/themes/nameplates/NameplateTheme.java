@@ -33,21 +33,21 @@ public abstract class NameplateTheme implements Nameable {
   protected String getHealthString(Nameplate nameplate) {
     String healthString = nameplate.getCurrentHealth() + " / " + nameplate.getMaxHealth();
     if (nameplate instanceof NPCNameplate
-            && ((NPCNameplate) nameplate).getPercentageHealthOverride() > 0) {
+        && ((NPCNameplate) nameplate).getPercentageHealthOverride() > 0) {
       healthString += "~";
     }
 
     boolean forcePercentage = nameplate.drawHealthAsPercentage();
-//        (nameplate.getActor() instanceof Player
-//                && !config.lookupPlayerHp()
-//                && nameplate.getActor() != plugin.getClient().getLocalPlayer())
-//            || (nameplate instanceof NPCNameplate
-//                && ((NPCNameplate) nameplate).isPercentageHealth());
+    //        (nameplate.getActor() instanceof Player
+    //                && !config.lookupPlayerHp()
+    //                && nameplate.getActor() != plugin.getClient().getLocalPlayer())
+    //            || (nameplate instanceof NPCNameplate
+    //                && ((NPCNameplate) nameplate).isPercentageHealth());
 
     HitpointsDisplayStyle displayStyle = config.hitpointsDisplayStyle();
     if (forcePercentage || displayStyle != HitpointsDisplayStyle.HITPOINTS) {
       double percentage =
-              Math.ceil((float) nameplate.getCurrentHealth() / nameplate.getMaxHealth() * 1000f) / 10f;
+          Math.ceil((float) nameplate.getCurrentHealth() / nameplate.getMaxHealth() * 1000f) / 10f;
 
       if (forcePercentage || displayStyle == HitpointsDisplayStyle.PERCENTAGE) {
         healthString = percentage + "%";

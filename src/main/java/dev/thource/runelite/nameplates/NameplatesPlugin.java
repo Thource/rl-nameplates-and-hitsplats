@@ -209,13 +209,10 @@ public class NameplatesPlugin extends Plugin {
   private int ticksSinceHPRegen;
   @Getter private Instant nextPoisonTick;
 
-
-
-  // TODO: make a plugin panel where the user can view the themes for nameplates and hitsplats and easily define their own
+  // TODO: make a plugin panel where the user can view the themes for nameplates and hitsplats and
+  // easily define their own
   //   the panel will show a preview by rendering a fake nameplate and fake hitsplats
   //   plus a dono button lolol
-
-
 
   private void overrideSprites() {
     Map<Integer, SpritePixels> overrides = client.getSpriteOverrides();
@@ -253,14 +250,14 @@ public class NameplatesPlugin extends Plugin {
     clientThread.invokeLater(client::resetHealthBarCaches);
   }
 
-  public static boolean getConfirmation(Component parentComponent, String text,
-                                        String confirmText, int messageType) {
+  public static boolean getConfirmation(
+      Component parentComponent, String text, String confirmText, int messageType) {
     int result = JOptionPane.CANCEL_OPTION;
 
     try {
       result =
-              JOptionPane.showConfirmDialog(parentComponent, text, confirmText,
-                      JOptionPane.OK_CANCEL_OPTION, messageType);
+          JOptionPane.showConfirmDialog(
+              parentComponent, text, confirmText, JOptionPane.OK_CANCEL_OPTION, messageType);
     } catch (Exception err) {
       log.warn("Unexpected exception occurred while check for confirm required", err);
     }
@@ -272,17 +269,19 @@ public class NameplatesPlugin extends Plugin {
   protected void startUp() {
     if (panel == null) {
       // edt
-      SwingUtilities.invokeLater(() -> {
-        panel = new NameplatesPluginPanel(this);
+      SwingUtilities.invokeLater(
+          () -> {
+            panel = new NameplatesPluginPanel(this);
 
-        navButton = NavigationButton.builder()
-                .tooltip("Nameplates & Hitsplats")
-                .icon(ImageUtil.loadImageResource(getClass(), "icon-28.png"))
-                .panel(panel)
-                .priority(8)
-                .build();
-        clientToolbar.addNavigation(navButton);
-      });
+            navButton =
+                NavigationButton.builder()
+                    .tooltip("Nameplates & Hitsplats")
+                    .icon(ImageUtil.loadImageResource(getClass(), "icon-28.png"))
+                    .panel(panel)
+                    .priority(8)
+                    .build();
+            clientToolbar.addNavigation(navButton);
+          });
     }
 
     clientThread.invoke(

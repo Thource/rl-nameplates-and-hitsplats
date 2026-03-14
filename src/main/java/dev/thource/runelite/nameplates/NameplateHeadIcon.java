@@ -30,7 +30,8 @@ public enum NameplateHeadIcon implements Nameable {
   SOUL_SPLIT(HeadIcon.SOUL_SPLIT, 11, "Soul Split"),
   DEFLECT_MELEE(HeadIcon.DEFLECT_MELEE, 12, "Def. Melee"),
   DEFLECT_RANGE(HeadIcon.DEFLECT_RANGE, 13, "Def. Range"),
-  DEFLECT_MAGE(HeadIcon.DEFLECT_MAGE, 14, "Def. Magic"),;
+  DEFLECT_MAGE(HeadIcon.DEFLECT_MAGE, 14, "Def. Magic"),
+  ;
 
   @Getter private final HeadIcon headIcon;
   private final int overheadFileId;

@@ -30,7 +30,8 @@ public enum NameplateSkullIcon implements Nameable {
   FORINTHRY_SURGE_KEYS_TWO(SkullIcon.FORINTHRY_SURGE_KEYS_TWO, "2 Keys (fs)"),
   FORINTHRY_SURGE_KEYS_THREE(SkullIcon.FORINTHRY_SURGE_KEYS_THREE, "3 Keys (fs)"),
   FORINTHRY_SURGE_KEYS_FOUR(SkullIcon.FORINTHRY_SURGE_KEYS_FOUR, "4 Keys (fs)"),
-  FORINTHRY_SURGE_KEYS_FIVE(SkullIcon.FORINTHRY_SURGE_KEYS_FIVE, "5 Keys (fs)"),;
+  FORINTHRY_SURGE_KEYS_FIVE(SkullIcon.FORINTHRY_SURGE_KEYS_FIVE, "5 Keys (fs)"),
+  ;
 
   @Getter private final int skullIcon;
   @Getter private final String name;
@@ -48,6 +49,7 @@ public enum NameplateSkullIcon implements Nameable {
   public static NameplateSkullIcon get(int skullIcon) {
     return map.get(skullIcon);
   }
+
   public static NameplateSkullIcon get(Player player) {
     return map.get(player.getSkullIcon());
   }

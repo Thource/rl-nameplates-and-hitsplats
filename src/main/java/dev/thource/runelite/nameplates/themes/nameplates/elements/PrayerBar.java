@@ -13,42 +13,72 @@ import lombok.Setter;
 @Setter
 public class PrayerBar extends Bar {
 
-    public PrayerBar() {
-        super();
+  public PrayerBar() {
+    super();
 
-        barColorProvider = new PrayerBarColorProvider();
+    barColorProvider = new PrayerBarColorProvider();
+  }
+
+  public PrayerBar(
+      String name,
+      PositionProvider xPositionProvider,
+      PositionProvider yPositionProvider,
+      int width,
+      int height,
+      int borderSize,
+      PositionProvider textXPositionProvider,
+      PositionProvider textYPositionProvider,
+      Color borderColor,
+      Color backgroundColor,
+      Color textColor,
+      HealthBarColorProvider barColorProvider) {
+    super(
+        name,
+        xPositionProvider,
+        yPositionProvider,
+        width,
+        height,
+        borderSize,
+        textXPositionProvider,
+        textYPositionProvider,
+        borderColor,
+        backgroundColor,
+        textColor,
+        barColorProvider);
+  }
+
+  @Override
+  public void draw(
+      Nameplate nameplate,
+      Graphics2D graphics,
+      int plateX,
+      int plateY,
+      int plateWidth,
+      int plateHeight) {
+    if (!nameplate.shouldDrawPrayerBar()) {
+      return;
     }
 
-    public PrayerBar(String name, PositionProvider xPositionProvider, PositionProvider yPositionProvider, int width, int height, int borderSize, PositionProvider textXPositionProvider, PositionProvider textYPositionProvider, Color borderColor, Color backgroundColor, Color textColor, HealthBarColorProvider barColorProvider) {
-        super(name, xPositionProvider, yPositionProvider, width, height, borderSize, textXPositionProvider, textYPositionProvider, borderColor, backgroundColor, textColor, barColorProvider);
-    }
+    super.draw(nameplate, graphics, plateX, plateY, plateWidth, plateHeight);
+  }
 
-    @Override
-    public void draw(Nameplate nameplate, Graphics2D graphics, int plateX, int plateY, int plateWidth, int plateHeight) {
-        if (!nameplate.shouldDrawPrayerBar()) {
-            return;
-        }
+  @Override
+  protected int getCurrentValue(Nameplate nameplate) {
+    return nameplate.getCurrentPrayer();
+  }
 
-        super.draw(nameplate, graphics, plateX, plateY, plateWidth, plateHeight);
-    }
+  @Override
+  protected int getMaxValue(Nameplate nameplate) {
+    return nameplate.getMaxPrayer();
+  }
 
-    @Override
-    protected int getCurrentValue(Nameplate nameplate) {
-        return nameplate.getCurrentPrayer();
-    }
+  public static PrayerBar deserialize(JsonObject obj, Gson gson) {
+    var providerJson = obj.getAsJsonObject("barColorProvider");
+    // We have to remove the barColorProvider so that we can specify the right class manually
+    obj.remove("barColorProvider");
 
-    @Override
-    protected int getMaxValue(Nameplate nameplate) {
-        return nameplate.getMaxPrayer();
-    }
-
-    public static PrayerBar deserialize(JsonObject obj, Gson gson) {
-        var providerJson = obj.getAsJsonObject("barColorProvider");
-        // We have to remove the barColorProvider so that we can specify the right class manually
-        obj.remove("barColorProvider");
-
-        var prayerBar = gson.fromJson(obj, PrayerBar.class);
-        prayerBar.setBarColorProvider(gson.fromJson(providerJson, PrayerBarColorProvider.class));
-        return prayerBar;
-    }
+    var prayerBar = gson.fromJson(obj, PrayerBar.class);
+    prayerBar.setBarColorProvider(gson.fromJson(providerJson, PrayerBarColorProvider.class));
+    return prayerBar;
+  }
 }

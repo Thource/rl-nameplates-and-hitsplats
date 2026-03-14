@@ -1,12 +1,11 @@
 package dev.thource.runelite.nameplates.panel.nameplates;
 
 import com.google.gson.JsonParseException;
-import dev.thource.runelite.nameplates.Nameplate;
 import dev.thource.runelite.nameplates.NameplateHeadIcon;
 import dev.thource.runelite.nameplates.NameplateSkullIcon;
+import dev.thource.runelite.nameplates.NameplatesPlugin;
 import dev.thource.runelite.nameplates.panel.CheckboxInput;
 import dev.thource.runelite.nameplates.panel.CollapsiblePanel;
-import dev.thource.runelite.nameplates.NameplatesPlugin;
 import dev.thource.runelite.nameplates.panel.DropdownInput;
 import dev.thource.runelite.nameplates.panel.IntInput;
 import dev.thource.runelite.nameplates.panel.ListSelector;
@@ -45,269 +44,392 @@ import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
 
 public class NameplatesPanel extends JPanel {
-    private final List<NameplateTheme> themes = new ArrayList<>();
-    private final ListSelector<NameplateTheme> themeListSelector;
-    private final NameplateEditPanel editPanel;
-    private NameplateTheme previewTheme;
+  private final List<NameplateTheme> themes = new ArrayList<>();
+  private final ListSelector<NameplateTheme> themeListSelector;
+  private final NameplateEditPanel editPanel;
+  private NameplateTheme previewTheme;
 
-    private void editTheme(NameplateTheme theme) {
-        if (!theme.isEditable() && !(theme instanceof CustomNameplateTheme)) {
-            return;
-        }
-
-        editPanel.editTheme((CustomNameplateTheme) theme);
-
-        themeListSelector.setVisible(false);
-        editPanel.setVisible(true);
+  private void editTheme(NameplateTheme theme) {
+    if (!theme.isEditable() && !(theme instanceof CustomNameplateTheme)) {
+      return;
     }
 
-    public NameplatesPanel(NameplatesPlugin plugin) {
-        super(new BorderLayout());
+    editPanel.editTheme((CustomNameplateTheme) theme);
 
-        var flatDarkTheme = new FlatDarkTheme();
-        var osrsTheme = new OSRSTheme();
-        themes.add(flatDarkTheme);
-        themes.add(osrsTheme);
-        previewTheme = themes.get(0);
+    themeListSelector.setVisible(false);
+    editPanel.setVisible(true);
+  }
 
-        // spam test data
-        for (int i = 0; i < 10; i++) {
-            themes.add(new CustomNameplateTheme());
-        }
+  public NameplatesPanel(NameplatesPlugin plugin) {
+    super(new BorderLayout());
 
-        setBorder(new EmptyBorder(0, 0, 0, 0));
-        setBackground(ColorScheme.DARK_GRAY_COLOR);
+    var flatDarkTheme = new FlatDarkTheme();
+    var osrsTheme = new OSRSTheme();
+    themes.add(flatDarkTheme);
+    themes.add(osrsTheme);
+    previewTheme = themes.get(0);
 
-        var previewPanel = new JPanel(new BorderLayout());
-        previewPanel.setBorder(new EmptyBorder(2, 2, 2, 2));
-        previewPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        add(previewPanel, BorderLayout.NORTH);
+    // spam test data
+    for (int i = 0; i < 10; i++) {
+      themes.add(new CustomNameplateTheme());
+    }
 
-        var titleLabel = new JLabel("Nameplate preview");
-        titleLabel.setBorder(new EmptyBorder(0, 4, 2, 0));
-        titleLabel.setForeground(Color.WHITE);
-        previewPanel.add(titleLabel, BorderLayout.NORTH);
+    setBorder(new EmptyBorder(0, 0, 0, 0));
+    setBackground(ColorScheme.DARK_GRAY_COLOR);
 
-        var bgImage = ImageUtil.loadImageResource(this.getClass(), "nameplate-preview.png");
-        var dummyActor = new DummyPlayer();
-        var nameplate = new DummyNameplate(plugin, dummyActor);
+    var previewPanel = new JPanel(new BorderLayout());
+    previewPanel.setBorder(new EmptyBorder(2, 2, 2, 2));
+    previewPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+    add(previewPanel, BorderLayout.NORTH);
 
-        final var previewWidth = 220;
-        final var maxOffset = bgImage.getWidth() - previewWidth;
+    var titleLabel = new JLabel("Nameplate preview");
+    titleLabel.setBorder(new EmptyBorder(0, 4, 2, 0));
+    titleLabel.setForeground(Color.WHITE);
+    previewPanel.add(titleLabel, BorderLayout.NORTH);
 
-        var preview = new JPanel() {
-            private int offsetX = 0;
+    var bgImage = ImageUtil.loadImageResource(this.getClass(), "nameplate-preview.png");
+    var dummyActor = new DummyPlayer();
+    var nameplate = new DummyNameplate(plugin, dummyActor);
 
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                g.drawImage(bgImage, -(maxOffset / 2) + offsetX, 0, null);
+    final var previewWidth = 220;
+    final var maxOffset = bgImage.getWidth() - previewWidth;
 
-                plugin.getNameplatesOverlay().renderNameplate((Graphics2D) g, nameplate, new Point((previewWidth / 2) + offsetX, 132), previewTheme);
-            }
+    var preview =
+        new JPanel() {
+          private int offsetX = 0;
+
+          @Override
+          protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            g.drawImage(bgImage, -(maxOffset / 2) + offsetX, 0, null);
+
+            plugin
+                .getNameplatesOverlay()
+                .renderNameplate(
+                    (Graphics2D) g,
+                    nameplate,
+                    new Point((previewWidth / 2) + offsetX, 132),
+                    previewTheme);
+          }
         };
-        preview.addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                var newOffset = (int) ((e.getX() - (previewWidth / 2f)) / (previewWidth / 2f) * -(maxOffset / 2f));
+    preview.addMouseMotionListener(
+        new MouseMotionAdapter() {
+          @Override
+          public void mouseMoved(MouseEvent e) {
+            var newOffset =
+                (int) ((e.getX() - (previewWidth / 2f)) / (previewWidth / 2f) * -(maxOffset / 2f));
 
-                if (newOffset != preview.offsetX) {
-                    preview.offsetX = newOffset;
-                    preview.repaint();
-                }
+            if (newOffset != preview.offsetX) {
+              preview.offsetX = newOffset;
+              preview.repaint();
             }
+          }
         });
-        preview.setLayout(new BorderLayout());
-        preview.setBorder(new EmptyBorder(2, 2, 2, 2));
-        preview.setPreferredSize(new java.awt.Dimension(previewWidth, 196));
-        previewPanel.add(preview, BorderLayout.CENTER);
+    preview.setLayout(new BorderLayout());
+    preview.setBorder(new EmptyBorder(2, 2, 2, 2));
+    preview.setPreferredSize(new java.awt.Dimension(previewWidth, 196));
+    previewPanel.add(preview, BorderLayout.CENTER);
 
-        var scrollPanel = new JPanel();
-        scrollPanel.setLayout(new BoxLayout(scrollPanel, BoxLayout.Y_AXIS));
+    var scrollPanel = new JPanel();
+    scrollPanel.setLayout(new BoxLayout(scrollPanel, BoxLayout.Y_AXIS));
 
-//        var scrollWrapper = new JPanel(new BorderLayout());
-//        scrollWrapper.add(scrollPanel, BorderLayout.NORTH);
-//        scrollWrapper.setBackground(ColorScheme.DARK_GRAY_COLOR);
+    //        var scrollWrapper = new JPanel(new BorderLayout());
+    //        scrollWrapper.add(scrollPanel, BorderLayout.NORTH);
+    //        scrollWrapper.setBackground(ColorScheme.DARK_GRAY_COLOR);
 
-        var scrollPane = new JScrollPane(new ScrollableContainer(scrollPanel));
-        scrollPane.setBorder(new EmptyBorder(4, 0, 0, 0));
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(16, 0));
-        scrollPane.getVerticalScrollBar().setBorder(new EmptyBorder(0, 9, 0, 0));
-        scrollPane.getVerticalScrollBar().setUnitIncrement(21);
+    var scrollPane = new JScrollPane(new ScrollableContainer(scrollPanel));
+    scrollPane.setBorder(new EmptyBorder(4, 0, 0, 0));
+    scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+    scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(16, 0));
+    scrollPane.getVerticalScrollBar().setBorder(new EmptyBorder(0, 9, 0, 0));
+    scrollPane.getVerticalScrollBar().setUnitIncrement(21);
 
-        add(scrollPane, BorderLayout.CENTER);
+    add(scrollPane, BorderLayout.CENTER);
 
-        var previewOptionsWrapper = new JPanel(new BorderLayout());
-        previewOptionsWrapper.setBackground(Color.RED);
-        scrollPanel.add(previewOptionsWrapper);
+    var previewOptionsWrapper = new JPanel(new BorderLayout());
+    previewOptionsWrapper.setBackground(Color.RED);
+    scrollPanel.add(previewOptionsWrapper);
 
-        var previewOptions = new CollapsiblePanel("Preview options", 224);
-        previewOptionsWrapper.add(previewOptions, BorderLayout.NORTH);
+    var previewOptions = new CollapsiblePanel("Preview options", 224);
+    previewOptionsWrapper.add(previewOptions, BorderLayout.NORTH);
 
-        var nameInput = new StringInput("Name", nameplate.getName(), (newName) -> {
-            nameplate.setName(newName);
+    var nameInput =
+        new StringInput(
+            "Name",
+            nameplate.getName(),
+            (newName) -> {
+              nameplate.setName(newName);
+              preview.repaint();
+            });
+    previewOptions.addToPanel(nameInput);
+
+    var levelInput =
+        new IntInput(
+            "Combat level",
+            nameplate.getCombatLevel(),
+            1,
+            9_999,
+            (level) -> {
+              nameplate.setCombatLevel(level);
+              preview.repaint();
+            });
+    previewOptions.addToPanel(levelInput);
+
+    var currentHealthInput =
+        new IntInput(
+            "Current HP",
+            nameplate.getCurrentHealth(),
+            1,
+            99,
+            (value) -> {
+              nameplate.setCurrentHealth(value);
+              preview.repaint();
+            });
+    previewOptions.addToPanel(currentHealthInput);
+
+    var maxHealthInput =
+        new IntInput(
+            "Max HP",
+            nameplate.getMaxHealth(),
+            1,
+            99,
+            (value) -> {
+              nameplate.setMaxHealth(value);
+              preview.repaint();
+            });
+    previewOptions.addToPanel(maxHealthInput);
+
+    var prayerBarInput =
+        new CheckboxInput(
+            "Prayer bar",
+            nameplate.shouldDrawPrayerBar(),
+            (value) -> {
+              nameplate.setDrawPrayerBar(value);
+              preview.repaint();
+            });
+    previewOptions.addToPanel(prayerBarInput);
+
+    var currentPrayerInput =
+        new IntInput(
+            "Current PP",
+            nameplate.getCurrentPrayer(),
+            1,
+            99,
+            (value) -> {
+              nameplate.setCurrentPrayer(value);
+              preview.repaint();
+            });
+    previewOptions.addToPanel(currentPrayerInput);
+
+    var maxPrayerInput =
+        new IntInput(
+            "Max PP",
+            nameplate.getMaxPrayer(),
+            1,
+            99,
+            (value) -> {
+              nameplate.setMaxPrayer(value);
+              preview.repaint();
+            });
+    previewOptions.addToPanel(maxPrayerInput);
+
+    var overheadInput =
+        new DropdownInput<>(
+            "Overhead icon",
+            NameplateHeadIcon.get(dummyActor.getOverheadIcon()),
+            NameplateHeadIcon.values(),
+            (icon) -> {
+              dummyActor.setOverhead(icon.getHeadIcon());
+              preview.repaint();
+            });
+    previewOptions.addToPanel(overheadInput);
+
+    var skullInput =
+        new DropdownInput<>(
+            "Skull icon",
+            NameplateSkullIcon.get(dummyActor.getSkullIcon()),
+            NameplateSkullIcon.values(),
+            (icon) -> {
+              dummyActor.setSkull(icon.getSkullIcon());
+              preview.repaint();
+            });
+    previewOptions.addToPanel(skullInput);
+
+    var noLootInput =
+        new CheckboxInput(
+            "No-loot",
+            nameplate.isNoLoot(),
+            (value) -> {
+              nameplate.setNoLoot(value);
+              preview.repaint();
+            });
+    previewOptions.addToPanel(noLootInput);
+
+    var hoveredInput =
+        new CheckboxInput(
+            "Hovered",
+            nameplate.isHovered(),
+            (value) -> {
+              nameplate.setHovered(value);
+              preview.repaint();
+            });
+    previewOptions.addToPanel(hoveredInput);
+
+    var hintArrowInput =
+        new CheckboxInput(
+            "Hint arrow",
+            nameplate.hasHintArrow(),
+            (value) -> {
+              nameplate.setHintArrow(value);
+              preview.repaint();
+            });
+    previewOptions.addToPanel(hintArrowInput);
+
+    themeListSelector = createThemeSelector(plugin, flatDarkTheme, preview);
+    scrollPanel.add(themeListSelector);
+
+    editPanel = new NameplateEditPanel();
+    editPanel.setVisible(false);
+    scrollPanel.add(editPanel);
+  }
+
+  private void updateThemeSelector() {
+    themeListSelector.setValues(themes);
+  }
+
+  @Nonnull
+  private ListSelector<NameplateTheme> createThemeSelector(
+      NameplatesPlugin plugin, FlatDarkTheme flatDarkTheme, JPanel preview) {
+    var themeListSelector = new ListSelector<>("Themes", flatDarkTheme, themes);
+    themeListSelector.addChangeListener(
+        sel -> {
+          if (sel != null) {
+            previewTheme = sel;
             preview.repaint();
-        });
-        previewOptions.addToPanel(nameInput);
+          }
 
-        var levelInput = new IntInput("Combat level", nameplate.getCombatLevel(), 1, 9_999, (level) -> {
-            nameplate.setCombatLevel(level);
-            preview.repaint();
-        });
-        previewOptions.addToPanel(levelInput);
+          themeListSelector.clearButtons();
 
-        var currentHealthInput = new IntInput("Current HP", nameplate.getCurrentHealth(), 1, 99, (value) -> {
-            nameplate.setCurrentHealth(value);
-            preview.repaint();
-        });
-        previewOptions.addToPanel(currentHealthInput);
+          var selectedIndex = themes.indexOf(sel);
+          var staticThemes = themes.stream().filter(t -> !t.isEditable()).count();
+          if (sel != null && sel.isEditable()) {
+            if (selectedIndex > staticThemes) {
+              themeListSelector.addButton(
+                  "Move up",
+                  new ImageIcon(
+                      ImageUtil.loadImageResource(NameplatesPluginPanel.class, "move-up.png")),
+                  () -> {
+                    themes.remove(sel);
+                    themes.add(selectedIndex - 1, sel);
 
-        var maxHealthInput = new IntInput("Max HP", nameplate.getMaxHealth(), 1, 99, (value) -> {
-            nameplate.setMaxHealth(value);
-            preview.repaint();
-        });
-        previewOptions.addToPanel(maxHealthInput);
-
-        var prayerBarInput = new CheckboxInput("Prayer bar", nameplate.shouldDrawPrayerBar(), (value) -> {
-            nameplate.setDrawPrayerBar(value);
-            preview.repaint();
-        });
-        previewOptions.addToPanel(prayerBarInput);
-
-        var currentPrayerInput = new IntInput("Current PP", nameplate.getCurrentPrayer(), 1, 99, (value) -> {
-            nameplate.setCurrentPrayer(value);
-            preview.repaint();
-        });
-        previewOptions.addToPanel(currentPrayerInput);
-
-        var maxPrayerInput = new IntInput("Max PP", nameplate.getMaxPrayer(), 1, 99, (value) -> {
-            nameplate.setMaxPrayer(value);
-            preview.repaint();
-        });
-        previewOptions.addToPanel(maxPrayerInput);
-
-        var overheadInput = new DropdownInput<>("Overhead icon", NameplateHeadIcon.get(dummyActor.getOverheadIcon()), NameplateHeadIcon.values(), (icon) -> {
-            dummyActor.setOverhead(icon.getHeadIcon());
-            preview.repaint();
-        });
-        previewOptions.addToPanel(overheadInput);
-
-        var skullInput = new DropdownInput<>("Skull icon", NameplateSkullIcon.get(dummyActor.getSkullIcon()), NameplateSkullIcon.values(), (icon) -> {
-            dummyActor.setSkull(icon.getSkullIcon());
-            preview.repaint();
-        });
-        previewOptions.addToPanel(skullInput);
-
-        var noLootInput = new CheckboxInput("No-loot", nameplate.isNoLoot(), (value) -> {
-            nameplate.setNoLoot(value);
-            preview.repaint();
-        });
-        previewOptions.addToPanel(noLootInput);
-
-        var hoveredInput = new CheckboxInput("Hovered", nameplate.isHovered(), (value) -> {
-            nameplate.setHovered(value);
-            preview.repaint();
-        });
-        previewOptions.addToPanel(hoveredInput);
-
-        var hintArrowInput = new CheckboxInput("Hint arrow", nameplate.hasHintArrow(), (value) -> {
-            nameplate.setHintArrow(value);
-            preview.repaint();
-        });
-        previewOptions.addToPanel(hintArrowInput);
-
-        themeListSelector = createThemeSelector(plugin, flatDarkTheme, preview);
-        scrollPanel.add(themeListSelector);
-
-        editPanel = new NameplateEditPanel();
-        editPanel.setVisible(false);
-        scrollPanel.add(editPanel);
-    }
-
-    private void updateThemeSelector() {
-        themeListSelector.setValues(themes);
-    }
-
-    @Nonnull
-    private ListSelector<NameplateTheme> createThemeSelector(NameplatesPlugin plugin, FlatDarkTheme flatDarkTheme, JPanel preview) {
-        var themeListSelector = new ListSelector<>("Themes", flatDarkTheme, themes);
-        themeListSelector.addChangeListener(sel -> {
-            if (sel != null) {
-                previewTheme = sel;
-                preview.repaint();
+                    updateThemeSelector();
+                  });
             }
+            if (selectedIndex < themes.size() - 1) {
+              themeListSelector.addButton(
+                  "Move down",
+                  new ImageIcon(
+                      ImageUtil.loadImageResource(NameplatesPluginPanel.class, "move-down.png")),
+                  () -> {
+                    themes.remove(sel);
+                    themes.add(selectedIndex + 1, sel);
 
-            themeListSelector.clearButtons();
-
-            var selectedIndex = themes.indexOf(sel);
-            var staticThemes = themes.stream().filter(t -> !t.isEditable()).count();
-            if (sel != null && sel.isEditable()) {
-                if (selectedIndex > staticThemes) {
-                    themeListSelector.addButton("Move up", new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "move-up.png")), () -> {
-                        themes.remove(sel);
-                        themes.add(selectedIndex - 1, sel);
-
-                        updateThemeSelector();
-                    });
-                }
-                if (selectedIndex < themes.size() - 1) {
-                    themeListSelector.addButton("Move down", new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "move-down.png")), () -> {
-                        themes.remove(sel);
-                        themes.add(selectedIndex + 1, sel);
-
-                        updateThemeSelector();
-                    });
-                }
+                    updateThemeSelector();
+                  });
             }
-            themeListSelector.addButtonGlue();
-            if (sel != null) {
-                themeListSelector.addButton("Export theme (copy to clipboard)", new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "export.png")), () -> {
-                    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(plugin.getGson().toJson(sel)), null);
+          }
+          themeListSelector.addButtonGlue();
+          if (sel != null) {
+            themeListSelector.addButton(
+                "Export theme (copy to clipboard)",
+                new ImageIcon(
+                    ImageUtil.loadImageResource(NameplatesPluginPanel.class, "export.png")),
+                () -> {
+                  Toolkit.getDefaultToolkit()
+                      .getSystemClipboard()
+                      .setContents(new StringSelection(plugin.getGson().toJson(sel)), null);
 
-                    JOptionPane.showMessageDialog(themeListSelector, "Theme \"" + sel.getName() + "\" has been copied to your clipboard.", "Theme exported", JOptionPane.INFORMATION_MESSAGE);
+                  JOptionPane.showMessageDialog(
+                      themeListSelector,
+                      "Theme \"" + sel.getName() + "\" has been copied to your clipboard.",
+                      "Theme exported",
+                      JOptionPane.INFORMATION_MESSAGE);
                 });
 
-                if (sel.isEditable()) {
-                    themeListSelector.addButton("Edit theme", new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "edit.png")), () -> {
-                        editTheme(sel);
-                    });
-                    themeListSelector.addButton("Delete theme", new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "trash.png")), () -> {
-                        if (NameplatesPlugin.getConfirmation(themeListSelector, "Are you sure you want to delete theme \"" + sel.getName() + "\"?\nThis cannot be undone.", "Confirm deletion", JOptionPane.WARNING_MESSAGE)) {
-                            themes.remove(sel);
+            if (sel.isEditable()) {
+              themeListSelector.addButton(
+                  "Edit theme",
+                  new ImageIcon(
+                      ImageUtil.loadImageResource(NameplatesPluginPanel.class, "edit.png")),
+                  () -> {
+                    editTheme(sel);
+                  });
+              themeListSelector.addButton(
+                  "Delete theme",
+                  new ImageIcon(
+                      ImageUtil.loadImageResource(NameplatesPluginPanel.class, "trash.png")),
+                  () -> {
+                    if (NameplatesPlugin.getConfirmation(
+                        themeListSelector,
+                        "Are you sure you want to delete theme \""
+                            + sel.getName()
+                            + "\"?\nThis cannot be undone.",
+                        "Confirm deletion",
+                        JOptionPane.WARNING_MESSAGE)) {
+                      themes.remove(sel);
 
-                            updateThemeSelector();
-                        }
-                    });
-                }
+                      updateThemeSelector();
+                    }
+                  });
             }
-            themeListSelector.addButton("Import theme", new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "import.png")), () -> {
+          }
+          themeListSelector.addButton(
+              "Import theme",
+              new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "import.png")),
+              () -> {
                 var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
                 if (clipboard == null) {
-                    return;
+                  return;
                 }
 
                 String clipboardText;
                 try {
-                    clipboardText = (String) clipboard.getTransferData(DataFlavor.stringFlavor);
+                  clipboardText = (String) clipboard.getTransferData(DataFlavor.stringFlavor);
 
-                    if (clipboardText.isBlank()) {
-                        throw new IOException("Clipboard is empty");
-                    }
+                  if (clipboardText.isBlank()) {
+                    throw new IOException("Clipboard is empty");
+                  }
                 } catch (UnsupportedFlavorException | IOException e) {
-                    JOptionPane.showMessageDialog(themeListSelector, "Theme failed to import. (clipboard error)", "Theme import error", JOptionPane.ERROR_MESSAGE);
-                    return;
+                  JOptionPane.showMessageDialog(
+                      themeListSelector,
+                      "Theme failed to import. (clipboard error)",
+                      "Theme import error",
+                      JOptionPane.ERROR_MESSAGE);
+                  return;
                 }
 
                 CustomNameplateTheme theme = null;
                 try {
-                    theme = CustomNameplateTheme.deserialize(clipboardText, plugin.getGson());
+                  theme = CustomNameplateTheme.deserialize(clipboardText, plugin.getGson());
                 } catch (JsonParseException | IllegalArgumentException e) {
-                    JOptionPane.showMessageDialog(themeListSelector, "Theme failed to import. (bad data)", "Theme import error", JOptionPane.ERROR_MESSAGE);
+                  JOptionPane.showMessageDialog(
+                      themeListSelector,
+                      "Theme failed to import. (bad data)",
+                      "Theme import error",
+                      JOptionPane.ERROR_MESSAGE);
                 }
 
-                if (theme == null || !NameplatesPlugin.getConfirmation(themeListSelector, "Import theme \"" + theme.getName() + "\" with " + theme.getElements().size() + " elements?", "Confirm import", JOptionPane.INFORMATION_MESSAGE)) {
-                    return;
+                if (theme == null
+                    || !NameplatesPlugin.getConfirmation(
+                        themeListSelector,
+                        "Import theme \""
+                            + theme.getName()
+                            + "\" with "
+                            + theme.getElements().size()
+                            + " elements?",
+                        "Confirm import",
+                        JOptionPane.INFORMATION_MESSAGE)) {
+                  return;
                 }
 
                 themes.add(theme);
@@ -315,21 +437,30 @@ public class NameplatesPanel extends JPanel {
                 themeListSelector.selectValue(theme);
 
                 // todo: save the theme
-            });
-            if (sel != null) {
-                themeListSelector.addButton("Clone theme", new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "clone.png")), () -> {
-                    var theme = CustomNameplateTheme.deserialize(plugin.getGson().toJson(sel), plugin.getGson());
-                    theme.setName(theme.getName() + " (copy)");
-                    editTheme(theme);
+              });
+          if (sel != null) {
+            themeListSelector.addButton(
+                "Clone theme",
+                new ImageIcon(
+                    ImageUtil.loadImageResource(NameplatesPluginPanel.class, "clone.png")),
+                () -> {
+                  var theme =
+                      CustomNameplateTheme.deserialize(
+                          plugin.getGson().toJson(sel), plugin.getGson());
+                  theme.setName(theme.getName() + " (copy)");
+                  editTheme(theme);
                 });
-            }
-            themeListSelector.addButton("Create new theme", new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "create.png")), () -> {
+          }
+          themeListSelector.addButton(
+              "Create new theme",
+              new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "create.png")),
+              () -> {
                 var theme = new CustomNameplateTheme();
                 theme.setName("New theme");
                 editTheme(theme);
-            });
-            themeListSelector.revalidate();
+              });
+          themeListSelector.revalidate();
         });
-        return themeListSelector;
-    }
+    return themeListSelector;
+  }
 }

@@ -1,7 +1,6 @@
 package dev.thource.runelite.nameplates;
 
 import lombok.Getter;
-import net.runelite.api.Client;
 import net.runelite.api.Player;
 import net.runelite.api.Skill;
 import net.runelite.client.hiscore.HiscoreSkill;
@@ -18,69 +17,69 @@ public class PlayerNameplate extends Nameplate {
     this.hiscoreLookupStarted = actor.getCombatLevel() == 126;
   }
 
-    @Override
-    public boolean isAnyPrayerActive() {
-        if (actor != plugin.getClient().getLocalPlayer()) {
-            return super.isAnyPrayerActive();
-        }
-
-        return plugin.isAnyPrayerActive();
+  @Override
+  public boolean isAnyPrayerActive() {
+    if (actor != plugin.getClient().getLocalPlayer()) {
+      return super.isAnyPrayerActive();
     }
 
-    @Override
-    public int getCurrentPrayer() {
-        if (actor != plugin.getClient().getLocalPlayer()) {
-            return super.getCurrentPrayer();
-        }
+    return plugin.isAnyPrayerActive();
+  }
 
-        return plugin.getClient().getBoostedSkillLevel(Skill.PRAYER);
+  @Override
+  public int getCurrentPrayer() {
+    if (actor != plugin.getClient().getLocalPlayer()) {
+      return super.getCurrentPrayer();
     }
 
-    @Override
-    public int getMaxPrayer() {
-        if (actor != plugin.getClient().getLocalPlayer()) {
-            return super.getMaxPrayer();
-        }
+    return plugin.getClient().getBoostedSkillLevel(Skill.PRAYER);
+  }
 
-        return plugin.getClient().getRealSkillLevel(Skill.PRAYER);
+  @Override
+  public int getMaxPrayer() {
+    if (actor != plugin.getClient().getLocalPlayer()) {
+      return super.getMaxPrayer();
     }
 
-    @Override
-    public String getPrayerString() {
-        if (actor != plugin.getClient().getLocalPlayer()) {
-            return null;
-        }
+    return plugin.getClient().getRealSkillLevel(Skill.PRAYER);
+  }
 
-        return getCurrentPrayer() + " / " + getMaxPrayer();
+  @Override
+  public String getPrayerString() {
+    if (actor != plugin.getClient().getLocalPlayer()) {
+      return null;
     }
 
-    @Override
-    public float getPrayerPercentage() {
-        if (actor != plugin.getClient().getLocalPlayer()) {
-            return 0;
-        }
+    return getCurrentPrayer() + " / " + getMaxPrayer();
+  }
 
-        int currentPrayer = plugin.getClient().getBoostedSkillLevel(Skill.PRAYER);
-        int maxPrayer = plugin.getClient().getRealSkillLevel(Skill.PRAYER);
-
-        return (float) currentPrayer / maxPrayer;
+  @Override
+  public float getPrayerPercentage() {
+    if (actor != plugin.getClient().getLocalPlayer()) {
+      return 0;
     }
 
-    @Override
-    public PoisonStatus getPoisonStatus() {
-      if (actor != plugin.getClient().getLocalPlayer()) {
-          return null;
-      }
+    int currentPrayer = plugin.getClient().getBoostedSkillLevel(Skill.PRAYER);
+    int maxPrayer = plugin.getClient().getRealSkillLevel(Skill.PRAYER);
 
-      return plugin.getPoisonStatus();
+    return (float) currentPrayer / maxPrayer;
+  }
+
+  @Override
+  public PoisonStatus getPoisonStatus() {
+    if (actor != plugin.getClient().getLocalPlayer()) {
+      return null;
     }
 
-    public void updateFromActor(NameplatesPlugin plugin) {
+    return plugin.getPoisonStatus();
+  }
+
+  public void updateFromActor(NameplatesPlugin plugin) {
     super.updateFromActor(plugin);
 
     var client = plugin.getClient();
     if (client == null) {
-        return;
+      return;
     }
 
     if (actor == client.getLocalPlayer()) {
@@ -116,18 +115,18 @@ public class PlayerNameplate extends Nameplate {
     }
   }
 
-    @Override
-    public boolean hasHintArrow() {
-        return plugin.getClient().getHintArrowPlayer() == actor;
-    }
+  @Override
+  public boolean hasHintArrow() {
+    return plugin.getClient().getHintArrowPlayer() == actor;
+  }
 
-    @Override
-    public boolean drawHealthAsPercentage() {
-        return actor != plugin.getClient().getLocalPlayer();
-    }
+  @Override
+  public boolean drawHealthAsPercentage() {
+    return actor != plugin.getClient().getLocalPlayer();
+  }
 
-    @Override
-    public boolean shouldDrawPrayerBar() {
-        return actor == plugin.getClient().getLocalPlayer();
-    }
+  @Override
+  public boolean shouldDrawPrayerBar() {
+    return actor == plugin.getClient().getLocalPlayer();
+  }
 }
