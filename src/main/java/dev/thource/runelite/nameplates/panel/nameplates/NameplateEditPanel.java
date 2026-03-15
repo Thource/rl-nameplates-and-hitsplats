@@ -1,9 +1,11 @@
 package dev.thource.runelite.nameplates.panel.nameplates;
 
-import dev.thource.runelite.nameplates.panel.CheckboxInput;
-import dev.thource.runelite.nameplates.panel.IntInput;
-import dev.thource.runelite.nameplates.panel.ListSelector;
-import dev.thource.runelite.nameplates.panel.StringInput;
+import com.google.gson.Gson;
+import dev.thource.runelite.nameplates.NameplatesPlugin;
+import dev.thource.runelite.nameplates.panel.components.CheckboxInput;
+import dev.thource.runelite.nameplates.panel.components.IntInput;
+import dev.thource.runelite.nameplates.panel.components.ListSelector;
+import dev.thource.runelite.nameplates.panel.components.StringInput;
 import dev.thource.runelite.nameplates.panel.components.TabSwitcherPanel;
 import dev.thource.runelite.nameplates.themes.nameplates.CustomNameplateTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Element;
@@ -14,6 +16,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import lombok.Getter;
+import net.runelite.client.ui.DynamicGridLayout;
 
 public class NameplateEditPanel extends JPanel {
   private final JLabel editingLabel;
@@ -23,9 +27,10 @@ public class NameplateEditPanel extends JPanel {
   private final IntInput heightWithPrayerBarInput;
   private final CheckboxInput stackInput;
   private final ListSelector<Element> elementsList;
-  private CustomNameplateTheme editingTheme;
+  @Getter private CustomNameplateTheme editingTheme;
 
-  public NameplateEditPanel() {
+  public NameplateEditPanel(
+      NameplatesPanel nameplatesPanel, NameplatesPlugin plugin, JPanel preview) {
     super();
 
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -39,35 +44,58 @@ public class NameplateEditPanel extends JPanel {
     add(buttonContainer);
 
     var cancelButton = new JButton("Cancel");
+    cancelButton.addActionListener(e -> nameplatesPanel.editTheme(null, null));
     buttonContainer.add(cancelButton);
 
     var saveButton = new JButton("Save");
+    saveButton.addActionListener(
+        e -> {
+          nameplatesPanel.saveEdit(editingTheme);
+        });
     buttonContainer.add(saveButton);
 
     var themeConfigTab = new JPanel();
-    themeConfigTab.setLayout(new BoxLayout(themeConfigTab, BoxLayout.Y_AXIS));
+    themeConfigTab.setLayout(new DynamicGridLayout(0, 1, 0, 5));
     themeConfigTab.setBorder(new EmptyBorder(8, 0, 0, 0));
 
     var elementsTab = new JPanel();
-    elementsTab.setLayout(new BoxLayout(elementsTab, BoxLayout.Y_AXIS));
+    elementsTab.setLayout(new DynamicGridLayout(0, 1, 0, 5));
     elementsTab.setBorder(new EmptyBorder(8, 0, 0, 0));
     elementsTab.setVisible(false);
 
     var tabSwitcher =
         new TabSwitcherPanel(
-            List.of("Theme config", "Elements"), List.of(elementsTab, elementsTab));
+            List.of("Theme config", "Elements"), List.of(themeConfigTab, elementsTab));
     add(tabSwitcher);
 
     add(themeConfigTab);
     add(elementsTab);
 
-    nameInput = new StringInput("Name", "Name", (value) -> editingTheme.setName(value));
+    nameInput = new StringInput("Name", "Name", (value) -> editingTheme.setName(value.trim()));
     themeConfigTab.add(nameInput);
 
-    widthInput = new IntInput("Width", 0, 0, 999, (value) -> editingTheme.setWidth(value));
+    widthInput =
+        new IntInput(
+            "Width",
+            0,
+            0,
+            999,
+            (value) -> {
+              editingTheme.setWidth(value);
+              preview.repaint();
+            });
     themeConfigTab.add(widthInput);
 
-    heightInput = new IntInput("Height", 0, 0, 999, (value) -> editingTheme.setHeight(value));
+    heightInput =
+        new IntInput(
+            "Height",
+            0,
+            0,
+            999,
+            (value) -> {
+              editingTheme.setHeight(value);
+              preview.repaint();
+            });
     themeConfigTab.add(heightInput);
 
     heightWithPrayerBarInput =
@@ -76,7 +104,10 @@ public class NameplateEditPanel extends JPanel {
             0,
             0,
             999,
-            (value) -> editingTheme.setHeightWithPrayerBar(value));
+            (value) -> {
+              editingTheme.setHeightWithPrayerBar(value);
+              preview.repaint();
+            });
     themeConfigTab.add(heightWithPrayerBarInput);
 
     stackInput =
@@ -87,8 +118,13 @@ public class NameplateEditPanel extends JPanel {
     elementsTab.add(elementsList);
   }
 
-  public void editTheme(CustomNameplateTheme theme) {
-    editingTheme = theme;
+  public void editTheme(CustomNameplateTheme theme, Gson gson) {
+    if (theme == null) {
+      editingTheme = null;
+      return;
+    }
+
+    editingTheme = CustomNameplateTheme.deserialize(theme.serialize(gson, false), gson, false);
 
     editingLabel.setText("Editing: " + theme.getName());
     nameInput.setValue(theme.getName());

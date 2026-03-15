@@ -1,9 +1,14 @@
 package dev.thource.runelite.nameplates;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
 import com.google.inject.Provides;
 import dev.thource.runelite.nameplates.panel.NameplatesPluginPanel;
 import dev.thource.runelite.nameplates.themes.Themes;
+import dev.thource.runelite.nameplates.themes.nameplates.CustomNameplateTheme;
+import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkTheme;
+import dev.thource.runelite.nameplates.themes.nameplates.NameplateTheme;
+import dev.thource.runelite.nameplates.themes.nameplates.OSRSTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Icon;
 import java.awt.Component;
 import java.awt.image.BufferedImage;
@@ -86,6 +91,7 @@ public class NameplatesPlugin extends Plugin {
   @Getter @Inject private NPCManager npcManager;
   @Getter @Inject private SpriteManager spriteManager;
   @Getter @Inject private HiscoreClient hiscoreClient;
+  @Getter @Inject private ConfigManager configManager;
 
   @Getter private final HashMap<Integer, HpCacheEntry> hpCache = new HashMap<>();
   @Getter private final HashMap<Integer, Nameplate> nameplates = new HashMap<>();
@@ -209,6 +215,9 @@ public class NameplatesPlugin extends Plugin {
   private int ticksSinceHPRegen;
   @Getter private Instant nextPoisonTick;
 
+  @Getter private final Map<String, NameplateTheme> nameplateThemes = new HashMap<>();
+  @Getter private NameplateTheme activeNameplateTheme;
+
   // TODO: make a plugin panel where the user can view the themes for nameplates and hitsplats and
   // easily define their own
   //   the panel will show a preview by rendering a fake nameplate and fake hitsplats
@@ -267,6 +276,39 @@ public class NameplatesPlugin extends Plugin {
 
   @Override
   protected void startUp() {
+    // load themes
+    nameplateThemes.clear();
+
+    // add static themes
+    nameplateThemes.put(FlatDarkTheme.ID, new FlatDarkTheme());
+    nameplateThemes.put(OSRSTheme.ID, new OSRSTheme());
+
+    // load user-defined themes
+    configManager
+        .getConfigurationKeys(NameplatesConfig.CONFIG_GROUP + ".themes.nameplates.")
+        .forEach(
+            key -> {
+              var themeJson =
+                  configManager.getConfiguration(
+                      NameplatesConfig.CONFIG_GROUP, key.replaceFirst("nameplates.", ""));
+              if (themeJson == null) {
+                return;
+              }
+
+              try {
+                var theme = CustomNameplateTheme.deserialize(themeJson, gson, false);
+                nameplateThemes.put(theme.getId(), theme);
+              } catch (JsonParseException | IllegalArgumentException e) {
+                log.warn("Failed to load custom nameplate theme {}", key, e);
+              }
+            });
+
+    nameplateThemes.values().forEach(theme -> theme.setPlugin(this));
+
+    activeNameplateTheme =
+        nameplateThemes.getOrDefault(
+            config.activeNameplateThemeId(), nameplateThemes.get(FlatDarkTheme.ID));
+
     if (panel == null) {
       // edt
       SwingUtilities.invokeLater(
@@ -704,6 +746,29 @@ public class NameplatesPlugin extends Plugin {
 
   public boolean shouldDrawFor(Nameplate nameplate) {
     return getDisplayMode(nameplate.getActor()).shouldDraw(client, nameplate);
+  }
+
+  public void saveNameplateThemes() {
+    nameplateThemes.values().stream()
+        .filter(NameplateTheme::isEditable)
+        .forEach(
+            nameplateTheme ->
+                configManager.setConfiguration(
+                    NameplatesConfig.CONFIG_GROUP,
+                    "themes.nameplates." + nameplateTheme.getId(),
+                    nameplateTheme.serialize(gson, false)));
+  }
+
+  public void addNameplateTheme(NameplateTheme theme) {
+    nameplateThemes.put(theme.getId(), theme);
+
+    if (activeNameplateTheme.getId().equals(theme.getId())) {
+      activeNameplateTheme = theme;
+    }
+  }
+
+  public void deleteNameplateTheme(String id) {
+    configManager.unsetConfiguration(NameplatesConfig.CONFIG_GROUP, "themes.nameplates." + id);
   }
 
   @Provides

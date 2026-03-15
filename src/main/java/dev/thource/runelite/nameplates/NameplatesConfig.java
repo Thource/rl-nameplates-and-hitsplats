@@ -42,6 +42,14 @@ public interface NameplatesConfig extends Config {
   }
 
   @ConfigItem(
+      keyName = "activeNameplateThemeId",
+      name = "Active nameplate theme ID",
+      description = "The ID of the active nameplate theme.",
+      hidden = true
+  )
+  default String activeNameplateThemeId() { return "flatDarkTheme"; }
+
+  @ConfigItem(
       keyName = "npcNameplateDisplayMode",
       name = "NPC nameplate display behaviour",
       description = "Defines when NPC nameplates will be visible.")

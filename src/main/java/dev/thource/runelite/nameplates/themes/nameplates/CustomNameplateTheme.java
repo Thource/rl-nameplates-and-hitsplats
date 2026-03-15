@@ -10,9 +10,12 @@ import dev.thource.runelite.nameplates.themes.nameplates.elements.IconContainer;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.PrayerBar;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Text;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class CustomNameplateTheme extends NameplateTheme {
   public CustomNameplateTheme() {
+    super(UUID.randomUUID().toString());
+
     name = "Custom Theme";
     width = 120;
     height = 26;
@@ -24,7 +27,7 @@ public class CustomNameplateTheme extends NameplateTheme {
     return true;
   }
 
-  public static CustomNameplateTheme deserialize(String json, Gson gson)
+  public static CustomNameplateTheme deserialize(String json, Gson gson, boolean fromImport)
       throws JsonSyntaxException, IllegalArgumentException {
     var themeEl = new JsonParser().parse(json);
     if (!themeEl.isJsonObject()) {
@@ -32,6 +35,12 @@ public class CustomNameplateTheme extends NameplateTheme {
     }
 
     var themeObj = themeEl.getAsJsonObject();
+
+    if (fromImport) {
+      // IDs should be random to avoid collisions
+      themeObj.remove("id");
+      themeObj.remove("order");
+    }
 
     var elementsArray = themeObj.getAsJsonArray("elements");
     // We have to remove the elements before deserializing the theme itself, otherwise Gson will try

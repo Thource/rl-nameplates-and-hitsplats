@@ -1,5 +1,7 @@
-package dev.thource.runelite.nameplates.panel;
+package dev.thource.runelite.nameplates.panel.components;
 
+import dev.thource.runelite.nameplates.panel.EnhancedSwingUtilities;
+import dev.thource.runelite.nameplates.panel.Nameable;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -19,14 +21,13 @@ import javax.swing.border.LineBorder;
 import net.runelite.client.ui.ColorScheme;
 
 public class ListSelector<T extends Nameable> extends LabelledInput {
+  private static final int BUTTON_SIZE = 24;
+
   private final JList<T> list;
   private final JPanel buttonContainer;
 
   public ListSelector(String name, T defaultValue, List<T> values) {
     super(name, true);
-
-    setPreferredSize(new Dimension(Integer.MAX_VALUE, 132));
-    setMaximumSize(new Dimension(Integer.MAX_VALUE, 132));
 
     @SuppressWarnings("unchecked")
     var array = (T[]) values.toArray(new Nameable[0]);
@@ -43,7 +44,11 @@ public class ListSelector<T extends Nameable> extends LabelledInput {
                 list, ((T) value).getName(), index, isSelected, cellHasFocus);
           }
         });
+    list.setSelectionBackground(ColorScheme.MEDIUM_GRAY_COLOR);
+
     var scrollPane = new JScrollPane(list);
+    scrollPane.setPreferredSize(new Dimension(Integer.MAX_VALUE, 108));
+    scrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 108));
     inputPanel.add(scrollPane, BorderLayout.CENTER);
 
     buttonContainer = new JPanel();
@@ -78,14 +83,14 @@ public class ListSelector<T extends Nameable> extends LabelledInput {
   }
 
   public void addButton(String name, ImageIcon icon, Runnable onClick) {
-    var totalPadding = (26 - icon.getIconHeight());
+    var totalPadding = (BUTTON_SIZE - icon.getIconHeight());
     var topPadding = totalPadding / 2;
     var bottomPadding = (int) Math.ceil(totalPadding / 2f);
 
     var button = new JButton();
     button.setIcon(icon);
     button.setToolTipText(name);
-    button.setPreferredSize(new Dimension(26, 26));
+    button.setPreferredSize(new Dimension(BUTTON_SIZE, BUTTON_SIZE));
     button.setBorder(
         new CompoundBorder(
             new LineBorder(ColorScheme.BORDER_COLOR, 1),

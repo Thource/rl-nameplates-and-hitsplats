@@ -1,5 +1,7 @@
-package dev.thource.runelite.nameplates.panel;
+package dev.thource.runelite.nameplates.panel.components;
 
+import dev.thource.runelite.nameplates.panel.BoundsPopupMenuListener;
+import dev.thource.runelite.nameplates.panel.Nameable;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.util.function.Consumer;

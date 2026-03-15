@@ -8,11 +8,16 @@ import java.awt.Color;
 import java.util.List;
 
 public class OSRSTheme extends NameplateTheme {
+  public static final String ID = "osrsTheme";
+
   public OSRSTheme() {
+    super(ID);
+
     name = "OSRS";
     width = 30;
     height = 4;
     heightWithPrayerBar = 4;
+    order = -99;
 
     elements.add(
         new IconContainer(

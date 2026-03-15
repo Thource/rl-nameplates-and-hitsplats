@@ -1,4 +1,4 @@
-package dev.thource.runelite.nameplates.panel;
+package dev.thource.runelite.nameplates.panel.components;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -8,7 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.ui.FontManager;
 
-abstract class LabelledInput extends JPanel {
+public abstract class LabelledInput extends JPanel {
   protected final JLabel label;
   protected final JPanel inputPanel;
 
@@ -17,10 +17,9 @@ abstract class LabelledInput extends JPanel {
   }
 
   protected LabelledInput(String name, boolean verticalLayout) {
-    //        setOpaque(false);
+    setOpaque(false);
     setLayout(new BorderLayout());
     setBorder(new EmptyBorder(0, 0, 0, 0));
-    setBackground(Color.BLUE);
 
     inputPanel = new JPanel();
     inputPanel.setOpaque(false);

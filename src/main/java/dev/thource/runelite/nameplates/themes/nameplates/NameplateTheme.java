@@ -1,5 +1,6 @@
 package dev.thource.runelite.nameplates.themes.nameplates;
 
+import com.google.gson.Gson;
 import dev.thource.runelite.nameplates.NPCNameplate;
 import dev.thource.runelite.nameplates.Nameplate;
 import dev.thource.runelite.nameplates.NameplatesConfig;
@@ -18,12 +19,18 @@ public abstract class NameplateTheme implements Nameable {
   protected transient NameplatesPlugin plugin;
   protected transient NameplatesConfig config;
 
+  @Getter protected String id;
+  @Getter @Setter protected int order;
   @Getter @Setter protected String name;
   @Getter @Setter protected int width;
   @Getter @Setter protected int height;
   @Getter @Setter protected int heightWithPrayerBar;
   @Getter @Setter protected boolean stacking;
   @Getter protected final List<Element> elements = new ArrayList<>();
+
+  protected NameplateTheme(String id) {
+    this.id = id;
+  }
 
   public void setPlugin(NameplatesPlugin plugin) {
     this.plugin = plugin;
@@ -78,5 +85,16 @@ public abstract class NameplateTheme implements Nameable {
 
   public boolean isEditable() {
     return false;
+  }
+
+  public String serialize(Gson gson, boolean forExport) {
+    var themeEl = gson.toJsonTree(this).getAsJsonObject();
+
+    if (forExport) {
+      themeEl.remove("id");
+      themeEl.remove("order");
+    }
+
+    return gson.toJson(themeEl);
   }
 }

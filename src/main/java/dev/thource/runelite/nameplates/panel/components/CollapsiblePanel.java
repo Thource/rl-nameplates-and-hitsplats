@@ -1,4 +1,4 @@
-package dev.thource.runelite.nameplates.panel;
+package dev.thource.runelite.nameplates.panel.components;
 
 import java.awt.BorderLayout;
 import java.awt.Component;

@@ -10,11 +10,16 @@ import java.awt.Color;
 import java.util.List;
 
 public class FlatDarkTheme extends NameplateTheme {
+  public static final String ID = "flatDarkTheme";
+
   public FlatDarkTheme() {
+    super(ID);
+
     name = "Flat Dark";
     width = 120;
     height = 26;
     heightWithPrayerBar = 38;
+    order = -100;
     stacking = true;
 
     elements.add(
@@ -36,7 +41,7 @@ public class FlatDarkTheme extends NameplateTheme {
             "Overhead",
             new PositionProvider(OffsetAnchor.START, 124),
             new PositionProvider(OffsetAnchor.START, 0),
-            new DimensionProvider(DimensionCalcType.STATIC, 26),
+            26,
             IconType.OVERHEAD));
     elements.add(
         new IconContainer(

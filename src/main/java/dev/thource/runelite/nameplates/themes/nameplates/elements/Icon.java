@@ -4,12 +4,16 @@ import dev.thource.runelite.nameplates.Nameplate;
 import dev.thource.runelite.nameplates.NameplateHeadIcon;
 import dev.thource.runelite.nameplates.NameplateSkullIcon;
 import dev.thource.runelite.nameplates.NameplatesPlugin;
+import dev.thource.runelite.nameplates.panel.components.DropdownInput;
+import dev.thource.runelite.nameplates.panel.components.IntInput;
+import dev.thource.runelite.nameplates.panel.components.LabelledInput;
 import dev.thource.runelite.nameplates.themes.nameplates.DimensionProvider;
 import dev.thource.runelite.nameplates.themes.nameplates.ImageFill;
 import dev.thource.runelite.nameplates.themes.nameplates.OffsetAnchor;
 import dev.thource.runelite.nameplates.themes.nameplates.PositionProvider;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import net.runelite.api.coords.Direction;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.util.ImageUtil;
@@ -34,14 +38,14 @@ public class Icon extends Element {
     }
   }
 
-  protected final DimensionProvider sizeProvider;
+  protected int size;
   protected IconType iconType;
   protected final transient ImageFill imageFill = new ImageFill();
 
   public Icon() {
     super();
 
-    sizeProvider = new DimensionProvider();
+    size = 26;
     iconType = IconType.OVERHEAD;
   }
 
@@ -49,16 +53,12 @@ public class Icon extends Element {
       String name,
       PositionProvider xPositionProvider,
       PositionProvider yPositionProvider,
-      DimensionProvider sizeProvider,
+      int size,
       IconType iconType) {
     super(name, xPositionProvider, yPositionProvider);
 
-    this.sizeProvider = sizeProvider;
+    this.size = size;
     this.iconType = iconType;
-  }
-
-  private int getSize(Nameplate nameplate) {
-    return sizeProvider.get(nameplate);
   }
 
   private static BufferedImage getImage(
@@ -134,8 +134,6 @@ public class Icon extends Element {
       return;
     }
 
-    var size = getSize(nameplate);
-
     var xOffset = 0;
     if (this.xPositionProvider.getAnchor() == OffsetAnchor.MIDDLE) {
       xOffset = -size / 2;
@@ -161,5 +159,31 @@ public class Icon extends Element {
     int drawX = x + xPositionProvider.getValue() + xOffset + (size - drawW) / 2;
     int drawY = y + yPositionProvider.getValue() + yOffset + (size - drawH) / 2;
     graphics.drawImage(image, drawX, drawY, drawW, drawH, null);
+  }
+
+  @Override
+  public List<LabelledInput> getEditInputs() {
+    var inputs = super.getEditInputs();
+
+    inputs.add(
+        new IntInput(
+            "Size",
+            size,
+            1,
+            999,
+            value -> {
+              size = value;
+            }));
+
+    inputs.add(
+        new DropdownInput<IconType>(
+            "Icon type",
+            iconType,
+            IconType.values(),
+            value -> {
+              iconType = value;
+            }));
+
+    return inputs;
   }
 }
