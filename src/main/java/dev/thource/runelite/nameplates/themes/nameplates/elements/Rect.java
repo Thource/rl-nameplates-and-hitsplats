@@ -1,21 +1,29 @@
 package dev.thource.runelite.nameplates.themes.nameplates.elements;
 
 import dev.thource.runelite.nameplates.Nameplate;
-import dev.thource.runelite.nameplates.themes.nameplates.DimensionProvider;
+import dev.thource.runelite.nameplates.NameplatesPlugin;
+import dev.thource.runelite.nameplates.panel.components.ColorInput;
+import dev.thource.runelite.nameplates.panel.components.IntInput;
+import dev.thource.runelite.nameplates.panel.components.LabelledInput;
 import dev.thource.runelite.nameplates.themes.nameplates.PositionProvider;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class Rect extends Element {
-  protected final DimensionProvider widthProvider;
-  protected final DimensionProvider heightProvider;
+  protected int width;
+  protected int height;
   protected Color color;
 
   public Rect() {
     super();
 
-    widthProvider = new DimensionProvider();
-    heightProvider = new DimensionProvider();
+    width = 10;
+    height = 10;
     color = Color.BLACK;
   }
 
@@ -23,34 +31,22 @@ public class Rect extends Element {
       String name,
       PositionProvider xPositionProvider,
       PositionProvider yPositionProvider,
-      DimensionProvider widthProvider,
-      DimensionProvider heightProvider,
+      int width,
+      int height,
       Color color) {
     super(name, xPositionProvider, yPositionProvider);
 
-    this.widthProvider = widthProvider;
-    this.heightProvider = heightProvider;
+    this.width = width;
+    this.height = height;
     this.color = color;
   }
 
-  private int getWidth(Nameplate nameplate) {
-    return widthProvider.get(nameplate);
-  }
-
-  private int getHeight(Nameplate nameplate) {
-    return heightProvider.get(nameplate);
-  }
-
   @Override
-  public void draw(
-      Nameplate nameplate, Graphics2D graphics, int x, int y, int plateWidth, int plateHeight) {
-    var width = getWidth(nameplate);
-    var height = getHeight(nameplate);
-
+  public void draw(Nameplate nameplate, Graphics2D graphics, int x, int y) {
     Rect.draw(
         graphics,
-        x + xPositionProvider.get(nameplate, plateWidth),
-        y + yPositionProvider.get(nameplate, plateHeight),
+        x + xPositionProvider.get(nameplate, width),
+        y + yPositionProvider.get(nameplate, height),
         width,
         height,
         color);
@@ -59,5 +55,16 @@ public class Rect extends Element {
   public static void draw(Graphics2D graphics, int x, int y, int width, int height, Color color) {
     graphics.setColor(color);
     graphics.fillRect(x, y, width, height);
+  }
+
+  @Override
+  public List<LabelledInput> getEditInputs(NameplatesPlugin plugin) {
+    var editInputs = super.getEditInputs(plugin);
+
+    editInputs.add(new IntInput("Width", width, 1, 999, val -> width = val));
+    editInputs.add(new IntInput("Height", height, 1, 999, val -> height = val));
+    editInputs.add(new ColorInput("Color", color, val -> color = val, plugin));
+
+    return editInputs;
   }
 }

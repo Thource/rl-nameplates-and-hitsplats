@@ -1,8 +1,10 @@
 package dev.thource.runelite.nameplates.themes.nameplates.elements;
 
 import dev.thource.runelite.nameplates.Nameplate;
+import dev.thource.runelite.nameplates.NameplatesPlugin;
 import dev.thource.runelite.nameplates.panel.Nameable;
 import dev.thource.runelite.nameplates.panel.components.LabelledInput;
+import dev.thource.runelite.nameplates.panel.components.PositionProviderInput;
 import dev.thource.runelite.nameplates.panel.components.StringInput;
 import dev.thource.runelite.nameplates.themes.nameplates.PositionProvider;
 import java.awt.Graphics2D;
@@ -32,15 +34,14 @@ public abstract class Element implements Nameable {
     this.yPositionProvider = yPositionProvider;
   }
 
-  public abstract void draw(
-      Nameplate nameplate, Graphics2D graphics, int x, int y, int plateWidth, int plateHeight);
+  public abstract void draw(Nameplate nameplate, Graphics2D graphics, int x, int y);
 
-  public List<LabelledInput> getEditInputs() {
+  public List<LabelledInput> getEditInputs(NameplatesPlugin plugin) {
     var list = new ArrayList<LabelledInput>();
 
     list.add(new StringInput("Name", name, this::setName));
-    list.add(new PositionProviderInput("X position", xPositionProvider));
-    list.add(new PositionProviderInput("Y position", yPositionProvider));
+    list.add(new PositionProviderInput("X position", xPositionProvider, false));
+    list.add(new PositionProviderInput("Y position", yPositionProvider, true));
 
     return list;
   }

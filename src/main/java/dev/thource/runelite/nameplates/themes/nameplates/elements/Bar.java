@@ -1,10 +1,17 @@
 package dev.thource.runelite.nameplates.themes.nameplates.elements;
 
 import dev.thource.runelite.nameplates.Nameplate;
+import dev.thource.runelite.nameplates.NameplatesPlugin;
+import dev.thource.runelite.nameplates.panel.components.CheckboxInput;
+import dev.thource.runelite.nameplates.panel.components.ColorInput;
+import dev.thource.runelite.nameplates.panel.components.IntInput;
+import dev.thource.runelite.nameplates.panel.components.LabelledInput;
+import dev.thource.runelite.nameplates.panel.components.PositionProviderInput;
 import dev.thource.runelite.nameplates.themes.nameplates.OffsetAnchor;
 import dev.thource.runelite.nameplates.themes.nameplates.PositionProvider;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,6 +21,7 @@ public abstract class Bar extends Element {
   protected int width;
   protected int height;
   protected int borderSize;
+  protected boolean drawText;
   protected final PositionProvider textXPositionProvider;
   protected final PositionProvider textYPositionProvider;
   protected Color borderColor;
@@ -27,6 +35,7 @@ public abstract class Bar extends Element {
     width = 120;
     height = 14;
     borderSize = 2;
+    drawText = true;
     textXPositionProvider = new PositionProvider(OffsetAnchor.MIDDLE, 60);
     textYPositionProvider = new PositionProvider(OffsetAnchor.MIDDLE, 7);
     borderColor = new Color(0.1f, 0.1f, 0.1f);
@@ -41,6 +50,7 @@ public abstract class Bar extends Element {
       int width,
       int height,
       int borderSize,
+      boolean drawText,
       PositionProvider textXPositionProvider,
       PositionProvider textYPositionProvider,
       Color borderColor,
@@ -52,6 +62,7 @@ public abstract class Bar extends Element {
     this.width = width;
     this.height = height;
     this.borderSize = borderSize;
+    this.drawText = drawText;
     this.textXPositionProvider = textXPositionProvider;
     this.textYPositionProvider = textYPositionProvider;
     this.borderColor = borderColor;
@@ -73,13 +84,7 @@ public abstract class Bar extends Element {
   }
 
   @Override
-  public void draw(
-      Nameplate nameplate,
-      Graphics2D graphics,
-      int plateX,
-      int plateY,
-      int plateWidth,
-      int plateHeight) {
+  public void draw(Nameplate nameplate, Graphics2D graphics, int plateX, int plateY) {
     var x = plateX + xPositionProvider.get(nameplate, width);
     var y = plateY + yPositionProvider.get(nameplate, height);
 
@@ -102,13 +107,41 @@ public abstract class Bar extends Element {
         innerHeight,
         barColorProvider.getColor(nameplate));
 
-    Text.draw(
-        graphics,
-        x,
-        y,
-        textXPositionProvider,
-        textYPositionProvider,
-        getText(nameplate),
-        textColor);
+    if (drawText) {
+      Text.draw(
+          graphics,
+          x,
+          y,
+          textXPositionProvider,
+          textYPositionProvider,
+          getText(nameplate),
+          textColor);
+    }
+  }
+
+  @Override
+  public List<LabelledInput> getEditInputs(NameplatesPlugin plugin) {
+    var editInputs = super.getEditInputs(plugin);
+
+    editInputs.add(new IntInput("Width", width, 1, 999, value -> width = value));
+    editInputs.add(new IntInput("Height", height, 1, 999, value -> height = value));
+    editInputs.add(new IntInput("Border size", borderSize, 0, 999, value -> borderSize = value));
+    editInputs.add(
+        new ColorInput("Border color", borderColor, value -> borderColor = value, plugin));
+    editInputs.add(new CheckboxInput("Text", drawText, value -> drawText = value));
+    editInputs.add(new PositionProviderInput("Text X position", textXPositionProvider, false));
+    editInputs.add(new PositionProviderInput("Text Y position", textYPositionProvider, true));
+    editInputs.add(new ColorInput("Text color", textColor, value -> textColor = value, plugin));
+    editInputs.add(
+        new ColorInput(
+            "Background color", backgroundColor, value -> backgroundColor = value, plugin));
+
+    // todo: add consumable colors
+
+    editInputs.addAll(barColorProvider.getEditInputs(plugin));
+
+    // todo: add indicator colors
+
+    return editInputs;
   }
 }

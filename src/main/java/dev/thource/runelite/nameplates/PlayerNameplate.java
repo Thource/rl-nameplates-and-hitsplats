@@ -129,4 +129,9 @@ public class PlayerNameplate extends Nameplate {
   public boolean shouldDrawPrayerBar() {
     return actor == plugin.getClient().getLocalPlayer();
   }
+
+  @Override
+  public boolean isSameTeam() {
+    return ((Player) actor).getTeam() == plugin.getClient().getLocalPlayer().getTeam();
+  }
 }

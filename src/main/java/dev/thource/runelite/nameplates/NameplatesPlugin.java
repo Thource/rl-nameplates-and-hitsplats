@@ -1,7 +1,6 @@
 package dev.thource.runelite.nameplates;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonParseException;
 import com.google.inject.Provides;
 import dev.thource.runelite.nameplates.panel.NameplatesPluginPanel;
 import dev.thource.runelite.nameplates.themes.Themes;
@@ -44,6 +43,7 @@ import net.runelite.api.VarPlayer;
 import net.runelite.api.Varbits;
 import net.runelite.api.WorldView;
 import net.runelite.api.events.ActorDeath;
+import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.HitsplatApplied;
@@ -68,6 +68,7 @@ import net.runelite.client.plugins.itemstats.StatChange;
 import net.runelite.client.plugins.itemstats.stats.Stats;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageUtil;
 
@@ -92,6 +93,7 @@ public class NameplatesPlugin extends Plugin {
   @Getter @Inject private SpriteManager spriteManager;
   @Getter @Inject private HiscoreClient hiscoreClient;
   @Getter @Inject private ConfigManager configManager;
+  @Getter @Inject private ColorPickerManager colorPickerManager;
 
   @Getter private final HashMap<Integer, HpCacheEntry> hpCache = new HashMap<>();
   @Getter private final HashMap<Integer, Nameplate> nameplates = new HashMap<>();
@@ -298,7 +300,7 @@ public class NameplatesPlugin extends Plugin {
               try {
                 var theme = CustomNameplateTheme.deserialize(themeJson, gson, false);
                 nameplateThemes.put(theme.getId(), theme);
-              } catch (JsonParseException | IllegalArgumentException e) {
+              } catch (RuntimeException e) {
                 log.warn("Failed to load custom nameplate theme {}", key, e);
               }
             });
@@ -512,6 +514,12 @@ public class NameplatesPlugin extends Plugin {
     hpCache.clear();
     nameplates.clear();
     hiscoreEndpoint = HiscoreEndpoint.fromWorldTypes(client.getWorldType());
+  }
+
+  @Subscribe
+  public void onClientTick(ClientTick clientTick) {
+    System.out.println("Client tick");
+    panel.updatePreview();
   }
 
   @Subscribe

@@ -16,7 +16,7 @@ public class ElementContainer {
   protected final List<Element> elements = new ArrayList<>();
 
   public void draw(Graphics2D graphics, Nameplate nameplate, int x, int y) {
-    elements.forEach(e -> e.draw(nameplate, graphics, x + xOffset, y + yOffset, width, height));
+    elements.forEach(e -> e.draw(nameplate, graphics, x + xOffset, y + yOffset));
   }
 
   public void add(Element element) {

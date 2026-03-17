@@ -78,6 +78,10 @@ public abstract class Nameplate {
     combatLevel = actor.getCombatLevel();
   }
 
+  public int getCombatLevelDifference() {
+    return getCombatLevel() - plugin.getClient().getLocalPlayer().getCombatLevel();
+  }
+
   public float getHealthPercentage() {
     return hpAnimationData.getCurrentValue() / getMaxHealth();
   }
@@ -104,5 +108,9 @@ public abstract class Nameplate {
 
   public boolean isHovered() {
     return plugin.getNameplatesOverlay().getHoveredActor() == this.actor;
+  }
+
+  public boolean isSameTeam() {
+    return false;
   }
 }

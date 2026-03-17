@@ -36,4 +36,9 @@ public class DropdownInput<T extends Nameable> extends LabelledInput {
     input.addPopupMenuListener(listener);
     inputPanel.add(input, BorderLayout.EAST);
   }
+
+  @Override
+  public void addGenericChangeListener(Runnable listener) {
+    input.addActionListener(e -> listener.run());
+  }
 }

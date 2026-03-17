@@ -1,11 +1,14 @@
 package dev.thource.runelite.nameplates.themes.nameplates;
 
+import dev.thource.runelite.nameplates.themes.nameplates.elements.CombatLevelColorProvider;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.CombatLevelText;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.HealthBar;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Icon;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.IconContainer;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.IconType;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.NameColorProvider;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.NameText;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.PrayerBar;
-import dev.thource.runelite.nameplates.themes.nameplates.elements.Text;
 import java.awt.Color;
 import java.util.List;
 
@@ -23,19 +26,17 @@ public class FlatDarkTheme extends NameplateTheme {
     stacking = true;
 
     elements.add(
-        new Text(
+        new NameText(
             "Name",
             new PositionProvider(OffsetAnchor.START, 0),
             new PositionProvider(OffsetAnchor.START, 0),
-            Color.WHITE,
-            new NameplateTextProvider(NameplateTextType.NAME)));
+            new NameColorProvider(Color.WHITE)));
     elements.add(
-        new Text(
+        new CombatLevelText(
             "Combat level",
             new PositionProvider(OffsetAnchor.END, 120),
             new PositionProvider(OffsetAnchor.START, 0),
-            Color.WHITE,
-            new NameplateTextProvider(NameplateTextType.COMBAT_LEVEL)));
+            new CombatLevelColorProvider()));
     elements.add(
         new Icon(
             "Overhead",

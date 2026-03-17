@@ -19,12 +19,16 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.image.BufferedImage;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+import lombok.Getter;
+import lombok.Setter;
 import net.runelite.api.Point;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
@@ -33,6 +37,7 @@ public class NameplatesPanel extends JPanel {
   private final NameplateThemeSelector themeListSelector;
   private final NameplateEditPanel editPanel;
   private final NameplatesPlugin plugin;
+  private final PreviewPanel preview;
   private NameplateTheme previewTheme;
 
   void editTheme(NameplateTheme theme, Gson gson) {
@@ -86,26 +91,7 @@ public class NameplatesPanel extends JPanel {
     final var previewWidth = 220;
     final var maxOffset = bgImage.getWidth() - previewWidth;
 
-    var preview =
-        new JPanel() {
-          private int offsetX = 0;
-
-          @Override
-          protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            g.drawImage(bgImage, -(maxOffset / 2) + offsetX, 0, null);
-
-            plugin
-                .getNameplatesOverlay()
-                .renderNameplate(
-                    (Graphics2D) g,
-                    nameplate,
-                    new Point((previewWidth / 2) + offsetX, 132),
-                    editPanel.getEditingTheme() != null
-                        ? editPanel.getEditingTheme()
-                        : previewTheme);
-          }
-        };
+    preview = new PreviewPanel(bgImage, maxOffset, plugin, nameplate, previewWidth);
     preview.addMouseMotionListener(
         new MouseMotionAdapter() {
           @Override
@@ -113,8 +99,8 @@ public class NameplatesPanel extends JPanel {
             var newOffset =
                 (int) ((e.getX() - (previewWidth / 2f)) / (previewWidth / 2f) * -(maxOffset / 2f));
 
-            if (newOffset != preview.offsetX) {
-              preview.offsetX = newOffset;
+            if (newOffset != preview.getOffsetX()) {
+              preview.setOffsetX(newOffset);
               preview.repaint();
             }
           }
@@ -288,5 +274,51 @@ public class NameplatesPanel extends JPanel {
     editPanel = new NameplateEditPanel(this, plugin, preview);
     editPanel.setVisible(false);
     scrollPanel.add(editPanel);
+  }
+
+  public void updatePreview() {
+    SwingUtilities.invokeLater(
+        () -> {
+          if (preview != null) {
+            preview.repaint();
+          }
+        });
+  }
+
+  private class PreviewPanel extends JPanel {
+    private final BufferedImage bgImage;
+    private final int maxOffset;
+    private final NameplatesPlugin plugin;
+    private final DummyNameplate nameplate;
+    private final int previewWidth;
+    @Getter @Setter private int offsetX;
+
+    public PreviewPanel(
+        BufferedImage bgImage,
+        int maxOffset,
+        NameplatesPlugin plugin,
+        DummyNameplate nameplate,
+        int previewWidth) {
+      this.bgImage = bgImage;
+      this.maxOffset = maxOffset;
+      this.plugin = plugin;
+      this.nameplate = nameplate;
+      this.previewWidth = previewWidth;
+      offsetX = 0;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+      super.paintComponent(g);
+      g.drawImage(bgImage, -(maxOffset / 2) + offsetX, 0, null);
+
+      plugin
+          .getNameplatesOverlay()
+          .renderNameplate(
+              (Graphics2D) g,
+              nameplate,
+              new Point((previewWidth / 2) + offsetX, 132),
+              editPanel.getEditingTheme() != null ? editPanel.getEditingTheme() : previewTheme);
+    }
   }
 }

@@ -1,41 +1,36 @@
 package dev.thource.runelite.nameplates.themes.nameplates.elements;
 
 import dev.thource.runelite.nameplates.Nameplate;
-import dev.thource.runelite.nameplates.themes.nameplates.NameplateTextProvider;
 import dev.thource.runelite.nameplates.themes.nameplates.OffsetAnchor;
 import dev.thource.runelite.nameplates.themes.nameplates.PositionProvider;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import net.runelite.client.ui.FontManager;
 
-public class Text extends Element {
-  protected Color color;
-  protected NameplateTextProvider textProvider;
+public abstract class Text extends Element {
+  protected abstract String getText(Nameplate nameplate);
 
-  public Text(
-      String name,
-      PositionProvider xPositionProvider,
-      PositionProvider yPositionProvider,
-      Color color,
-      NameplateTextProvider textProvider) {
+  protected abstract Color getColor(Nameplate nameplate);
+
+  public Text() {
+    super();
+  }
+
+  public Text(String name, PositionProvider xPositionProvider, PositionProvider yPositionProvider) {
     super(name, xPositionProvider, yPositionProvider);
-
-    this.color = color;
-    this.textProvider = textProvider;
   }
 
   @Override
-  public void draw(
-      Nameplate nameplate, Graphics2D graphics, int x, int y, int plateWidth, int plateHeight) {
-    var text = textProvider.get(nameplate);
-    if (text == null || text.trim().isEmpty()) {
+  public void draw(Nameplate nameplate, Graphics2D graphics, int x, int y) {
+    var text = getText(nameplate);
+    if (text.trim().isEmpty()) {
       return;
     }
 
     graphics.setFont(FontManager.getRunescapeSmallFont());
     var fontMetrics = graphics.getFontMetrics();
     var textBounds = fontMetrics.getStringBounds(text, graphics);
-    graphics.setColor(color);
+    graphics.setColor(getColor(nameplate));
 
     var textXOffset = -1;
     if (this.xPositionProvider.getAnchor() == OffsetAnchor.MIDDLE) {

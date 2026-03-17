@@ -18,6 +18,24 @@ import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.LinkBrowser;
 
 public class NameplatesPluginPanel extends PluginPanel {
+  public static final ImageIcon ADD_ICON =
+      new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "add.png"));
+  public static final ImageIcon CLONE_ICON =
+      new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "clone.png"));
+  public static final ImageIcon DELETE_ICON =
+      new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "delete.png"));
+  public static final ImageIcon EDIT_ICON =
+      new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "edit.png"));
+  public static final ImageIcon EXPORT_ICON =
+      new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "export.png"));
+  public static final ImageIcon IMPORT_ICON =
+      new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "import.png"));
+  public static final ImageIcon MOVE_DOWN_ICON =
+      new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "move-down.png"));
+  public static final ImageIcon MOVE_UP_ICON =
+      new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "move-up.png"));
+
+  private final NameplatesPanel nameplatesPanel;
 
   public NameplatesPluginPanel(NameplatesPlugin plugin) {
     super(false);
@@ -36,7 +54,7 @@ public class NameplatesPluginPanel extends PluginPanel {
     var bodyPanel = new JPanel(new BorderLayout());
     bodyPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
 
-    var nameplatesPanel = new NameplatesPanel(plugin);
+    nameplatesPanel = new NameplatesPanel(plugin);
 
     JButton wideButton1 = new JButton("Nameplates");
     wideButton1.setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -144,4 +162,8 @@ public class NameplatesPluginPanel extends PluginPanel {
 
   @Override
   public void onDeactivate() {}
+
+  public void updatePreview() {
+    nameplatesPanel.updatePreview();
+  }
 }

@@ -78,6 +78,11 @@ public class ListSelector<T extends Nameable> extends LabelledInput {
     onChange.accept(list.getSelectedValue());
   }
 
+  @Override
+  public void addGenericChangeListener(Runnable listener) {
+    addChangeListener((v) -> listener.run());
+  }
+
   public void clearButtons() {
     EnhancedSwingUtilities.fastRemoveAll(buttonContainer);
   }
@@ -105,5 +110,9 @@ public class ListSelector<T extends Nameable> extends LabelledInput {
 
   public void selectValue(T value) {
     list.setSelectedValue(value, true);
+  }
+
+  public T getSelectedValue() {
+    return list.getSelectedValue();
   }
 }

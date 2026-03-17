@@ -35,4 +35,6 @@ public abstract class LabelledInput extends JPanel {
     label.setAlignmentX(LEFT_ALIGNMENT);
     inputPanel.add(label, verticalLayout ? BorderLayout.NORTH : BorderLayout.WEST);
   }
+
+  public abstract void addGenericChangeListener(Runnable listener);
 }

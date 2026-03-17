@@ -45,9 +45,10 @@ public interface NameplatesConfig extends Config {
       keyName = "activeNameplateThemeId",
       name = "Active nameplate theme ID",
       description = "The ID of the active nameplate theme.",
-      hidden = true
-  )
-  default String activeNameplateThemeId() { return "flatDarkTheme"; }
+      hidden = true)
+  default String activeNameplateThemeId() {
+    return "flatDarkTheme";
+  }
 
   @ConfigItem(
       keyName = "npcNameplateDisplayMode",

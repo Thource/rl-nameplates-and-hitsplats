@@ -28,6 +28,11 @@ public class DummyNameplate extends Nameplate {
     setNoLoot(true);
   }
 
+  @Override
+  public int getCombatLevelDifference() {
+    return getCombatLevel() - 126;
+  }
+
   public void setHovered(boolean hovered) {
     dummyHovered = hovered;
   }

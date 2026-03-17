@@ -3,12 +3,13 @@ package dev.thource.runelite.nameplates.themes.nameplates;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.CombatLevelText;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Element;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.HealthBar;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Icon;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.IconContainer;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.NameText;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.PrayerBar;
-import dev.thource.runelite.nameplates.themes.nameplates.elements.Text;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -28,7 +29,7 @@ public class CustomNameplateTheme extends NameplateTheme {
   }
 
   public static CustomNameplateTheme deserialize(String json, Gson gson, boolean fromImport)
-      throws JsonSyntaxException, IllegalArgumentException {
+      throws RuntimeException {
     var themeEl = new JsonParser().parse(json);
     if (!themeEl.isJsonObject()) {
       throw new JsonSyntaxException("Expected a JSON object");
@@ -57,8 +58,11 @@ public class CustomNameplateTheme extends NameplateTheme {
       var type = elObj.get("elementType").getAsString();
       Class<? extends Element> clazz;
       switch (type) {
-        case "Text":
-          clazz = Text.class;
+        case "NameText":
+          clazz = NameText.class;
+          break;
+        case "CombatLevelText":
+          clazz = CombatLevelText.class;
           break;
         case "Icon":
           clazz = Icon.class;

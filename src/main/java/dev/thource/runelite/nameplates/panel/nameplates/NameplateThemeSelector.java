@@ -1,9 +1,17 @@
 package dev.thource.runelite.nameplates.panel.nameplates;
 
+import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.ADD_ICON;
+import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.CLONE_ICON;
+import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.DELETE_ICON;
+import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.EDIT_ICON;
+import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.EXPORT_ICON;
+import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.IMPORT_ICON;
+import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.MOVE_DOWN_ICON;
+import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.MOVE_UP_ICON;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import dev.thource.runelite.nameplates.NameplatesPlugin;
-import dev.thource.runelite.nameplates.panel.NameplatesPluginPanel;
 import dev.thource.runelite.nameplates.panel.components.ListSelector;
 import dev.thource.runelite.nameplates.themes.nameplates.CustomNameplateTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.NameplateTheme;
@@ -18,10 +26,8 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import net.runelite.client.util.ImageUtil;
 
 public class NameplateThemeSelector extends ListSelector<NameplateTheme> {
   private final NameplatesPlugin plugin;
@@ -74,7 +80,7 @@ public class NameplateThemeSelector extends ListSelector<NameplateTheme> {
       if (selectedIndex > staticThemes) {
         addButton(
             "Move up",
-            new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "move-up.png")),
+            MOVE_UP_ICON,
             () -> {
               var previousTheme = themesList.get(selectedIndex - 1);
               sel.setOrder(previousTheme.getOrder());
@@ -86,8 +92,7 @@ public class NameplateThemeSelector extends ListSelector<NameplateTheme> {
       if (selectedIndex < themes.size() - 1) {
         addButton(
             "Move down",
-            new ImageIcon(
-                ImageUtil.loadImageResource(NameplatesPluginPanel.class, "move-down.png")),
+            MOVE_DOWN_ICON,
             () -> {
               var nextTheme = themesList.get(selectedIndex + 1);
               nextTheme.setOrder(sel.getOrder());
@@ -103,11 +108,11 @@ public class NameplateThemeSelector extends ListSelector<NameplateTheme> {
     if (sel != null) {
       addButton(
           "Export theme (copy to clipboard)",
-          new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "export.png")),
+          EXPORT_ICON,
           () -> {
             Toolkit.getDefaultToolkit()
                 .getSystemClipboard()
-                .setContents(new StringSelection(gson.toJson(sel)), null);
+                .setContents(new StringSelection(sel.serialize(gson, true)), null);
 
             JOptionPane.showMessageDialog(
                 this,
@@ -117,13 +122,10 @@ public class NameplateThemeSelector extends ListSelector<NameplateTheme> {
           });
 
       if (sel.isEditable()) {
-        addButton(
-            "Edit theme",
-            new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "edit.png")),
-            () -> editThemeAction.accept(sel, gson));
+        addButton("Edit theme", EDIT_ICON, () -> editThemeAction.accept(sel, gson));
         addButton(
             "Delete theme",
-            new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "trash.png")),
+            DELETE_ICON,
             () -> {
               if (NameplatesPlugin.getConfirmation(
                   this,
@@ -142,7 +144,7 @@ public class NameplateThemeSelector extends ListSelector<NameplateTheme> {
 
     addButton(
         "Import theme",
-        new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "import.png")),
+        IMPORT_ICON,
         () -> {
           var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
           if (clipboard == null) {
@@ -200,7 +202,7 @@ public class NameplateThemeSelector extends ListSelector<NameplateTheme> {
     if (sel != null) {
       addButton(
           "Clone theme",
-          new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "clone.png")),
+          CLONE_ICON,
           () -> {
             var theme = CustomNameplateTheme.deserialize(sel.serialize(gson, true), gson, true);
             theme.setName(theme.getName() + " (copy)");
@@ -211,7 +213,7 @@ public class NameplateThemeSelector extends ListSelector<NameplateTheme> {
 
     addButton(
         "Create new theme",
-        new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "create.png")),
+        ADD_ICON,
         () -> {
           var theme = new CustomNameplateTheme();
           theme.setName("New theme");

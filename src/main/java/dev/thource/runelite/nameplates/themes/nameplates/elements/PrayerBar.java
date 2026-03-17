@@ -26,6 +26,7 @@ public class PrayerBar extends Bar {
       int width,
       int height,
       int borderSize,
+      boolean drawText,
       PositionProvider textXPositionProvider,
       PositionProvider textYPositionProvider,
       Color borderColor,
@@ -39,6 +40,7 @@ public class PrayerBar extends Bar {
         width,
         height,
         borderSize,
+        drawText,
         textXPositionProvider,
         textYPositionProvider,
         borderColor,
@@ -48,18 +50,12 @@ public class PrayerBar extends Bar {
   }
 
   @Override
-  public void draw(
-      Nameplate nameplate,
-      Graphics2D graphics,
-      int plateX,
-      int plateY,
-      int plateWidth,
-      int plateHeight) {
+  public void draw(Nameplate nameplate, Graphics2D graphics, int plateX, int plateY) {
     if (!nameplate.shouldDrawPrayerBar()) {
       return;
     }
 
-    super.draw(nameplate, graphics, plateX, plateY, plateWidth, plateHeight);
+    super.draw(nameplate, graphics, plateX, plateY);
   }
 
   @Override

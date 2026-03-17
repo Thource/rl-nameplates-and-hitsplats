@@ -37,6 +37,7 @@ public class OSRSTheme extends NameplateTheme {
             30,
             4,
             0,
+            false,
             new PositionProvider(OffsetAnchor.START, 0),
             new PositionProvider(OffsetAnchor.START, 0),
             Color.WHITE,

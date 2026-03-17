@@ -1,7 +1,11 @@
 package dev.thource.runelite.nameplates.themes.nameplates.elements;
 
 import dev.thource.runelite.nameplates.Nameplate;
+import dev.thource.runelite.nameplates.NameplatesPlugin;
+import dev.thource.runelite.nameplates.panel.components.ColorInput;
+import dev.thource.runelite.nameplates.panel.components.LabelledInput;
 import java.awt.Color;
+import java.util.List;
 
 public class HealthBarColorProvider extends BarColorProvider {
   protected Color poisonColor;
@@ -34,5 +38,19 @@ public class HealthBarColorProvider extends BarColorProvider {
     }
 
     return normalColor;
+  }
+
+  @Override
+  public List<LabelledInput> getEditInputs(NameplatesPlugin plugin) {
+    var editInputs = super.getEditInputs(plugin);
+
+    editInputs.add(
+        new ColorInput("Poison fill color", poisonColor, value -> poisonColor = value, plugin));
+    editInputs.add(
+        new ColorInput("Venom fill color", venomColor, value -> venomColor = value, plugin));
+    editInputs.add(
+        new ColorInput("Disease fill color", diseaseColor, value -> diseaseColor = value, plugin));
+
+    return editInputs;
   }
 }

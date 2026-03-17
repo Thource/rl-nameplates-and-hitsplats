@@ -12,11 +12,17 @@ public class CheckboxInput extends LabelledInput {
 
     input = new JCheckBox();
     input.setSelected(selected);
+    input.setFocusable(false);
     input.addChangeListener(e -> onChange.accept(input.isSelected()));
     inputPanel.add(input, BorderLayout.EAST);
   }
 
   public void setValue(boolean value) {
     input.setSelected(value);
+  }
+
+  @Override
+  public void addGenericChangeListener(Runnable listener) {
+    input.addChangeListener(e -> listener.run());
   }
 }

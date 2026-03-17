@@ -29,4 +29,9 @@ public class IntInput extends LabelledInput {
   public void setValue(int value) {
     input.setValue(value);
   }
+
+  @Override
+  public void addGenericChangeListener(Runnable listener) {
+    input.addChangeListener(e -> listener.run());
+  }
 }

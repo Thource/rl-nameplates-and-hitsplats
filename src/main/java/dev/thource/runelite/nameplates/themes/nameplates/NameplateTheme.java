@@ -79,7 +79,7 @@ public abstract class NameplateTheme implements Nameable {
     }
 
     for (Element element : elements) {
-      element.draw(nameplate, graphics, x, y, width, height);
+      element.draw(nameplate, graphics, x, y);
     }
   }
 

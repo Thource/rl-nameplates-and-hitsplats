@@ -7,8 +7,6 @@ import dev.thource.runelite.nameplates.NameplatesPlugin;
 import dev.thource.runelite.nameplates.panel.components.DropdownInput;
 import dev.thource.runelite.nameplates.panel.components.IntInput;
 import dev.thource.runelite.nameplates.panel.components.LabelledInput;
-import dev.thource.runelite.nameplates.themes.nameplates.DimensionProvider;
-import dev.thource.runelite.nameplates.themes.nameplates.ImageFill;
 import dev.thource.runelite.nameplates.themes.nameplates.OffsetAnchor;
 import dev.thource.runelite.nameplates.themes.nameplates.PositionProvider;
 import java.awt.Graphics2D;
@@ -40,7 +38,6 @@ public class Icon extends Element {
 
   protected int size;
   protected IconType iconType;
-  protected final transient ImageFill imageFill = new ImageFill();
 
   public Icon() {
     super();
@@ -111,78 +108,63 @@ public class Icon extends Element {
   }
 
   @Override
-  public void draw(
-      Nameplate nameplate, Graphics2D graphics, int x, int y, int plateWidth, int plateHeight) {
-    this.draw(nameplate, graphics, x, y, plateWidth, plateHeight, iconType, null);
+  public void draw(Nameplate nameplate, Graphics2D graphics, int x, int y) {
+    var direction = Direction.NORTH;
+    if (xPositionProvider.getAnchor() == OffsetAnchor.END) {
+      direction = Direction.EAST;
+    } else if (xPositionProvider.getAnchor() == OffsetAnchor.START) {
+      direction = Direction.WEST;
+    } else if (yPositionProvider.getAnchor() == OffsetAnchor.START) {
+      direction = Direction.SOUTH;
+    }
+
+    draw(
+        nameplate,
+        graphics,
+        x + xPositionProvider.get(nameplate, size),
+        y + yPositionProvider.get(nameplate, size),
+        size,
+        iconType,
+        direction);
   }
 
   public static boolean shouldDraw(Nameplate nameplate, IconType iconType) {
     return getImage(nameplate, iconType, Direction.EAST) != null;
   }
 
-  public void draw(
+  public static void draw(
       Nameplate nameplate,
       Graphics2D graphics,
       int x,
       int y,
-      int plateWidth,
-      int plateHeight,
+      int size,
       IconType iconType,
       Direction direction) {
+
     var image = getImage(nameplate, iconType, direction);
     if (image == null) {
       return;
     }
 
-    var xOffset = 0;
-    if (this.xPositionProvider.getAnchor() == OffsetAnchor.MIDDLE) {
-      xOffset = -size / 2;
-    } else if (this.xPositionProvider.getAnchor() == OffsetAnchor.END) {
-      xOffset = -size;
-    }
-
-    var yOffset = 0;
-    if (this.yPositionProvider.getAnchor() == OffsetAnchor.MIDDLE) {
-      yOffset = -size / 2;
-    } else if (this.yPositionProvider.getAnchor() == OffsetAnchor.END) {
-      yOffset = -size;
-    }
-
-    imageFill.setImage(image);
-
     // Draw image scaled to fit in size x size, preserving aspect ratio and centering
-    int imgW = image.getWidth();
-    int imgH = image.getHeight();
-    double scale = Math.max(1.0, Math.min((double) size / imgW, (double) size / imgH));
-    int drawW = (int) Math.round(imgW * scale);
-    int drawH = (int) Math.round(imgH * scale);
-    int drawX = x + xPositionProvider.getValue() + xOffset + (size - drawW) / 2;
-    int drawY = y + yPositionProvider.getValue() + yOffset + (size - drawH) / 2;
+    var imgW = image.getWidth();
+    var imgH = image.getHeight();
+    var scale = Math.min(1.0, Math.min((double) size / imgW, (double) size / imgH));
+    var drawW = (int) Math.round(imgW * scale);
+    var drawH = (int) Math.round(imgH * scale);
+    var drawX = x + (size - drawW) / 2;
+    var drawY = y + (size - drawH) / 2;
     graphics.drawImage(image, drawX, drawY, drawW, drawH, null);
   }
 
   @Override
-  public List<LabelledInput> getEditInputs() {
-    var inputs = super.getEditInputs();
+  public List<LabelledInput> getEditInputs(NameplatesPlugin plugin) {
+    var inputs = super.getEditInputs(plugin);
+
+    inputs.add(new IntInput("Icon size", size, 1, 999, value -> size = value));
 
     inputs.add(
-        new IntInput(
-            "Size",
-            size,
-            1,
-            999,
-            value -> {
-              size = value;
-            }));
-
-    inputs.add(
-        new DropdownInput<IconType>(
-            "Icon type",
-            iconType,
-            IconType.values(),
-            value -> {
-              iconType = value;
-            }));
+        new DropdownInput<>("Icon type", iconType, IconType.values(), value -> iconType = value));
 
     return inputs;
   }

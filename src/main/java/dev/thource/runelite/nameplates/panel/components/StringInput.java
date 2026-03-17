@@ -38,4 +38,27 @@ public class StringInput extends LabelledInput {
   public void setValue(String value) {
     input.setText(value);
   }
+
+  @Override
+  public void addGenericChangeListener(Runnable listener) {
+    input
+        .getDocument()
+        .addDocumentListener(
+            new DocumentListener() {
+              @Override
+              public void insertUpdate(DocumentEvent e) {
+                listener.run();
+              }
+
+              @Override
+              public void removeUpdate(DocumentEvent e) {
+                listener.run();
+              }
+
+              @Override
+              public void changedUpdate(DocumentEvent e) {
+                listener.run();
+              }
+            });
+  }
 }
