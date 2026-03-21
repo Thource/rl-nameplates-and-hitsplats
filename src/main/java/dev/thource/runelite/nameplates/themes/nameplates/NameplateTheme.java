@@ -66,7 +66,7 @@ public abstract class NameplateTheme implements Nameable {
     return healthString;
   }
 
-  public void drawNameplate(Graphics2D graphics, Nameplate nameplate, Point point) {
+  public int drawNameplate(Graphics2D graphics, Nameplate nameplate, Point point) {
     var x = point.getX();
     var y = point.getY();
     var drawPrayerBar = nameplate.shouldDrawPrayerBar();
@@ -81,6 +81,16 @@ public abstract class NameplateTheme implements Nameable {
     for (Element element : elements) {
       element.draw(nameplate, graphics, x, y);
     }
+
+    if (!stacking) {
+      return 0;
+    }
+
+    if (drawPrayerBar) {
+      return heightWithPrayerBar;
+    }
+
+    return height;
   }
 
   public boolean isEditable() {

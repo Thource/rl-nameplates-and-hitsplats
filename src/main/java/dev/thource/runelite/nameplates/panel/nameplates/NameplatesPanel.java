@@ -25,7 +25,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import lombok.Getter;
 import lombok.Setter;
@@ -151,6 +150,17 @@ public class NameplatesPanel extends JPanel {
             });
     previewOptions.addToPanel(levelInput);
 
+    var healthState =
+        new DropdownInput<>(
+            "Health state",
+            HealthState.NONE,
+            HealthState.values(),
+            state -> {
+              nameplate.setHealthState(state);
+              preview.repaint();
+            });
+    previewOptions.addToPanel(healthState);
+
     var currentHealthInput =
         new IntInput(
             "Current HP",
@@ -274,15 +284,6 @@ public class NameplatesPanel extends JPanel {
     editPanel = new NameplateEditPanel(this, plugin, preview);
     editPanel.setVisible(false);
     scrollPanel.add(editPanel);
-  }
-
-  public void updatePreview() {
-    SwingUtilities.invokeLater(
-        () -> {
-          if (preview != null) {
-            preview.repaint();
-          }
-        });
   }
 
   private class PreviewPanel extends JPanel {

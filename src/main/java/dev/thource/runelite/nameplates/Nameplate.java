@@ -61,6 +61,10 @@ public abstract class Nameplate {
     return null;
   }
 
+  public boolean isDiseased() {
+    return false;
+  }
+
   public int getCurrentPrayer() {
     return -1;
   }

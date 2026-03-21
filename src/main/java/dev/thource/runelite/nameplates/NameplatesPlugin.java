@@ -3,21 +3,18 @@ package dev.thource.runelite.nameplates;
 import com.google.gson.Gson;
 import com.google.inject.Provides;
 import dev.thource.runelite.nameplates.panel.NameplatesPluginPanel;
-import dev.thource.runelite.nameplates.themes.Themes;
 import dev.thource.runelite.nameplates.themes.nameplates.CustomNameplateTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.NameplateTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.OSRSTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Icon;
 import java.awt.Component;
-import java.awt.image.BufferedImage;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -37,29 +34,24 @@ import net.runelite.api.NPC;
 import net.runelite.api.Player;
 import net.runelite.api.Prayer;
 import net.runelite.api.Skill;
-import net.runelite.api.SpriteID;
-import net.runelite.api.SpritePixels;
-import net.runelite.api.VarPlayer;
-import net.runelite.api.Varbits;
 import net.runelite.api.WorldView;
 import net.runelite.api.events.ActorDeath;
-import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.HitsplatApplied;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.PlayerDespawned;
 import net.runelite.api.events.VarbitChanged;
-import net.runelite.api.widgets.ComponentID;
+import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.VarPlayerID;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.NPCManager;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.hiscore.HiscoreClient;
-import net.runelite.client.hiscore.HiscoreEndpoint;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.itemstats.Effect;
@@ -97,122 +89,11 @@ public class NameplatesPlugin extends Plugin {
 
   @Getter private final HashMap<Integer, HpCacheEntry> hpCache = new HashMap<>();
   @Getter private final HashMap<Integer, Nameplate> nameplates = new HashMap<>();
-  @Getter private final HashMap<Integer, SpritePixels> overriddenSprites = new HashMap<>();
 
   private NameplatesPluginPanel panel;
   private NavigationButton navButton;
 
-  private static final int[] spritesToHide = {
-    SpriteID.HEALTHBAR_DEFAULT_FRONT_30PX,
-    SpriteID.HEALTHBAR_DEFAULT_FRONT_40PX,
-    SpriteID.HEALTHBAR_DEFAULT_FRONT_50PX,
-    SpriteID.HEALTHBAR_DEFAULT_FRONT_60PX,
-    SpriteID.HEALTHBAR_DEFAULT_FRONT_70PX,
-    SpriteID.HEALTHBAR_DEFAULT_FRONT_80PX,
-    SpriteID.HEALTHBAR_DEFAULT_FRONT_100PX,
-    SpriteID.HEALTHBAR_DEFAULT_FRONT_120PX,
-    SpriteID.HEALTHBAR_DEFAULT_FRONT_140PX,
-    SpriteID.HEALTHBAR_DEFAULT_FRONT_160PX,
-    SpriteID.HEALTHBAR_DEFAULT_BACK_30PX,
-    SpriteID.HEALTHBAR_DEFAULT_BACK_40PX,
-    SpriteID.HEALTHBAR_DEFAULT_BACK_50PX,
-    SpriteID.HEALTHBAR_DEFAULT_BACK_60PX,
-    SpriteID.HEALTHBAR_DEFAULT_BACK_70PX,
-    SpriteID.HEALTHBAR_DEFAULT_BACK_80PX,
-    SpriteID.HEALTHBAR_DEFAULT_BACK_100PX,
-    SpriteID.HEALTHBAR_DEFAULT_BACK_120PX,
-    SpriteID.HEALTHBAR_DEFAULT_BACK_140PX,
-    SpriteID.HEALTHBAR_DEFAULT_BACK_160PX,
-    SpriteID.HEALTHBAR_CYAN_FRONT_30PX,
-    SpriteID.HEALTHBAR_CYAN_FRONT_40PX,
-    SpriteID.HEALTHBAR_CYAN_FRONT_50PX,
-    SpriteID.HEALTHBAR_CYAN_FRONT_60PX,
-    SpriteID.HEALTHBAR_CYAN_FRONT_70PX,
-    SpriteID.HEALTHBAR_CYAN_FRONT_80PX,
-    SpriteID.HEALTHBAR_CYAN_FRONT_100PX,
-    SpriteID.HEALTHBAR_CYAN_FRONT_120PX,
-    SpriteID.HEALTHBAR_CYAN_FRONT_140PX,
-    SpriteID.HEALTHBAR_CYAN_FRONT_160PX,
-    SpriteID.HEALTHBAR_CYAN_BACK_30PX,
-    SpriteID.HEALTHBAR_CYAN_BACK_40PX,
-    SpriteID.HEALTHBAR_CYAN_BACK_50PX,
-    SpriteID.HEALTHBAR_CYAN_BACK_60PX,
-    SpriteID.HEALTHBAR_CYAN_BACK_70PX,
-    SpriteID.HEALTHBAR_CYAN_BACK_80PX,
-    SpriteID.HEALTHBAR_CYAN_BACK_100PX,
-    SpriteID.HEALTHBAR_CYAN_BACK_120PX,
-    SpriteID.HEALTHBAR_CYAN_BACK_140PX,
-    SpriteID.HEALTHBAR_CYAN_BACK_160PX,
-    SpriteID.HEALTHBAR_ORANGE_FRONT_30PX,
-    SpriteID.HEALTHBAR_ORANGE_FRONT_40PX,
-    SpriteID.HEALTHBAR_ORANGE_FRONT_50PX,
-    SpriteID.HEALTHBAR_ORANGE_FRONT_60PX,
-    SpriteID.HEALTHBAR_ORANGE_FRONT_70PX,
-    SpriteID.HEALTHBAR_ORANGE_FRONT_80PX,
-    SpriteID.HEALTHBAR_ORANGE_FRONT_100PX,
-    SpriteID.HEALTHBAR_ORANGE_FRONT_120PX,
-    SpriteID.HEALTHBAR_ORANGE_FRONT_140PX,
-    SpriteID.HEALTHBAR_ORANGE_FRONT_160PX,
-    SpriteID.HEALTHBAR_ORANGE_BACK_30PX,
-    SpriteID.HEALTHBAR_ORANGE_BACK_40PX,
-    SpriteID.HEALTHBAR_ORANGE_BACK_50PX,
-    SpriteID.HEALTHBAR_ORANGE_BACK_60PX,
-    SpriteID.HEALTHBAR_ORANGE_BACK_70PX,
-    SpriteID.HEALTHBAR_ORANGE_BACK_80PX,
-    SpriteID.HEALTHBAR_ORANGE_BACK_100PX,
-    SpriteID.HEALTHBAR_ORANGE_BACK_120PX,
-    SpriteID.HEALTHBAR_ORANGE_BACK_140PX,
-    SpriteID.HEALTHBAR_ORANGE_BACK_160PX,
-    SpriteID.HEALTHBAR_YELLOW_FRONT_30PX,
-    SpriteID.HEALTHBAR_YELLOW_FRONT_40PX,
-    SpriteID.HEALTHBAR_YELLOW_FRONT_50PX,
-    SpriteID.HEALTHBAR_YELLOW_FRONT_60PX,
-    SpriteID.HEALTHBAR_YELLOW_FRONT_70PX,
-    SpriteID.HEALTHBAR_YELLOW_FRONT_80PX,
-    SpriteID.HEALTHBAR_YELLOW_FRONT_100PX,
-    SpriteID.HEALTHBAR_YELLOW_FRONT_120PX,
-    SpriteID.HEALTHBAR_YELLOW_FRONT_140PX,
-    SpriteID.HEALTHBAR_YELLOW_FRONT_160PX,
-    SpriteID.HEALTHBAR_YELLOW_BACK_30PX,
-    SpriteID.HEALTHBAR_YELLOW_BACK_40PX,
-    SpriteID.HEALTHBAR_YELLOW_BACK_50PX,
-    SpriteID.HEALTHBAR_YELLOW_BACK_60PX,
-    SpriteID.HEALTHBAR_YELLOW_BACK_70PX,
-    SpriteID.HEALTHBAR_YELLOW_BACK_80PX,
-    SpriteID.HEALTHBAR_YELLOW_BACK_100PX,
-    SpriteID.HEALTHBAR_YELLOW_BACK_120PX,
-    SpriteID.HEALTHBAR_YELLOW_BACK_140PX,
-    SpriteID.HEALTHBAR_YELLOW_BACK_160PX,
-    SpriteID.HEALTHBAR_PURPLE_FRONT_30PX,
-    SpriteID.HEALTHBAR_PURPLE_FRONT_40PX,
-    SpriteID.HEALTHBAR_PURPLE_FRONT_50PX,
-    SpriteID.HEALTHBAR_PURPLE_FRONT_60PX,
-    SpriteID.HEALTHBAR_PURPLE_FRONT_70PX,
-    SpriteID.HEALTHBAR_PURPLE_FRONT_80PX,
-    SpriteID.HEALTHBAR_PURPLE_FRONT_100PX,
-    SpriteID.HEALTHBAR_PURPLE_FRONT_120PX,
-    SpriteID.HEALTHBAR_PURPLE_FRONT_140PX,
-    SpriteID.HEALTHBAR_PURPLE_FRONT_160PX,
-    SpriteID.HEALTHBAR_PURPLE_BACK_30PX,
-    SpriteID.HEALTHBAR_PURPLE_BACK_40PX,
-    SpriteID.HEALTHBAR_PURPLE_BACK_50PX,
-    SpriteID.HEALTHBAR_PURPLE_BACK_60PX,
-    SpriteID.HEALTHBAR_PURPLE_BACK_70PX,
-    SpriteID.HEALTHBAR_PURPLE_BACK_80PX,
-    SpriteID.HEALTHBAR_PURPLE_BACK_100PX,
-    SpriteID.HEALTHBAR_PURPLE_BACK_120PX,
-    SpriteID.HEALTHBAR_PURPLE_BACK_140PX,
-    SpriteID.HEALTHBAR_PURPLE_BACK_160PX,
-    SpriteID.HEALTHBAR_BLUE_FRONT_50PX,
-    SpriteID.HEALTHBAR_BLUE_BACK_50PX,
-    SpriteID.HEALTHBAR_COX_GREEN,
-    SpriteID.HEALTHBAR_COX_BLUE,
-    SpriteID.HEALTHBAR_COX_YELLOW,
-    SpriteID.HEALTHBAR_COX_RED,
-  };
   private int cacheCleaningTick;
-  SpritePixels transparent;
-  @Getter private HiscoreEndpoint hiscoreEndpoint = HiscoreEndpoint.NORMAL;
   private Instant startOfLastTick = Instant.now();
   private int ticksSinceHPRegen;
   @Getter private Instant nextPoisonTick;
@@ -220,52 +101,12 @@ public class NameplatesPlugin extends Plugin {
   @Getter private final Map<String, NameplateTheme> nameplateThemes = new HashMap<>();
   @Getter private NameplateTheme activeNameplateTheme;
 
-  // TODO: make a plugin panel where the user can view the themes for nameplates and hitsplats and
-  // easily define their own
-  //   the panel will show a preview by rendering a fake nameplate and fake hitsplats
-  //   plus a dono button lolol
-
-  private void overrideSprites() {
-    Map<Integer, SpritePixels> overrides = client.getSpriteOverrides();
-    boolean anySpriteOverridden = false;
-
-    for (int spriteId : spritesToHide) {
-      SpritePixels overridenSprite = overrides.get(spriteId);
-      if (overridenSprite == transparent) {
-        continue;
-      }
-
-      overriddenSprites.put(spriteId, overrides.get(spriteId));
-      overrides.put(spriteId, transparent);
-      anySpriteOverridden = true;
-    }
-
-    if (anySpriteOverridden) {
-      clientThread.invokeLater(client::resetHealthBarCaches);
-    }
-  }
-
-  private void restoreSprites() {
-    Map<Integer, SpritePixels> overrides = client.getSpriteOverrides();
-
-    for (int spriteId : spritesToHide) {
-      SpritePixels overriddenSprite = overriddenSprites.get(spriteId);
-
-      if (overriddenSprite != null) {
-        overrides.put(spriteId, overriddenSprite);
-      } else {
-        overrides.remove(spriteId);
-      }
-    }
-
-    clientThread.invokeLater(client::resetHealthBarCaches);
-  }
-
   public static boolean getConfirmation(
       Component parentComponent, String text, String confirmText, int messageType) {
     int result = JOptionPane.CANCEL_OPTION;
 
     try {
+      //noinspection MagicConstant
       result =
           JOptionPane.showConfirmDialog(
               parentComponent, text, confirmText, JOptionPane.OK_CANCEL_OPTION, messageType);
@@ -278,7 +119,45 @@ public class NameplatesPlugin extends Plugin {
 
   @Override
   protected void startUp() {
-    // load themes
+    loadThemes();
+
+    if (panel == null) {
+      // edt
+      SwingUtilities.invokeLater(
+          () -> {
+            panel = new NameplatesPluginPanel(this);
+
+            navButton =
+                NavigationButton.builder()
+                    .tooltip("Nameplates & Hitsplats")
+                    .icon(ImageUtil.loadImageResource(getClass(), "icon-28.png"))
+                    .panel(panel)
+                    .priority(8)
+                    .build();
+            clientToolbar.addNavigation(navButton);
+          });
+    }
+
+    clientThread.invoke(
+        () -> {
+          for (NameplateHeadIcon icon : NameplateHeadIcon.values()) {
+            icon.loadImage(spriteManager);
+          }
+          for (NameplateSkullIcon icon : NameplateSkullIcon.values()) {
+            icon.loadImage(spriteManager);
+          }
+
+          Icon.initImages(spriteManager);
+        });
+
+    overlayManager.add(nameplatesOverlay);
+
+    if (navButton != null) {
+      clientToolbar.addNavigation(navButton);
+    }
+  }
+
+  private void loadThemes() {
     nameplateThemes.clear();
 
     // add static themes
@@ -310,51 +189,6 @@ public class NameplatesPlugin extends Plugin {
     activeNameplateTheme =
         nameplateThemes.getOrDefault(
             config.activeNameplateThemeId(), nameplateThemes.get(FlatDarkTheme.ID));
-
-    if (panel == null) {
-      // edt
-      SwingUtilities.invokeLater(
-          () -> {
-            panel = new NameplatesPluginPanel(this);
-
-            navButton =
-                NavigationButton.builder()
-                    .tooltip("Nameplates & Hitsplats")
-                    .icon(ImageUtil.loadImageResource(getClass(), "icon-28.png"))
-                    .panel(panel)
-                    .priority(8)
-                    .build();
-            clientToolbar.addNavigation(navButton);
-          });
-    }
-
-    clientThread.invoke(
-        () -> {
-          for (NameplateHeadIcon icon : NameplateHeadIcon.values()) {
-            icon.loadImage(spriteManager);
-          }
-          for (NameplateSkullIcon icon : NameplateSkullIcon.values()) {
-            icon.loadImage(spriteManager);
-          }
-
-          Icon.initImages(spriteManager);
-        });
-
-    for (Themes theme : Themes.values()) {
-      theme.getTheme().setPlugin(this);
-    }
-
-    if (transparent == null) {
-      transparent =
-          ImageUtil.getImageSpritePixels(
-              new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB), client);
-    }
-
-    overlayManager.add(nameplatesOverlay);
-
-    if (navButton != null) {
-      clientToolbar.addNavigation(navButton);
-    }
   }
 
   @Override
@@ -364,8 +198,6 @@ public class NameplatesPlugin extends Plugin {
     }
 
     overlayManager.remove(nameplatesOverlay);
-
-    restoreSprites();
   }
 
   public int getCurrentHealth(Actor actor, int maxHealth) {
@@ -374,8 +206,8 @@ public class NameplatesPlugin extends Plugin {
     }
 
     if (actor instanceof NPC
-        && ((NPC) actor).getId() == client.getVarpValue(VarPlayer.HP_HUD_NPC_ID)) {
-      return client.getVarbitValue(Varbits.BOSS_HEALTH_CURRENT);
+        && ((NPC) actor).getId() == client.getVarpValue(VarPlayerID.HPBAR_HUD_NPC)) {
+      return client.getVarbitValue(VarbitID.HPBAR_HUD_HP);
     }
 
     if (actor.getHealthScale() == -1) {
@@ -513,13 +345,6 @@ public class NameplatesPlugin extends Plugin {
 
     hpCache.clear();
     nameplates.clear();
-    hiscoreEndpoint = HiscoreEndpoint.fromWorldTypes(client.getWorldType());
-  }
-
-  @Subscribe
-  public void onClientTick(ClientTick clientTick) {
-    System.out.println("Client tick");
-    panel.updatePreview();
   }
 
   @Subscribe
@@ -527,7 +352,7 @@ public class NameplatesPlugin extends Plugin {
     startOfLastTick = Instant.now();
 
     int ticksPerHPRegen = NORMAL_HP_REGEN_TICKS;
-    if (client.isPrayerActive(Prayer.RAPID_HEAL)) {
+    if (client.getVarbitValue(VarbitID.PRAYER_RAPIDHEAL) == 1) {
       ticksPerHPRegen /= 2;
     }
 
@@ -536,8 +361,6 @@ public class NameplatesPlugin extends Plugin {
     if (client.getBoostedSkillLevel(Skill.HITPOINTS) == client.getRealSkillLevel(Skill.HITPOINTS)) {
       ticksSinceHPRegen = 0;
     }
-
-    overrideSprites();
 
     WorldView topLevelWorldView = client.getTopLevelWorldView();
     Stream.of(topLevelWorldView.npcs(), topLevelWorldView.players())
@@ -559,10 +382,10 @@ public class NameplatesPlugin extends Plugin {
 
   @Subscribe
   private void onVarbitChanged(VarbitChanged varbitChanged) {
-    if (varbitChanged.getVarpId() == VarPlayer.POISON) {
+    if (varbitChanged.getVarpId() == VarPlayerID.POISON) {
       nextPoisonTick =
           Instant.now().plus(Duration.of(PoisonStatus.POISON_TICK_MILLIS, ChronoUnit.MILLIS));
-    } else if (varbitChanged.getVarbitId() == Varbits.PRAYER_RAPID_HEAL) {
+    } else if (varbitChanged.getVarbitId() == VarbitID.PRAYER_RAPIDHEAL) {
       ticksSinceHPRegen = 0;
     }
   }
@@ -582,22 +405,6 @@ public class NameplatesPlugin extends Plugin {
     Actor actor = actorDeath.getActor();
 
     hpCache.remove(getActorId(actor));
-  }
-
-  @Subscribe
-  public void onConfigChanged(ConfigChanged configChanged) {
-    if (!configChanged.getGroup().equals(NameplatesConfig.CONFIG_GROUP)) {
-      return;
-    }
-
-    if (configChanged.getKey().equals("lookupPlayerHp")) {
-      clientThread.invoke(
-          () ->
-              client.getTopLevelWorldView().players().stream()
-                  .map(this::getNameplateForActor)
-                  .filter(Objects::nonNull)
-                  .forEach(nameplate -> nameplate.updateFromActor(this)));
-    }
   }
 
   @Subscribe
@@ -626,7 +433,7 @@ public class NameplatesPlugin extends Plugin {
   }
 
   private void checkHitsplatForNoLoot(Hitsplat hitsplat, NPC npc) {
-    int accountType = client.getVarbitValue(Varbits.ACCOUNT_TYPE);
+    int accountType = client.getVarbitValue(VarbitID.IRONMAN);
     if (accountType == 0) {
       return;
     }
@@ -641,9 +448,9 @@ public class NameplatesPlugin extends Plugin {
     }
 
     if (isNoLoot) {
-      Nameplate nameplate = getNameplateForActor(npc);
+      var nameplate = (NPCNameplate) getNameplateForActor(npc);
       if (nameplate != null) {
-        ((NPCNameplate) nameplate).setNoLoot(true);
+        nameplate.setNoLoot(true);
       }
     }
   }
@@ -656,7 +463,7 @@ public class NameplatesPlugin extends Plugin {
 
   public double getHpRegenProgress() {
     int ticksPerHPRegen = NORMAL_HP_REGEN_TICKS;
-    if (client.isPrayerActive(Prayer.RAPID_HEAL)) {
+    if (client.getVarbitValue(VarbitID.PRAYER_RAPIDHEAL) == 1) {
       ticksPerHPRegen /= 2;
     }
 
@@ -664,7 +471,7 @@ public class NameplatesPlugin extends Plugin {
   }
 
   public boolean isAnyPrayerActive() {
-    return Arrays.stream(Prayer.values()).anyMatch(p -> client.isPrayerActive(p));
+    return Arrays.stream(Prayer.values()).anyMatch(p -> client.getVarbitValue(p.getVarbit()) == 1);
   }
 
   private StatChange[] getHoveredItemStatChanges() {
@@ -672,7 +479,7 @@ public class NameplatesPlugin extends Plugin {
       return new StatChange[0];
     }
 
-    final MenuEntry[] menu = client.getMenuEntries();
+    final MenuEntry[] menu = client.getMenu().getMenuEntries();
     final int menuSize = menu.length;
     if (menuSize == 0) {
       return new StatChange[0];
@@ -680,7 +487,7 @@ public class NameplatesPlugin extends Plugin {
 
     final MenuEntry entry = menu[menuSize - 1];
     final Widget widget = entry.getWidget();
-    if (widget == null || widget.getId() != ComponentID.INVENTORY_CONTAINER) {
+    if (widget == null || widget.getId() != InterfaceID.Inventory.ITEMS) {
       return new StatChange[0];
     }
 
@@ -715,7 +522,7 @@ public class NameplatesPlugin extends Plugin {
   }
 
   public PoisonStatus getPoisonStatus() {
-    final int poisonValue = client.getVarpValue(VarPlayer.POISON);
+    final int poisonValue = client.getVarpValue(VarPlayerID.POISON);
 
     if (poisonValue > 0) {
       return new PoisonStatus(poisonValue);
@@ -777,6 +584,12 @@ public class NameplatesPlugin extends Plugin {
 
   public void deleteNameplateTheme(String id) {
     configManager.unsetConfiguration(NameplatesConfig.CONFIG_GROUP, "themes.nameplates." + id);
+  }
+
+  public void setActiveNameplateTheme(NameplateTheme theme) {
+    configManager.setConfiguration(
+        NameplatesConfig.CONFIG_GROUP, "activeNameplateThemeId", theme.getId());
+    activeNameplateTheme = theme;
   }
 
   @Provides

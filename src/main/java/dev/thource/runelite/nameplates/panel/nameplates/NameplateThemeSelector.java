@@ -8,6 +8,7 @@ import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.EXPORT
 import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.IMPORT_ICON;
 import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.MOVE_DOWN_ICON;
 import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.MOVE_UP_ICON;
+import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.SET_ACTIVE_ICON;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
@@ -15,6 +16,7 @@ import dev.thource.runelite.nameplates.NameplatesPlugin;
 import dev.thource.runelite.nameplates.panel.components.ListSelector;
 import dev.thource.runelite.nameplates.themes.nameplates.CustomNameplateTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.NameplateTheme;
+import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -26,6 +28,8 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
@@ -51,6 +55,19 @@ public class NameplateThemeSelector extends ListSelector<NameplateTheme> {
     this.gson = plugin.getGson();
     this.onPreviewThemeSelected = onPreviewThemeSelected;
     this.editThemeAction = editThemeAction;
+
+    list.setCellRenderer(
+        new DefaultListCellRenderer() {
+          public Component getListCellRendererComponent(
+              JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            var name = ((NameplateTheme) value).getName();
+            if (plugin.getActiveNameplateTheme() == value) {
+              name = "* " + name;
+            }
+
+            return super.getListCellRendererComponent(list, name, index, isSelected, cellHasFocus);
+          }
+        });
 
     addChangeListener(this::onThemeChanged);
   }
@@ -106,6 +123,16 @@ public class NameplateThemeSelector extends ListSelector<NameplateTheme> {
     addButtonGlue();
 
     if (sel != null) {
+      if (plugin.getActiveNameplateTheme() != sel) {
+        addButton(
+            "Set active theme",
+            SET_ACTIVE_ICON,
+            () -> {
+              plugin.setActiveNameplateTheme(sel);
+              updateValues();
+            });
+      }
+
       addButton(
           "Export theme (copy to clipboard)",
           EXPORT_ICON,

@@ -1,6 +1,5 @@
 package dev.thource.runelite.nameplates;
 
-import dev.thource.runelite.nameplates.themes.Themes;
 import java.awt.Color;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
@@ -35,11 +34,6 @@ public interface NameplatesConfig extends Config {
   // show full nameplate when hovering "attack"
 
   String CONFIG_GROUP = "nameplates";
-
-  @ConfigItem(keyName = "theme", name = "Theme", description = "The theme.")
-  default Themes theme() {
-    return Themes.DEFAULT;
-  }
 
   @ConfigItem(
       keyName = "activeNameplateThemeId",
@@ -146,15 +140,6 @@ public interface NameplatesConfig extends Config {
       name = "Draw poison damage indicator",
       description = "If enabled, draws the poison damage indicator")
   default boolean drawPoisonDamageIndicator() {
-    return true;
-  }
-
-  // TODO: remove this
-  @ConfigItem(
-      keyName = "lookupPlayerHp",
-      name = "Fetch other players HP",
-      description = "If enabled, fetch other players HP from the hiscores")
-  default boolean lookupPlayerHp() {
     return true;
   }
 

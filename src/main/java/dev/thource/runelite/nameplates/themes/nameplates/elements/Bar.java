@@ -20,6 +20,7 @@ import lombok.Setter;
 public abstract class Bar extends Element {
   protected int width;
   protected int height;
+  protected int cornerRadius;
   protected int borderSize;
   protected boolean drawText;
   protected final PositionProvider textXPositionProvider;
@@ -89,14 +90,21 @@ public abstract class Bar extends Element {
     var y = plateY + yPositionProvider.get(nameplate, height);
 
     if (borderSize > 0) {
-      Rect.draw(graphics, x, y, width, height, borderColor);
+      Rect.draw(graphics, x, y, width, height, borderColor, cornerRadius);
     }
 
     var innerWidth = width - borderSize * 2;
     var innerHeight = height - borderSize * 2;
 
     if (backgroundColor.getAlpha() > 0) {
-      Rect.draw(graphics, x + borderSize, y + borderSize, innerWidth, innerHeight, backgroundColor);
+      Rect.draw(
+          graphics,
+          x + borderSize,
+          y + borderSize,
+          innerWidth,
+          innerHeight,
+          backgroundColor,
+          cornerRadius - borderSize);
     }
 
     Rect.draw(
@@ -105,7 +113,8 @@ public abstract class Bar extends Element {
         y + borderSize,
         (int) (innerWidth * getProgress(nameplate)),
         innerHeight,
-        barColorProvider.getColor(nameplate));
+        barColorProvider.getColor(nameplate),
+        cornerRadius - borderSize);
 
     if (drawText) {
       Text.draw(
@@ -125,6 +134,8 @@ public abstract class Bar extends Element {
 
     editInputs.add(new IntInput("Width", width, 1, 999, value -> width = value));
     editInputs.add(new IntInput("Height", height, 1, 999, value -> height = value));
+    editInputs.add(
+        new IntInput("Corner radius", cornerRadius, 0, 999, value -> cornerRadius = value));
     editInputs.add(new IntInput("Border size", borderSize, 0, 999, value -> borderSize = value));
     editInputs.add(
         new ColorInput("Border color", borderColor, value -> borderColor = value, plugin));

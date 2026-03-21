@@ -34,6 +34,8 @@ public class NameplatesPluginPanel extends PluginPanel {
       new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "move-down.png"));
   public static final ImageIcon MOVE_UP_ICON =
       new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "move-up.png"));
+  public static final ImageIcon SET_ACTIVE_ICON =
+      new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "set-active.png"));
 
   private final NameplatesPanel nameplatesPanel;
 
@@ -162,8 +164,4 @@ public class NameplatesPluginPanel extends PluginPanel {
 
   @Override
   public void onDeactivate() {}
-
-  public void updatePreview() {
-    nameplatesPanel.updatePreview();
-  }
 }

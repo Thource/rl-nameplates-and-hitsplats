@@ -57,14 +57,18 @@ public class NameColorProvider extends ColorProvider {
       if (player.isFriend()) {
         return friendColor;
       }
-      if (player.isClanMember()) {
-        return clanColor;
-      }
-      if (player.isFriendsChatMember()) {
-        return friendsChatColor;
-      }
-      if (nameplate.isSameTeam()) {
-        return teamColor;
+
+      var localPlayer = nameplate.getPlugin().getClient().getLocalPlayer();
+      if (player != localPlayer) {
+        if (player.isClanMember()) {
+          return clanColor;
+        }
+        if (player.isFriendsChatMember()) {
+          return friendsChatColor;
+        }
+        if (nameplate.isSameTeam()) {
+          return teamColor;
+        }
       }
     }
 

@@ -1,8 +1,5 @@
 package dev.thource.runelite.nameplates;
 
-import dev.thource.runelite.nameplates.themes.BaseTheme;
-import dev.thource.runelite.nameplates.themes.Themes;
-import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.NameplateTheme;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -50,9 +47,7 @@ public class NameplatesOverlay extends Overlay {
     WorldView topLevelWorldView = client.getTopLevelWorldView();
 
     Player localPlayer = client.getLocalPlayer();
-    var theme = plugin.getConfig().theme();
-    if (theme == Themes.OSRS
-        || plugin.getAlwaysDrawName(localPlayer)
+    if (plugin.getAlwaysDrawName(localPlayer)
         || plugin.shouldDrawFor(plugin.getNameplateForActor(localPlayer))) {
       map.computeIfAbsent(localPlayer.getLocalLocation(), (k) -> new ArrayList<>())
           .add(localPlayer);
@@ -61,8 +56,7 @@ public class NameplatesOverlay extends Overlay {
         .flatMap(IndexedObjectSet::stream)
         .filter(
             (actor) ->
-                theme == Themes.OSRS
-                    || plugin.getAlwaysDrawName(actor)
+                plugin.getAlwaysDrawName(actor)
                     || plugin.shouldDrawFor(plugin.getNameplateForActor(actor)))
         .filter((actor) -> actor != localPlayer)
         .forEach(
@@ -192,19 +186,7 @@ public class NameplatesOverlay extends Overlay {
 
   // returns rendered nameplate height
   public int renderNameplate(Graphics2D graphics, Nameplate nameplate, Point point, int distance) {
-    //        float scale = Math.min(Math.max(8f / (distance / 300f), 0.5f), 1);
-    //        scale = Math.max(scale * ((float) Math.pow(client.get3dZoom(), 0.6f) / 50f), 1f);
-    float scale = 1;
-
-    var actor = nameplate.getActor();
-    BaseTheme theme = getTheme(actor);
-    //    int nameplateHeight = theme.drawNameplate(graphics, nameplate, point, scale, isHovered);
-
-    var fdt = new FlatDarkTheme();
-    fdt.setPlugin(plugin);
-    fdt.drawNameplate(graphics, nameplate, point);
-
-    return 0;
+    return plugin.getActiveNameplateTheme().drawNameplate(graphics, nameplate, point);
   }
 
   // returns rendered nameplate height
@@ -213,10 +195,6 @@ public class NameplatesOverlay extends Overlay {
     theme.drawNameplate(graphics, nameplate, point);
 
     return 0;
-  }
-
-  private BaseTheme getTheme(Actor actor) {
-    return this.plugin.getConfig().theme().getTheme();
   }
 
   private MenuEntry getHoveredMenuEntry(final MenuEntry[] menuEntries) {

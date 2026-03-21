@@ -5,7 +5,6 @@ import dev.thource.runelite.nameplates.NameplatesPlugin;
 import dev.thource.runelite.nameplates.panel.components.ColorInput;
 import dev.thource.runelite.nameplates.panel.components.IntInput;
 import dev.thource.runelite.nameplates.panel.components.LabelledInput;
-import dev.thource.runelite.nameplates.themes.nameplates.PositionProvider;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.List;
@@ -17,6 +16,7 @@ import lombok.Setter;
 public class Rect extends Element {
   protected int width;
   protected int height;
+  protected int cornerRadius;
   protected Color color;
 
   public Rect() {
@@ -24,21 +24,8 @@ public class Rect extends Element {
 
     width = 10;
     height = 10;
+    cornerRadius = 0;
     color = Color.BLACK;
-  }
-
-  public Rect(
-      String name,
-      PositionProvider xPositionProvider,
-      PositionProvider yPositionProvider,
-      int width,
-      int height,
-      Color color) {
-    super(name, xPositionProvider, yPositionProvider);
-
-    this.width = width;
-    this.height = height;
-    this.color = color;
   }
 
   @Override
@@ -49,12 +36,22 @@ public class Rect extends Element {
         y + yPositionProvider.get(nameplate, height),
         width,
         height,
-        color);
+        color,
+        cornerRadius);
   }
 
-  public static void draw(Graphics2D graphics, int x, int y, int width, int height, Color color) {
+  public static void draw(
+      Graphics2D graphics, int x, int y, int width, int height, Color color, int cornerRadius) {
     graphics.setColor(color);
-    graphics.fillRect(x, y, width, height);
+    if (cornerRadius > 0) {
+      graphics.setRenderingHint(
+          java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+      graphics.fillRoundRect(x, y, width, height, cornerRadius * 2, cornerRadius * 2);
+      graphics.setRenderingHint(
+          java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_OFF);
+    } else {
+      graphics.fillRect(x, y, width, height);
+    }
   }
 
   @Override
@@ -63,6 +60,7 @@ public class Rect extends Element {
 
     editInputs.add(new IntInput("Width", width, 1, 999, val -> width = val));
     editInputs.add(new IntInput("Height", height, 1, 999, val -> height = val));
+    editInputs.add(new IntInput("Corner radius", cornerRadius, 0, 999, val -> cornerRadius = val));
     editInputs.add(new ColorInput("Color", color, val -> color = val, plugin));
 
     return editInputs;

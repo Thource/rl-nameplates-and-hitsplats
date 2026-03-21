@@ -2,6 +2,7 @@ package dev.thource.runelite.nameplates.panel.nameplates;
 
 import dev.thource.runelite.nameplates.Nameplate;
 import dev.thource.runelite.nameplates.NameplatesPlugin;
+import dev.thource.runelite.nameplates.PoisonStatus;
 
 public class DummyNameplate extends Nameplate {
   private String dummyName;
@@ -13,6 +14,7 @@ public class DummyNameplate extends Nameplate {
   private int dummyMaxHealth;
   private int dummyCurrentPrayer;
   private int dummyMaxPrayer;
+  private HealthState dummyHealthState = HealthState.NONE;
 
   public DummyNameplate(NameplatesPlugin plugin, DummyPlayer dummyActor) {
     super(plugin, dummyActor);
@@ -122,5 +124,27 @@ public class DummyNameplate extends Nameplate {
   @Override
   public boolean shouldDrawPrayerBar() {
     return dummyDrawPrayerBar;
+  }
+
+  public void setHealthState(HealthState state) {
+    dummyHealthState = state;
+  }
+
+  @Override
+  public PoisonStatus getPoisonStatus() {
+    if (dummyHealthState == HealthState.POISON) {
+      return new PoisonStatus(100);
+    }
+
+    if (dummyHealthState == HealthState.VENOM) {
+      return new PoisonStatus(1_000_100);
+    }
+
+    return null;
+  }
+
+  @Override
+  public boolean isDiseased() {
+    return dummyHealthState == HealthState.DISEASE;
   }
 }

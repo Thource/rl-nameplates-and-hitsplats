@@ -18,13 +18,14 @@ import javax.swing.JScrollPane;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import lombok.Getter;
 import net.runelite.client.ui.ColorScheme;
 
 public class ListSelector<T extends Nameable> extends LabelledInput {
-  private static final int BUTTON_SIZE = 24;
+  protected static final int BUTTON_SIZE = 24;
 
-  private final JList<T> list;
-  private final JPanel buttonContainer;
+  protected final JList<T> list;
+  protected final JPanel buttonContainer;
 
   public ListSelector(String name, T defaultValue, List<T> values) {
     super(name, true);
