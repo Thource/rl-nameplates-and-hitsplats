@@ -1,7 +1,7 @@
 package dev.thource.runelite.nameplates.panel;
 
 import dev.thource.runelite.nameplates.NameplatesPlugin;
-import dev.thource.runelite.nameplates.panel.nameplates.NameplatesPanel;
+import dev.thource.runelite.nameplates.panel.nameplates.NameplatePanel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -37,7 +37,7 @@ public class NameplatesPluginPanel extends PluginPanel {
   public static final ImageIcon SET_ACTIVE_ICON =
       new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "set-active.png"));
 
-  private final NameplatesPanel nameplatesPanel;
+  private final NameplatePanel nameplatePanel;
 
   public NameplatesPluginPanel(NameplatesPlugin plugin) {
     super(false);
@@ -56,7 +56,7 @@ public class NameplatesPluginPanel extends PluginPanel {
     var bodyPanel = new JPanel(new BorderLayout());
     bodyPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
 
-    nameplatesPanel = new NameplatesPanel(plugin);
+    nameplatePanel = new NameplatePanel(plugin);
 
     JButton wideButton1 = new JButton("Nameplates");
     wideButton1.setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -74,7 +74,7 @@ public class NameplatesPluginPanel extends PluginPanel {
           @Override
           public void mouseExited(MouseEvent e) {
             wideButton1.setBackground(
-                nameplatesPanel.getParent() != null
+                nameplatePanel.getParent() != null
                     ? ColorScheme.MEDIUM_GRAY_COLOR
                     : ColorScheme.DARKER_GRAY_COLOR);
           }
@@ -96,19 +96,19 @@ public class NameplatesPluginPanel extends PluginPanel {
           @Override
           public void mouseExited(MouseEvent e) {
             wideButton2.setBackground(
-                nameplatesPanel.getParent() == null
+                nameplatePanel.getParent() == null
                     ? ColorScheme.MEDIUM_GRAY_COLOR
                     : ColorScheme.DARKER_GRAY_COLOR);
           }
         });
     wideButton1.addActionListener(
         e -> {
-          if (nameplatesPanel.getParent() != null) {
+          if (nameplatePanel.getParent() != null) {
             return;
           }
 
           EnhancedSwingUtilities.fastRemoveAll(bodyPanel);
-          bodyPanel.add(nameplatesPanel);
+          bodyPanel.add(nameplatePanel);
           bodyPanel.revalidate();
           bodyPanel.repaint();
 
@@ -117,7 +117,7 @@ public class NameplatesPluginPanel extends PluginPanel {
         });
     wideButton2.addActionListener(
         e -> {
-          if (nameplatesPanel.getParent() == null) {
+          if (nameplatePanel.getParent() == null) {
             return;
           }
 
@@ -156,7 +156,7 @@ public class NameplatesPluginPanel extends PluginPanel {
 
     add(bodyPanel, BorderLayout.CENTER);
 
-    bodyPanel.add(nameplatesPanel);
+    bodyPanel.add(nameplatePanel);
   }
 
   @Override

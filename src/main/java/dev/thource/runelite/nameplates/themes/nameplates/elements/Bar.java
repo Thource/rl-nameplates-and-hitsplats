@@ -25,6 +25,7 @@ public abstract class Bar extends Element {
   protected boolean drawText;
   protected final PositionProvider textXPositionProvider;
   protected final PositionProvider textYPositionProvider;
+  protected List<StatusTextType> barTexts;
   protected Color borderColor;
   protected Color backgroundColor;
   protected Color textColor;
@@ -81,7 +82,7 @@ public abstract class Bar extends Element {
   }
 
   protected float getProgress(Nameplate nameplate) {
-    return (float) getCurrentValue(nameplate) / (float) getMaxValue(nameplate);
+    return Math.min(1, (float) getCurrentValue(nameplate) / (float) getMaxValue(nameplate));
   }
 
   @Override

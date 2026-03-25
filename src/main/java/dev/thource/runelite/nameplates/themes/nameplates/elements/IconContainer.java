@@ -134,10 +134,13 @@ public class IconContainer extends Element {
           iconTypesSelector.addButtonGlue();
 
           if (sel != null) {
-            iconTypesSelector.addButton("Remove icon", DELETE_ICON, () -> {
-              iconTypes.remove(sel);
-              iconTypesSelector.setValues(iconTypes);
-            });
+            iconTypesSelector.addButton(
+                "Remove icon",
+                DELETE_ICON,
+                () -> {
+                  iconTypes.remove(sel);
+                  iconTypesSelector.setValues(iconTypes);
+                });
           }
 
           var iconsToAdd =

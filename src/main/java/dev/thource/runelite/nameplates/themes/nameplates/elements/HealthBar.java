@@ -58,13 +58,6 @@ public class HealthBar extends Bar {
     return nameplate.getMaxHealth();
   }
 
-  // This override is required so that the health bar can animate without the text also being
-  // animated
-  @Override
-  protected float getProgress(Nameplate nameplate) {
-    return nameplate.getHealthPercentage();
-  }
-
   public static HealthBar deserialize(JsonObject obj, Gson gson) {
     var providerJson = obj.getAsJsonObject("barColorProvider");
     // We have to remove the barColorProvider so that we can specify the right class manually

@@ -1,7 +1,6 @@
 package dev.thource.runelite.nameplates.themes.nameplates.elements;
 
 import dev.thource.runelite.nameplates.Nameplate;
-import dev.thource.runelite.nameplates.themes.nameplates.OffsetAnchor;
 import dev.thource.runelite.nameplates.themes.nameplates.PositionProvider;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -27,29 +26,7 @@ public abstract class Text extends Element {
       return;
     }
 
-    graphics.setFont(FontManager.getRunescapeSmallFont());
-    var fontMetrics = graphics.getFontMetrics();
-    var textBounds = fontMetrics.getStringBounds(text, graphics);
-    graphics.setColor(getColor(nameplate));
-
-    var textXOffset = -1;
-    if (this.xPositionProvider.getAnchor() == OffsetAnchor.MIDDLE) {
-      textXOffset = (int) -textBounds.getWidth() / 2;
-    } else if (this.xPositionProvider.getAnchor() == OffsetAnchor.END) {
-      textXOffset = (int) -textBounds.getWidth();
-    }
-
-    var textYOffset = (int) textBounds.getHeight() - 2;
-    if (this.yPositionProvider.getAnchor() == OffsetAnchor.MIDDLE) {
-      textYOffset = (int) textBounds.getHeight() / 2;
-    } else if (this.yPositionProvider.getAnchor() == OffsetAnchor.END) {
-      textYOffset = -2;
-    }
-
-    graphics.drawString(
-        text,
-        x + xPositionProvider.getValue() + textXOffset,
-        y + yPositionProvider.getValue() + textYOffset);
+    draw(graphics, x, y, xPositionProvider, yPositionProvider, text, getColor(nameplate));
   }
 
   public static void draw(
@@ -60,6 +37,10 @@ public abstract class Text extends Element {
       PositionProvider yPositionProvider,
       String text,
       Color color) {
+    if (text.trim().isEmpty()) {
+      return;
+    }
+
     graphics.setFont(FontManager.getRunescapeSmallFont());
     var fontMetrics = graphics.getFontMetrics();
     var textBounds = fontMetrics.getStringBounds(text, graphics);

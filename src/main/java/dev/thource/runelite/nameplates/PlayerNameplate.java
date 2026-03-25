@@ -4,7 +4,7 @@ import lombok.Getter;
 import net.runelite.api.Player;
 import net.runelite.api.Skill;
 import net.runelite.api.gameval.VarPlayerID;
-import net.runelite.client.hiscore.HiscoreSkill;
+import net.runelite.client.plugins.itemstats.StatChange;
 
 @Getter
 public class PlayerNameplate extends Nameplate {
@@ -76,7 +76,7 @@ public class PlayerNameplate extends Nameplate {
       return false;
     }
 
-    return plugin.getClient().getVarpValue(VarPlayerID.DISEASE)  > 0;
+    return plugin.getClient().getVarpValue(VarPlayerID.DISEASE) > 0;
   }
 
   public void updateFromActor(NameplatesPlugin plugin) {
@@ -107,5 +107,27 @@ public class PlayerNameplate extends Nameplate {
   @Override
   public boolean isSameTeam() {
     return ((Player) actor).getTeam() == plugin.getClient().getLocalPlayer().getTeam();
+  }
+
+  @Override
+  public StatChange getHoveredItemHpChange() {
+    var client = plugin.getClient();
+
+    if (actor == client.getLocalPlayer()) {
+      return plugin.getHoveredItemHpChange();
+    }
+
+    return null;
+  }
+
+  @Override
+  public StatChange getHoveredItemPrayerChange() {
+    var client = plugin.getClient();
+
+    if (actor == client.getLocalPlayer()) {
+      return plugin.getHoveredItemPrayerChange();
+    }
+
+    return null;
   }
 }

@@ -18,7 +18,6 @@ import javax.swing.JScrollPane;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import lombok.Getter;
 import net.runelite.client.ui.ColorScheme;
 
 public class ListSelector<T extends Nameable> extends LabelledInput {

@@ -362,8 +362,8 @@ public class NameplatesPlugin extends Plugin {
       ticksSinceHPRegen = 0;
     }
 
-    WorldView topLevelWorldView = client.getTopLevelWorldView();
-    Stream.of(topLevelWorldView.npcs(), topLevelWorldView.players())
+    WorldView worldView = client.getLocalPlayer().getWorldView();
+    Stream.of(worldView.npcs(), worldView.players())
         .flatMap(IndexedObjectSet::stream)
         .forEach(
             (actor) -> {

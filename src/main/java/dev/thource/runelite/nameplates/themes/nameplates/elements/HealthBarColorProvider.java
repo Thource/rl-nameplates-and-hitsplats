@@ -6,7 +6,6 @@ import dev.thource.runelite.nameplates.panel.components.ColorInput;
 import dev.thource.runelite.nameplates.panel.components.LabelledInput;
 import java.awt.Color;
 import java.util.List;
-import net.runelite.api.Player;
 
 public class HealthBarColorProvider extends BarColorProvider {
   protected Color poisonColor;

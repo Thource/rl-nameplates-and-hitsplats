@@ -1,6 +1,7 @@
 package dev.thource.runelite.nameplates.panel.nameplates;
 
 import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.ADD_ICON;
+import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.CLONE_ICON;
 import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.DELETE_ICON;
 import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.MOVE_DOWN_ICON;
 import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.MOVE_UP_ICON;
@@ -22,6 +23,7 @@ import dev.thource.runelite.nameplates.themes.nameplates.elements.IconContainer;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.NameText;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.PrayerBar;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Rect;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.StatusText;
 import java.awt.GridLayout;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -50,7 +52,7 @@ public class NameplateEditPanel extends JPanel {
   @Getter private CustomNameplateTheme editingTheme;
 
   public NameplateEditPanel(
-      NameplatesPanel nameplatesPanel, NameplatesPlugin plugin, JPanel preview) {
+      NameplatePanel nameplatePanel, NameplatesPlugin plugin, JPanel preview) {
     super();
 
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -64,11 +66,11 @@ public class NameplateEditPanel extends JPanel {
     add(buttonContainer);
 
     var cancelButton = new JButton("Cancel");
-    cancelButton.addActionListener(e -> nameplatesPanel.editTheme(null, null));
+    cancelButton.addActionListener(e -> nameplatePanel.editTheme(null, null));
     buttonContainer.add(cancelButton);
 
     var saveButton = new JButton("Save");
-    saveButton.addActionListener(e -> nameplatesPanel.saveEdit(editingTheme));
+    saveButton.addActionListener(e -> nameplatePanel.saveEdit(editingTheme));
     buttonContainer.add(saveButton);
 
     var themeConfigTab = new JPanel();
@@ -186,6 +188,21 @@ public class NameplateEditPanel extends JPanel {
                   elementsList.setValues(editingTheme.getElements());
                   preview.repaint();
                 });
+
+            elementsList.addButton(
+                "Clone element",
+                CLONE_ICON,
+                () -> {
+                  var gson = plugin.getGson();
+                  var clonedEl = Element.deserialize(gson, gson.toJsonTree(el));
+                  clonedEl.setName(clonedEl.getName() + " (copy)");
+                  editingTheme
+                      .getElements()
+                      .add(editingTheme.getElements().indexOf(el) + 1, clonedEl);
+                  elementsList.setValues(editingTheme.getElements());
+                  elementsList.selectValue(clonedEl);
+                  preview.repaint();
+                });
           }
 
           elementsList.addButton(
@@ -199,6 +216,7 @@ public class NameplateEditPanel extends JPanel {
                         CombatLevelText.class,
                         HealthBar.class,
                         PrayerBar.class,
+                        StatusText.class,
                         Icon.class,
                         IconContainer.class,
                         Rect.class)

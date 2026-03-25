@@ -44,7 +44,7 @@ public class NameplatesOverlay extends Overlay {
   private Map<LocalPoint, List<Actor>> getLocalPointActorMap() {
     HashMap<LocalPoint, List<Actor>> map = new HashMap<>();
 
-    WorldView topLevelWorldView = client.getTopLevelWorldView();
+    WorldView worldView = client.getLocalPlayer().getWorldView();
 
     Player localPlayer = client.getLocalPlayer();
     if (plugin.getAlwaysDrawName(localPlayer)
@@ -52,7 +52,7 @@ public class NameplatesOverlay extends Overlay {
       map.computeIfAbsent(localPlayer.getLocalLocation(), (k) -> new ArrayList<>())
           .add(localPlayer);
     }
-    Stream.of(topLevelWorldView.players(), topLevelWorldView.npcs())
+    Stream.of(worldView.players(), worldView.npcs())
         .flatMap(IndexedObjectSet::stream)
         .filter(
             (actor) ->
@@ -73,7 +73,8 @@ public class NameplatesOverlay extends Overlay {
     long deltaMs = System.currentTimeMillis() - lastRender;
 
     LocalPoint cameraPoint =
-        new LocalPoint(client.getCameraX(), client.getCameraY(), client.getTopLevelWorldView());
+        new LocalPoint(
+            client.getCameraX(), client.getCameraY(), client.getLocalPlayer().getWorldView());
 
     getLocalPointActorMap().entrySet().stream()
         .sorted(

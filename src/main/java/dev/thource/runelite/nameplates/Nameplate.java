@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.Actor;
 import net.runelite.api.Client;
+import net.runelite.client.plugins.itemstats.StatChange;
 import net.runelite.client.plugins.opponentinfo.HitpointsDisplayStyle;
 import net.runelite.client.util.Text;
 
@@ -116,5 +117,13 @@ public abstract class Nameplate {
 
   public boolean isSameTeam() {
     return false;
+  }
+
+  public StatChange getHoveredItemHpChange() {
+    return null;
+  }
+
+  public StatChange getHoveredItemPrayerChange() {
+    return null;
   }
 }
