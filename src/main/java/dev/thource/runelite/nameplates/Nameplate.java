@@ -5,7 +5,8 @@ import lombok.Setter;
 import net.runelite.api.Actor;
 import net.runelite.api.Client;
 import net.runelite.client.plugins.itemstats.StatChange;
-import net.runelite.client.plugins.opponentinfo.HitpointsDisplayStyle;
+import net.runelite.client.plugins.itemstats.stats.Stat;
+import net.runelite.client.plugins.party.data.PartyData;
 import net.runelite.client.util.Text;
 
 @Getter
@@ -23,6 +24,8 @@ public abstract class Nameplate {
   protected final AnimationData hpAnimationData = new AnimationData();
   protected final NameplatesPlugin plugin;
 
+  public abstract boolean isPercentageHealth();
+
   public Nameplate(NameplatesPlugin plugin, Actor actor) {
     this.actor = actor;
     this.plugin = plugin;
@@ -31,31 +34,29 @@ public abstract class Nameplate {
     hpAnimationData.startAnimation(maxHealth, maxHealth, 0);
   }
 
-  public String getHealthString() {
-    String healthString = this.getCurrentHealth() + " / " + this.getMaxHealth();
-    if (this instanceof NPCNameplate && ((NPCNameplate) this).getPercentageHealthOverride() > 0) {
-      healthString += "~";
-    }
-
-    boolean forcePercentage = this.drawHealthAsPercentage();
-
-    HitpointsDisplayStyle displayStyle = plugin.getConfig().hitpointsDisplayStyle();
-    if (forcePercentage || displayStyle != HitpointsDisplayStyle.HITPOINTS) {
-      double percentage =
-          Math.ceil((float) this.getCurrentHealth() / this.getMaxHealth() * 1000f) / 10f;
-
-      if (forcePercentage || displayStyle == HitpointsDisplayStyle.PERCENTAGE) {
-        healthString = percentage + "%";
-      } else {
-        healthString += " (" + percentage + "%)";
-      }
-    }
-
-    return healthString;
+  public void updateFromActor(NameplatesPlugin plugin) {
+    name = Text.removeTags(actor.getName());
+    combatLevel = actor.getCombatLevel();
   }
 
-  public String getPrayerString() {
-    return null;
+  public int getCombatLevelDifference() {
+    return getCombatLevel() - plugin.getClient().getLocalPlayer().getCombatLevel();
+  }
+
+  public boolean shouldDrawHealthBar() {
+    return true;
+  }
+
+  public boolean shouldDrawPrayerBar() {
+    return false;
+  }
+
+  public boolean shouldDrawEnergyBar() {
+    return false;
+  }
+
+  public boolean shouldDrawSpecialBar() {
+    return false;
   }
 
   public PoisonStatus getPoisonStatus() {
@@ -63,6 +64,18 @@ public abstract class Nameplate {
   }
 
   public boolean isDiseased() {
+    return false;
+  }
+
+  public boolean isAnyPrayerActive() {
+    return false;
+  }
+
+  public boolean isRunActive() {
+    return false;
+  }
+
+  public boolean isSpecialActive() {
     return false;
   }
 
@@ -74,29 +87,12 @@ public abstract class Nameplate {
     return -1;
   }
 
-  public boolean isAnyPrayerActive() {
-    return false;
+  public int getCurrentEnergy() {
+    return -1;
   }
 
-  public void updateFromActor(NameplatesPlugin plugin) {
-    this.name = Text.removeTags(actor.getName());
-    combatLevel = actor.getCombatLevel();
-  }
-
-  public int getCombatLevelDifference() {
-    return getCombatLevel() - plugin.getClient().getLocalPlayer().getCombatLevel();
-  }
-
-  public float getHealthPercentage() {
-    return hpAnimationData.getCurrentValue() / getMaxHealth();
-  }
-
-  public boolean shouldDrawPrayerBar() {
-    return false;
-  }
-
-  public float getPrayerPercentage() {
-    return 0;
+  public int getCurrentSpecial() {
+    return -1;
   }
 
   public boolean isInCombat(Client client) {
@@ -109,8 +105,6 @@ public abstract class Nameplate {
 
   public abstract boolean hasHintArrow();
 
-  public abstract boolean drawHealthAsPercentage();
-
   public boolean isHovered() {
     return plugin.getNameplatesOverlay().getHoveredActor() == this.actor;
   }
@@ -119,11 +113,15 @@ public abstract class Nameplate {
     return false;
   }
 
-  public StatChange getHoveredItemHpChange() {
+  public StatChange getHoveredItemStatChange(Stat stat) {
     return null;
   }
 
-  public StatChange getHoveredItemPrayerChange() {
+  public boolean hasVengeance() {
+    return false;
+  }
+
+  public PartyData getPartyData() {
     return null;
   }
 }

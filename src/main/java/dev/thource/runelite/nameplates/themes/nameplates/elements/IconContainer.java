@@ -12,7 +12,6 @@ import dev.thource.runelite.nameplates.panel.components.IntInput;
 import dev.thource.runelite.nameplates.panel.components.LabelledInput;
 import dev.thource.runelite.nameplates.panel.components.ListSelector;
 import dev.thource.runelite.nameplates.themes.nameplates.OffsetAnchor;
-import dev.thource.runelite.nameplates.themes.nameplates.PositionProvider;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,36 +20,16 @@ import java.util.stream.Collectors;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+import lombok.Builder;
+import lombok.experimental.SuperBuilder;
 import net.runelite.api.coords.Direction;
 
+@SuperBuilder
 public class IconContainer extends Element {
-  protected int iconSize;
-  protected int padding;
-  protected boolean isVertical = false;
-  protected final List<IconType> iconTypes = new ArrayList<>();
-
-  public IconContainer() {
-    super();
-
-    iconSize = 26;
-    padding = 4;
-  }
-
-  public IconContainer(
-      String name,
-      PositionProvider xPositionProvider,
-      PositionProvider yPositionProvider,
-      int iconSize,
-      int padding,
-      boolean isVertical,
-      List<IconType> iconTypes) {
-    super(name, xPositionProvider, yPositionProvider);
-
-    this.iconSize = iconSize;
-    this.padding = padding;
-    this.isVertical = isVertical;
-    this.iconTypes.addAll(iconTypes);
-  }
+  @Builder.Default protected int iconSize = 26;
+  @Builder.Default protected int padding = 4;
+  @Builder.Default protected boolean isVertical = false;
+  @Builder.Default protected List<IconType> iconTypes = new ArrayList<>();
 
   @Override
   public void draw(Nameplate nameplate, Graphics2D graphics, int x, int y) {
@@ -61,11 +40,11 @@ public class IconContainer extends Element {
     var totalSize = iconSize * iconsToDraw.length + (iconsToDraw.length - 1) * padding;
 
     if (isVertical) {
-      x += xPositionProvider.get(nameplate, iconSize);
-      y += yPositionProvider.get(nameplate, totalSize);
+      x += xPositionProvider.get(iconSize);
+      y += yPositionProvider.get(totalSize);
     } else {
-      x += xPositionProvider.get(nameplate, totalSize);
-      y += yPositionProvider.get(nameplate, iconSize);
+      x += xPositionProvider.get(totalSize);
+      y += yPositionProvider.get(iconSize);
     }
 
     var direction = Direction.SOUTH;

@@ -4,19 +4,24 @@ import com.google.gson.Gson;
 import com.google.inject.Provides;
 import dev.thource.runelite.nameplates.panel.NameplatesPluginPanel;
 import dev.thource.runelite.nameplates.themes.nameplates.CustomNameplateTheme;
+import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkFullInfoTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.NameplateTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.OSRSTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Icon;
 import java.awt.Component;
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -33,6 +38,7 @@ import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
 import net.runelite.api.Player;
 import net.runelite.api.Prayer;
+import net.runelite.api.Renderable;
 import net.runelite.api.Skill;
 import net.runelite.api.WorldView;
 import net.runelite.api.events.ActorDeath;
@@ -47,22 +53,31 @@ import net.runelite.api.gameval.VarPlayerID;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.callback.Hooks;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.NPCManager;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.hiscore.HiscoreClient;
+import net.runelite.client.party.PartyMember;
+import net.runelite.client.party.PartyService;
+import net.runelite.client.party.events.UserJoin;
+import net.runelite.client.party.events.UserPart;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.itemstats.Effect;
 import net.runelite.client.plugins.itemstats.ItemStatChanges;
 import net.runelite.client.plugins.itemstats.StatChange;
-import net.runelite.client.plugins.itemstats.stats.Stats;
+import net.runelite.client.plugins.itemstats.stats.Stat;
+import net.runelite.client.plugins.party.data.PartyData;
+import net.runelite.client.plugins.party.messages.StatusUpdate;
 import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageUtil;
+import net.runelite.client.util.Text;
 
 /** NameplatesPlugin is a RuneLite plugin designed to add WoW style nameplates to NPCs. */
 @Slf4j
@@ -71,6 +86,7 @@ import net.runelite.client.util.ImageUtil;
     description = "Adds nameplates to NPCs.",
     tags = {"nameplates", "health", "npcs"})
 public class NameplatesPlugin extends Plugin {
+  @Getter static Font RUNESCAPE_CHAT_FONT;
 
   private static final int NORMAL_HP_REGEN_TICKS = 100;
   @Getter @Inject private Client client;
@@ -86,9 +102,14 @@ public class NameplatesPlugin extends Plugin {
   @Getter @Inject private HiscoreClient hiscoreClient;
   @Getter @Inject private ConfigManager configManager;
   @Getter @Inject private ColorPickerManager colorPickerManager;
+  @Getter @Inject private PartyService partyService;
+  @Inject private Hooks hooks;
 
   @Getter private final HashMap<Integer, HpCacheEntry> hpCache = new HashMap<>();
   @Getter private final HashMap<Integer, Nameplate> nameplates = new HashMap<>();
+
+  @Getter
+  private final Map<Long, PartyData> partyDataMap = Collections.synchronizedMap(new HashMap<>());
 
   private NameplatesPluginPanel panel;
   private NavigationButton navButton;
@@ -100,6 +121,8 @@ public class NameplatesPlugin extends Plugin {
 
   @Getter private final Map<String, NameplateTheme> nameplateThemes = new HashMap<>();
   @Getter private NameplateTheme activeNameplateTheme;
+
+  private final Hooks.RenderableDrawListener drawListener = this::shouldDraw;
 
   public static boolean getConfirmation(
       Component parentComponent, String text, String confirmText, int messageType) {
@@ -119,6 +142,20 @@ public class NameplatesPlugin extends Plugin {
 
   @Override
   protected void startUp() {
+    if (RUNESCAPE_CHAT_FONT == null) {
+      try(var inRunescapeChatFont = NameplatesPlugin.class.getResourceAsStream("RuneScape-Bold-12.ttf")) {
+        RUNESCAPE_CHAT_FONT = Font.createFont(Font.TRUETYPE_FONT, inRunescapeChatFont);
+      }
+      catch (FontFormatException ex)
+      {
+        throw new RuntimeException("Font loaded, but format incorrect.", ex);
+      }
+      catch (IOException ex)
+      {
+        throw new RuntimeException("Font file not found.", ex);
+      }
+    }
+
     loadThemes();
 
     if (panel == null) {
@@ -155,6 +192,8 @@ public class NameplatesPlugin extends Plugin {
     if (navButton != null) {
       clientToolbar.addNavigation(navButton);
     }
+
+    hooks.registerRenderableDrawListener(drawListener);
   }
 
   private void loadThemes() {
@@ -162,6 +201,7 @@ public class NameplatesPlugin extends Plugin {
 
     // add static themes
     nameplateThemes.put(FlatDarkTheme.ID, new FlatDarkTheme());
+    nameplateThemes.put(FlatDarkFullInfoTheme.ID, new FlatDarkFullInfoTheme());
     nameplateThemes.put(OSRSTheme.ID, new OSRSTheme());
 
     // load user-defined themes
@@ -193,6 +233,8 @@ public class NameplatesPlugin extends Plugin {
 
   @Override
   protected void shutDown() {
+    hooks.unregisterRenderableDrawListener(drawListener);
+
     if (navButton != null) {
       clientToolbar.removeNavigation(navButton);
     }
@@ -201,8 +243,15 @@ public class NameplatesPlugin extends Plugin {
   }
 
   public int getCurrentHealth(Actor actor, int maxHealth) {
-    if (actor instanceof Player && actor == client.getLocalPlayer()) {
-      return client.getBoostedSkillLevel(Skill.HITPOINTS);
+    if (actor instanceof Player) {
+      if (actor == client.getLocalPlayer()) {
+        return client.getBoostedSkillLevel(Skill.HITPOINTS);
+      }
+
+      var partyMember = partyService.getMemberByDisplayName(actor.getName());
+      if (partyMember != null) {
+        return partyDataMap.get(partyMember.getMemberId()).getHitpoints();
+      }
     }
 
     if (actor instanceof NPC
@@ -263,11 +312,11 @@ public class NameplatesPlugin extends Plugin {
       return;
     }
 
-    Integer maxHealth = 10;
+    Integer maxHealth = 100;
     Nameplate nameplate = getNameplateForActor(actor);
     if (nameplate != null) {
       if (nameplate instanceof NPCNameplate) {
-        if ((((NPCNameplate) nameplate).isPercentageHealth()
+        if ((nameplate.isPercentageHealth()
                 || ((NPCNameplate) nameplate).getPercentageHealthOverride() > 0)
             && ((NPCNameplate) nameplate).getDamageTaken() > 0) {
           ((NPCNameplate) nameplate).recalculatePercentageHealth(this);
@@ -407,6 +456,10 @@ public class NameplatesPlugin extends Plugin {
     hpCache.remove(getActorId(actor));
   }
 
+  boolean shouldDraw(Renderable renderable, boolean drawingUI) {
+    return !drawingUI || (!(renderable instanceof Player) && !(renderable instanceof NPC));
+  }
+
   @Subscribe
   public void onHitsplatApplied(HitsplatApplied hitsplatApplied) {
     Hitsplat hitsplat = hitsplatApplied.getHitsplat();
@@ -430,6 +483,71 @@ public class NameplatesPlugin extends Plugin {
         }
       }
     }
+  }
+
+  @Subscribe
+  public void onUserJoin(UserJoin userJoin) {
+    // this has a side effect of creating the party data
+    getPartyData(userJoin.getMemberId());
+  }
+
+  @Subscribe
+  public void onUserPart(UserPart userPart) {
+    partyDataMap.remove(userPart.getMemberId());
+  }
+
+  @Subscribe
+  public void onStatusUpdate(final StatusUpdate event) {
+    final PartyData partyData = getPartyData(event.getMemberId());
+    if (partyData == null) {
+      return;
+    }
+
+    if (event.getHealthCurrent() != null) {
+      partyData.setHitpoints(event.getHealthCurrent());
+    }
+    if (event.getHealthMax() != null) {
+      partyData.setMaxHitpoints(event.getHealthMax());
+    }
+    if (event.getPrayerCurrent() != null) {
+      partyData.setPrayer(event.getPrayerCurrent());
+    }
+    if (event.getPrayerMax() != null) {
+      partyData.setMaxPrayer(event.getPrayerMax());
+    }
+    if (event.getRunEnergy() != null) {
+      partyData.setRunEnergy(event.getRunEnergy());
+    }
+    if (event.getSpecEnergy() != null) {
+      partyData.setSpecEnergy(event.getSpecEnergy());
+    }
+    if (event.getVengeanceActive() != null) {
+      partyData.setVengeanceActive(event.getVengeanceActive());
+    }
+    if (event.getMemberColor() != null) {
+      partyData.setColor(event.getMemberColor());
+    }
+
+    final PartyMember member = partyService.getMemberById(event.getMemberId());
+    if (event.getCharacterName() != null) {
+      final String name = Text.removeTags(Text.toJagexName(event.getCharacterName()));
+      if (!name.isEmpty()) {
+        member.setDisplayName(name);
+      }
+    }
+  }
+
+  @Nullable PartyData getPartyData(final long uuid) {
+    final PartyMember memberById = partyService.getMemberById(uuid);
+
+    if (memberById == null) {
+      // This happens when you are not in party but you still receive message.
+      // Can happen if you just left party and you received message before message went through
+      // in ws service
+      return null;
+    }
+
+    return partyDataMap.computeIfAbsent(uuid, (u) -> new PartyData(uuid, null));
   }
 
   private void checkHitsplatForNoLoot(Hitsplat hitsplat, NPC npc) {
@@ -499,26 +617,13 @@ public class NameplatesPlugin extends Plugin {
     return change.calculate(client).getStatChanges();
   }
 
-  public StatChange getHoveredItemHpChange() {
+  public StatChange getHoveredItemStatChange(Stat stat) {
     StatChange[] changes = getHoveredItemStatChanges();
     if (changes.length == 0) {
       return null;
     }
 
-    Optional<StatChange> hpChange =
-        Arrays.stream(changes).filter(c -> c.getStat() == Stats.HITPOINTS).findFirst();
-    return hpChange.orElse(null);
-  }
-
-  public StatChange getHoveredItemPrayerChange() {
-    StatChange[] changes = getHoveredItemStatChanges();
-    if (changes.length == 0) {
-      return null;
-    }
-
-    Optional<StatChange> hpChange =
-        Arrays.stream(changes).filter(c -> c.getStat() == Stats.PRAYER).findFirst();
-    return hpChange.orElse(null);
+    return Arrays.stream(changes).filter(c -> c.getStat() == stat).findFirst().orElse(null);
   }
 
   public PoisonStatus getPoisonStatus() {

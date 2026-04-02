@@ -16,33 +16,27 @@ public class OSRSTheme extends NameplateTheme {
     name = "OSRS";
     width = 30;
     height = 4;
-    heightWithPrayerBar = 4;
-    order = -99;
+    order = -98;
 
     elements.add(
-        new IconContainer(
-            "Overhead skull hint",
-            new PositionProvider(OffsetAnchor.MIDDLE, 15),
-            new PositionProvider(OffsetAnchor.END, -4),
-            26,
-            4,
-            true,
-            List.of(IconType.HINT_ARROW, IconType.SKULL, IconType.OVERHEAD)));
+        IconContainer.builder()
+            .name("Overhead skull hint")
+            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 15))
+            .yPositionProvider(new PositionProvider(OffsetAnchor.END, -4))
+            .isVertical(true)
+            .iconTypes(List.of(IconType.HINT_ARROW, IconType.SKULL, IconType.OVERHEAD))
+            .build());
 
     elements.add(
-        new HealthBar(
-            "Health bar",
-            new PositionProvider(OffsetAnchor.START, 0),
-            new PositionProvider(OffsetAnchor.START, 0),
-            30,
-            4,
-            0,
-            false,
-            new PositionProvider(OffsetAnchor.START, 0),
-            new PositionProvider(OffsetAnchor.START, 0),
-            Color.WHITE,
-            Color.RED,
-            Color.GREEN,
-            new HealthBarColorProvider(Color.GREEN, Color.GREEN, Color.GREEN, Color.GREEN)));
+        HealthBar.builder()
+            .name("Health bar")
+            .width(30)
+            .height(4)
+            .barColorProvider(
+                new HealthBarColorProvider(Color.GREEN, Color.GREEN, Color.GREEN, Color.GREEN))
+            .backgroundColor(Color.RED)
+            .borderSize(0)
+            .drawConsumableIndicator(false)
+            .build());
   }
 }

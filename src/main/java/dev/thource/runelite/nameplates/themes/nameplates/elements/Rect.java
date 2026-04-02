@@ -8,32 +8,26 @@ import dev.thource.runelite.nameplates.panel.components.LabelledInput;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.List;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
+@SuperBuilder
 public class Rect extends Element {
-  protected int width;
-  protected int height;
-  protected int cornerRadius;
-  protected Color color;
-
-  public Rect() {
-    super();
-
-    width = 10;
-    height = 10;
-    cornerRadius = 0;
-    color = Color.BLACK;
-  }
+  @Builder.Default protected int width = 10;
+  @Builder.Default protected int height = 10;
+  @Builder.Default protected int cornerRadius = 0;
+  @Builder.Default protected Color color = Color.BLACK;
 
   @Override
   public void draw(Nameplate nameplate, Graphics2D graphics, int x, int y) {
     Rect.draw(
         graphics,
-        x + xPositionProvider.get(nameplate, width),
-        y + yPositionProvider.get(nameplate, height),
+        x + xPositionProvider.get(width),
+        y + yPositionProvider.get(height),
         width,
         height,
         color,

@@ -14,7 +14,6 @@ public class CustomNameplateTheme extends NameplateTheme {
     name = "Custom Theme";
     width = 120;
     height = 26;
-    heightWithPrayerBar = 38;
   }
 
   @Override

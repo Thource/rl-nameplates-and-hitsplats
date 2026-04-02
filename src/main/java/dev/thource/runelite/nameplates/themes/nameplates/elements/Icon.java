@@ -8,14 +8,16 @@ import dev.thource.runelite.nameplates.panel.components.DropdownInput;
 import dev.thource.runelite.nameplates.panel.components.IntInput;
 import dev.thource.runelite.nameplates.panel.components.LabelledInput;
 import dev.thource.runelite.nameplates.themes.nameplates.OffsetAnchor;
-import dev.thource.runelite.nameplates.themes.nameplates.PositionProvider;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
+import lombok.Builder;
+import lombok.experimental.SuperBuilder;
 import net.runelite.api.coords.Direction;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.util.ImageUtil;
 
+@SuperBuilder
 public class Icon extends Element {
   private static final BufferedImage NO_LOOT_IMAGE =
       ImageUtil.loadImageResource(NameplatesPlugin.class, "no_loot_indicator.png");
@@ -23,6 +25,7 @@ public class Icon extends Element {
   private static BufferedImage UP_ARROW_IMAGE;
   private static BufferedImage RIGHT_ARROW_IMAGE;
   private static BufferedImage LEFT_ARROW_IMAGE;
+  private static BufferedImage VENGEANCE_IMAGE;
 
   public static void initImages(SpriteManager spriteManager) {
     DOWN_ARROW_IMAGE = spriteManager.getSprite(441, 0);
@@ -34,29 +37,11 @@ public class Icon extends Element {
     if (DOWN_ARROW_IMAGE != null) {
       UP_ARROW_IMAGE = ImageUtil.rotateImage(DOWN_ARROW_IMAGE, Math.PI); // 180 degrees
     }
+    VENGEANCE_IMAGE = spriteManager.getSprite(1961, 0);
   }
 
-  protected int size;
-  protected IconType iconType;
-
-  public Icon() {
-    super();
-
-    size = 26;
-    iconType = IconType.OVERHEAD;
-  }
-
-  public Icon(
-      String name,
-      PositionProvider xPositionProvider,
-      PositionProvider yPositionProvider,
-      int size,
-      IconType iconType) {
-    super(name, xPositionProvider, yPositionProvider);
-
-    this.size = size;
-    this.iconType = iconType;
-  }
+  @Builder.Default protected int size = 26;
+  @Builder.Default protected IconType iconType = IconType.OVERHEAD;
 
   private static BufferedImage getImage(
       Nameplate nameplate, IconType iconType, Direction direction) {
@@ -81,6 +66,12 @@ public class Icon extends Element {
         }
 
         return NO_LOOT_IMAGE;
+      case VENGEANCE:
+        if (!nameplate.hasVengeance()) {
+          return null;
+        }
+
+        return VENGEANCE_IMAGE;
       case HOVERED:
       case HINT_ARROW:
         if (iconType == IconType.HINT_ARROW) {
@@ -121,8 +112,8 @@ public class Icon extends Element {
     draw(
         nameplate,
         graphics,
-        x + xPositionProvider.get(nameplate, size),
-        y + yPositionProvider.get(nameplate, size),
+        x + xPositionProvider.get(size),
+        y + yPositionProvider.get(size),
         size,
         iconType,
         direction);

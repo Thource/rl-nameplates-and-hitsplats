@@ -11,6 +11,7 @@ public enum IconType implements Nameable {
   NO_LOOT("No-loot"),
   HOVERED("Hovered"),
   HINT_ARROW("Hint arrow"),
+  VENGEANCE("Vengeance"),
   ;
 
   @Getter private final String name;

@@ -12,29 +12,18 @@ import dev.thource.runelite.nameplates.themes.nameplates.PositionProvider;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-@Getter
-@Setter
+@SuperBuilder
 public abstract class Element implements Nameable {
   protected final String elementType = getClass().getSimpleName();
-  protected String name;
-  protected final PositionProvider xPositionProvider;
-  protected final PositionProvider yPositionProvider;
 
-  protected Element() {
-    name = getClass().getSimpleName();
-    xPositionProvider = new PositionProvider();
-    yPositionProvider = new PositionProvider();
-  }
-
-  protected Element(
-      String name, PositionProvider xPositionProvider, PositionProvider yPositionProvider) {
-    this.name = name;
-    this.xPositionProvider = xPositionProvider;
-    this.yPositionProvider = yPositionProvider;
-  }
+  @Builder.Default @Getter @Setter protected String name = "Element";
+  @Builder.Default protected PositionProvider xPositionProvider = new PositionProvider();
+  @Builder.Default protected PositionProvider yPositionProvider = new PositionProvider();
 
   public abstract void draw(Nameplate nameplate, Graphics2D graphics, int x, int y);
 
@@ -71,6 +60,12 @@ public abstract class Element implements Nameable {
       case "PrayerBar":
         clazz = PrayerBar.class;
         break;
+      case "EnergyBar":
+        clazz = EnergyBar.class;
+        break;
+      case "SpecialBar":
+        clazz = SpecialBar.class;
+        break;
       case "StatusText":
         clazz = StatusText.class;
         break;
@@ -79,12 +74,6 @@ public abstract class Element implements Nameable {
         throw new IllegalArgumentException("Unknown elementType: " + type);
     }
 
-    if (clazz == HealthBar.class) {
-      return HealthBar.deserialize(elObj, gson);
-    } else if (clazz == PrayerBar.class) {
-      return PrayerBar.deserialize(elObj, gson);
-    } else {
-      return gson.fromJson(el, clazz);
-    }
+    return gson.fromJson(el, clazz);
   }
 }

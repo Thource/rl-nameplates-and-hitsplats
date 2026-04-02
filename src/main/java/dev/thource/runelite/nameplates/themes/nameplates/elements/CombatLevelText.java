@@ -3,27 +3,24 @@ package dev.thource.runelite.nameplates.themes.nameplates.elements;
 import dev.thource.runelite.nameplates.Nameplate;
 import dev.thource.runelite.nameplates.NameplatesPlugin;
 import dev.thource.runelite.nameplates.panel.components.LabelledInput;
-import dev.thource.runelite.nameplates.themes.nameplates.PositionProvider;
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.util.List;
+import lombok.Builder;
+import lombok.experimental.SuperBuilder;
 
+@SuperBuilder
 public class CombatLevelText extends Text {
-  protected final CombatLevelColorProvider colorProvider;
+  @Builder.Default
+  protected final CombatLevelColorProvider colorProvider = new CombatLevelColorProvider();
 
-  public CombatLevelText() {
-    super();
+  @Override
+  public void draw(Nameplate nameplate, Graphics2D graphics, int x, int y) {
+    if (nameplate.getCombatLevel() <= 0) {
+      return;
+    }
 
-    colorProvider = new CombatLevelColorProvider();
-  }
-
-  public CombatLevelText(
-      String name,
-      PositionProvider xPositionProvider,
-      PositionProvider yPositionProvider,
-      CombatLevelColorProvider colorProvider) {
-    super(name, xPositionProvider, yPositionProvider);
-
-    this.colorProvider = colorProvider;
+    super.draw(nameplate, graphics, x, y);
   }
 
   @Override

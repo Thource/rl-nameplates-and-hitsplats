@@ -1,6 +1,7 @@
 package dev.thource.runelite.nameplates;
 
 import dev.thource.runelite.nameplates.themes.nameplates.NameplateTheme;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import lombok.Getter;
@@ -22,6 +24,7 @@ import net.runelite.api.Player;
 import net.runelite.api.Point;
 import net.runelite.api.WorldView;
 import net.runelite.api.coords.LocalPoint;
+import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -76,47 +79,67 @@ public class NameplatesOverlay extends Overlay {
         new LocalPoint(
             client.getCameraX(), client.getCameraY(), client.getLocalPlayer().getWorldView());
 
-    getLocalPointActorMap().entrySet().stream()
-        .sorted(
-            Comparator.comparingInt(
-                    (Map.Entry<LocalPoint, List<Actor>> entry) ->
-                        entry.getKey().distanceTo(cameraPoint))
-                .reversed())
-        .forEach(
-            (entry) -> {
-              List<Actor> actors = entry.getValue();
+    var actorEntrySets =
+        getLocalPointActorMap().entrySet().stream()
+            .sorted(
+                Comparator.comparingInt(
+                        (Map.Entry<LocalPoint, List<Actor>> entry) ->
+                            entry.getKey().distanceTo(cameraPoint))
+                    .reversed())
+            .collect(Collectors.toList());
 
-              int stackHeight = 0;
+    for (var entry : actorEntrySets) {
+      var actors = entry.getValue();
+      var firstActorHeight = actors.get(0).getLogicalHeight();
 
-              for (Actor actor : actors) {
-                if (actor.getOverheadCycle() > 0) {
-                  stackHeight += 8;
-                  break;
-                }
-              }
+      var stackHeight = 0;
 
-              int firstActorHeight = actors.get(0).getLogicalHeight();
-              for (Actor actor : actors) {
-                Point point = actor.getCanvasTextLocation(graphics, " ", firstActorHeight + 15);
-                if (point == null) {
-                  continue;
-                }
+      // Text has to be drawn here, because to hide overheads and skulls, we need to hide every 2d ui element
+      graphics.setFont(FontManager.getRunescapeBoldFont());
+      var fontMetrics = graphics.getFontMetrics();
+      for (Actor actor : actors) {
+        if (actor.getOverheadCycle() <= 0) {
+          continue;
+        }
 
-                Nameplate nameplate = plugin.getNameplateForActor(actor);
-                if (nameplate == null) {
-                  continue;
-                }
+        var point = actor.getCanvasTextLocation(graphics, " ", firstActorHeight + 15);
+        if (point == null) {
+          continue;
+        }
 
-                stackHeight +=
-                    renderNameplate(
-                            graphics,
-                            nameplate,
-                            new Point(point.getX(), point.getY() - stackHeight),
-                            actor.getLocalLocation().distanceTo(cameraPoint))
-                        + 4;
-                nameplate.getHpAnimationData().progressBy(deltaMs);
-              }
-            });
+        var text = actor.getOverheadText();
+        if (text == null || text.isEmpty()) {
+          continue;
+        }
+
+        var textBounds = fontMetrics.getStringBounds(text, graphics);
+        graphics.setColor(Color.BLACK);
+        graphics.drawString(
+            text, point.getX() - ((int) (textBounds.getWidth() / 2)) + 1, point.getY() - stackHeight + 1);
+        graphics.setColor(Color.YELLOW);
+        graphics.drawString(
+            text, point.getX() - ((int) (textBounds.getWidth() / 2)), point.getY() - stackHeight);
+        stackHeight += (int) textBounds.getHeight();
+      }
+
+      for (Actor actor : actors) {
+        Nameplate nameplate = plugin.getNameplateForActor(actor);
+        if (nameplate == null) {
+          continue;
+        }
+
+        var point = actor.getCanvasTextLocation(graphics, " ", firstActorHeight + 15);
+        if (point == null) {
+          continue;
+        }
+
+        stackHeight +=
+            renderNameplate(
+                    graphics, nameplate, new Point(point.getX(), point.getY() - stackHeight))
+                + 4;
+        nameplate.getHpAnimationData().progressBy(deltaMs);
+      }
+    }
 
     lastRender = System.currentTimeMillis();
 
@@ -186,16 +209,13 @@ public class NameplatesOverlay extends Overlay {
   }
 
   // returns rendered nameplate height
-  public int renderNameplate(Graphics2D graphics, Nameplate nameplate, Point point, int distance) {
+  public int renderNameplate(Graphics2D graphics, Nameplate nameplate, Point point) {
     return plugin.getActiveNameplateTheme().drawNameplate(graphics, nameplate, point);
   }
 
-  // returns rendered nameplate height
-  public int renderNameplate(
+  public void renderNameplate(
       Graphics2D graphics, Nameplate nameplate, Point point, NameplateTheme theme) {
     theme.drawNameplate(graphics, nameplate, point);
-
-    return 0;
   }
 
   private MenuEntry getHoveredMenuEntry(final MenuEntry[] menuEntries) {

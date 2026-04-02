@@ -6,11 +6,10 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum StatusType implements Nameable {
-  HEALTH("Health"),
-  PRAYER("Prayer"),
-  ENERGY("Run energy"),
-  SPECIAL("Special attack");
+public enum NameTextDisplayMode implements Nameable {
+  WITH_COMBAT_LEVEL("With combat level"),
+  WITHOUT_COMBAT_LEVEL("Without combat level"),
+  ALWAYS("Always");
 
   private final String name;
 }

@@ -17,16 +17,18 @@ import dev.thource.runelite.nameplates.panel.components.TabSwitcherPanel;
 import dev.thource.runelite.nameplates.themes.nameplates.CustomNameplateTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.CombatLevelText;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Element;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.EnergyBar;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.HealthBar;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Icon;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.IconContainer;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.NameText;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.PrayerBar;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Rect;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.SpecialBar;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.StatusText;
 import java.awt.GridLayout;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.function.Supplier;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -41,11 +43,28 @@ import net.runelite.client.ui.DynamicGridLayout;
 
 @Slf4j
 public class NameplateEditPanel extends JPanel {
+  private static class ElementFactory {
+    private final String label;
+    private final Supplier<? extends Element> creator;
+
+    private ElementFactory(String label, Supplier<? extends Element> creator) {
+      this.label = label;
+      this.creator = creator;
+    }
+
+    private String label() {
+      return label;
+    }
+
+    private Supplier<? extends Element> creator() {
+      return creator;
+    }
+  }
+
   private final JLabel editingLabel;
   private final StringInput nameInput;
   private final IntInput widthInput;
   private final IntInput heightInput;
-  private final IntInput heightWithPrayerBarInput;
   private final CheckboxInput stackInput;
   private final ListSelector<Element> elementsList;
   private final JPanel elementInputsPanel;
@@ -116,18 +135,6 @@ public class NameplateEditPanel extends JPanel {
               preview.repaint();
             });
     themeConfigTab.add(heightInput);
-
-    heightWithPrayerBarInput =
-        new IntInput(
-            "Height with prayer bar",
-            0,
-            0,
-            999,
-            (value) -> {
-              editingTheme.setHeightWithPrayerBar(value);
-              preview.repaint();
-            });
-    themeConfigTab.add(heightWithPrayerBarInput);
 
     stackInput =
         new CheckboxInput("Stack nameplates", true, (value) -> editingTheme.setStacking(value));
@@ -212,32 +219,45 @@ public class NameplateEditPanel extends JPanel {
                 var popupMenu = new JPopupMenu();
 
                 List.of(
-                        NameText.class,
-                        CombatLevelText.class,
-                        HealthBar.class,
-                        PrayerBar.class,
-                        StatusText.class,
-                        Icon.class,
-                        IconContainer.class,
-                        Rect.class)
+                        new ElementFactory(
+                            NameText.class.getSimpleName(),
+                            () -> NameText.builder().name("Name").build()),
+                        new ElementFactory(
+                            CombatLevelText.class.getSimpleName(),
+                            () -> CombatLevelText.builder().name("Combat level").build()),
+                        new ElementFactory(
+                            HealthBar.class.getSimpleName(),
+                            () -> HealthBar.builder().name("Health bar").build()),
+                        new ElementFactory(
+                            PrayerBar.class.getSimpleName(),
+                            () -> PrayerBar.builder().name("Prayer bar").build()),
+                        new ElementFactory(
+                            EnergyBar.class.getSimpleName(),
+                            () -> EnergyBar.builder().name("Energy bar").build()),
+                        new ElementFactory(
+                            SpecialBar.class.getSimpleName(),
+                            () -> SpecialBar.builder().name("Special bar").build()),
+                        new ElementFactory(
+                            StatusText.class.getSimpleName(),
+                            () -> StatusText.builder().name("Status text").build()),
+                        new ElementFactory(
+                            Icon.class.getSimpleName(), () -> Icon.builder().name("Icon").build()),
+                        new ElementFactory(
+                            IconContainer.class.getSimpleName(),
+                            () -> IconContainer.builder().name("Icon container").build()),
+                        new ElementFactory(
+                            Rect.class.getSimpleName(), () -> Rect.builder().name("Rect").build()))
                     .forEach(
-                        clazz -> {
-                          var menuItem = new JMenuItem(clazz.getSimpleName());
+                        factory -> {
+                          var menuItem = new JMenuItem(factory.label());
                           menuItem.addActionListener(
                               e -> {
-                                try {
-                                  var newEl = clazz.getDeclaredConstructor().newInstance();
-                                  editingTheme.getElements().add(newEl);
+                                var newEl = factory.creator().get();
+                                editingTheme.getElements().add(newEl);
 
-                                  elementsList.setValues(editingTheme.getElements());
-                                  elementsList.selectValue(newEl);
-                                  preview.repaint();
-                                } catch (InstantiationException
-                                    | IllegalAccessException
-                                    | InvocationTargetException
-                                    | NoSuchMethodException ex) {
-                                  log.error("Failed to create new element", ex);
-                                }
+                                elementsList.setValues(editingTheme.getElements());
+                                elementsList.selectValue(newEl);
+                                preview.repaint();
                               });
                           popupMenu.add(menuItem);
                         });
@@ -272,7 +292,6 @@ public class NameplateEditPanel extends JPanel {
     nameInput.setValue(editingTheme.getName());
     widthInput.setValue(editingTheme.getWidth());
     heightInput.setValue(editingTheme.getHeight());
-    heightWithPrayerBarInput.setValue(editingTheme.getHeightWithPrayerBar());
     stackInput.setValue(editingTheme.isStacking());
 
     elementsList.setValues(editingTheme.getElements());

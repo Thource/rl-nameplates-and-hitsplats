@@ -1,28 +1,28 @@
 package dev.thource.runelite.nameplates.themes.nameplates;
 
 import dev.thource.runelite.nameplates.themes.nameplates.elements.CombatLevelText;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.EnergyBar;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.HealthBar;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.IconContainer;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.IconType;
-import dev.thource.runelite.nameplates.themes.nameplates.elements.NameColorProvider;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.NameText;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.NameTextDisplayMode;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.PrayerBar;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.SpecialBar;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.StatusText;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.StatusType;
-import java.awt.Color;
 import java.util.List;
 
-public class FlatDarkTheme extends NameplateTheme {
-  public static final String ID = "flatDarkTheme";
+public class FlatDarkFullInfoTheme extends NameplateTheme {
+  public static final String ID = "flatDarkFullInfoTheme";
 
-  public FlatDarkTheme() {
+  public FlatDarkFullInfoTheme() {
     super(ID);
 
-    name = "Flat Dark";
+    name = "Flat Dark Full Info";
     width = 120;
     height = 26;
-    order = -100;
+    order = -99;
     stacking = true;
 
     elements.add(
@@ -79,6 +79,32 @@ public class FlatDarkTheme extends NameplateTheme {
             .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 60))
             .yPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 31))
             .statusType(StatusType.PRAYER)
+            .build());
+
+    elements.add(
+        EnergyBar.builder()
+            .name("Energy bar")
+            .yPositionProvider(new PositionProvider(OffsetAnchor.START, 36))
+            .build());
+    elements.add(
+        StatusText.builder()
+            .name("Energy text")
+            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 60))
+            .yPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 43))
+            .statusType(StatusType.ENERGY)
+            .build());
+
+    elements.add(
+        SpecialBar.builder()
+            .name("Special bar")
+            .yPositionProvider(new PositionProvider(OffsetAnchor.START, 48))
+            .build());
+    elements.add(
+        StatusText.builder()
+            .name("Special text")
+            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 60))
+            .yPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 55))
+            .statusType(StatusType.SPECIAL)
             .build());
   }
 }

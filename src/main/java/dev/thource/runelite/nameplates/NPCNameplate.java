@@ -1,14 +1,27 @@
 package dev.thource.runelite.nameplates;
 
 import com.google.common.base.Strings;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.NPC;
 import net.runelite.api.NPCComposition;
 import net.runelite.api.ParamID;
+import net.runelite.api.gameval.DBTableID;
+import net.runelite.api.gameval.NpcID;
+import net.runelite.api.gameval.VarPlayerID;
+import net.runelite.api.gameval.VarbitID;
 
 @Getter
 public class NPCNameplate extends Nameplate {
+  private static final List<Integer> BOAT_IDS =
+      List.of(
+          NpcID.BOAT_HP_NPC_TINY,
+          NpcID.BOAT_HP_NPC_SMALL,
+          NpcID.BOAT_HP_NPC_MEDIUM,
+          NpcID.BOAT_HP_NPC_LARGE,
+          NpcID.BOAT_HP_NPC_COLOSSAL);
+
   private boolean percentageHealth;
   private int percentageHealthOverride;
   private float firstPercentageHealth = -1f;
@@ -21,9 +34,38 @@ public class NPCNameplate extends Nameplate {
   public void updateFromActor(NameplatesPlugin plugin) {
     super.updateFromActor(plugin);
 
+    var client = plugin.getClient();
+    NPC npc = (NPC) actor;
+    if (BOAT_IDS.contains(npc.getId())) {
+      currentHealth = client.getVarbitValue(VarbitID.SAILING_SIDEPANEL_BOAT_HP);
+      maxHealth = client.getVarbitValue(VarbitID.SAILING_SIDEPANEL_BOAT_HP_MAX);
+      hpAnimationData.startAnimation(currentHealth, currentHealth, 0);
+
+      var name2 =
+          client
+              .getDBTableField(
+                  DBTableID.SailingBoatNameOptions.Row.SAILING_BOAT_NAME_DESCRIPTOR_OPTIONS, 1, 0)[
+              client.getVarbitValue(VarbitID.SAILING_BOARDED_BOAT_NAME_2) - 1];
+      var name3 =
+          client
+              .getDBTableField(
+                  DBTableID.SailingBoatNameOptions.Row.SAILING_BOAT_NAME_NOUN_OPTIONS, 1, 0)[
+              client.getVarbitValue(VarbitID.SAILING_BOARDED_BOAT_NAME_3) - 1];
+      name = name2 + " " + name3;
+
+      return;
+    }
+
+    if (npc.getId() == client.getVarpValue(VarPlayerID.HPBAR_HUD_NPC)) {
+      maxHealth = client.getVarbitValue(VarbitID.HPBAR_HUD_BASEHP);
+      percentageHealth = false;
+      percentageHealthOverride = 0;
+      firstPercentageHealth = -1f;
+      return;
+    }
+
     int maxHealth = 0;
 
-    NPC npc = (NPC) actor;
     Integer health = plugin.getNpcManager().getHealth(npc.getId());
     if (health != null) {
       maxHealth = health;
@@ -46,12 +88,11 @@ public class NPCNameplate extends Nameplate {
     return plugin.getClient().getHintArrowNpc() == actor;
   }
 
-  @Override
-  public boolean drawHealthAsPercentage() {
-    return isPercentageHealth();
-  }
-
   public void recalculatePercentageHealth(NameplatesPlugin plugin) {
+    if (((NPC) actor).getId() == NpcID.GEMSTONE_CRAB) {
+      return;
+    }
+
     if (firstPercentageHealth == -1f) {
       firstPercentageHealth = (float) currentHealth / maxHealth;
     }

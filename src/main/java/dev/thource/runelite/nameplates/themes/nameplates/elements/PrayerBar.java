@@ -1,61 +1,22 @@
 package dev.thource.runelite.nameplates.themes.nameplates.elements;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import dev.thource.runelite.nameplates.Nameplate;
-import dev.thource.runelite.nameplates.themes.nameplates.PositionProvider;
-import java.awt.Color;
-import java.awt.Graphics2D;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import net.runelite.client.plugins.itemstats.StatChange;
+import net.runelite.client.plugins.itemstats.stats.Stats;
 
 @Getter
 @Setter
+@SuperBuilder
 public class PrayerBar extends Bar {
-
-  public PrayerBar() {
-    super();
-
-    barColorProvider = new PrayerBarColorProvider();
-  }
-
-  public PrayerBar(
-      String name,
-      PositionProvider xPositionProvider,
-      PositionProvider yPositionProvider,
-      int width,
-      int height,
-      int borderSize,
-      boolean drawText,
-      PositionProvider textXPositionProvider,
-      PositionProvider textYPositionProvider,
-      Color borderColor,
-      Color backgroundColor,
-      Color textColor,
-      HealthBarColorProvider barColorProvider) {
-    super(
-        name,
-        xPositionProvider,
-        yPositionProvider,
-        width,
-        height,
-        borderSize,
-        drawText,
-        textXPositionProvider,
-        textYPositionProvider,
-        borderColor,
-        backgroundColor,
-        textColor,
-        barColorProvider);
-  }
+  @Builder.Default PrayerBarColorProvider barColorProvider = new PrayerBarColorProvider();
 
   @Override
-  public void draw(Nameplate nameplate, Graphics2D graphics, int plateX, int plateY) {
-    if (!nameplate.shouldDrawPrayerBar()) {
-      return;
-    }
-
-    super.draw(nameplate, graphics, plateX, plateY);
+  public boolean shouldDraw(Nameplate nameplate) {
+    return nameplate.shouldDrawPrayerBar();
   }
 
   @Override
@@ -68,13 +29,8 @@ public class PrayerBar extends Bar {
     return nameplate.getMaxPrayer();
   }
 
-  public static PrayerBar deserialize(JsonObject obj, Gson gson) {
-    var providerJson = obj.getAsJsonObject("barColorProvider");
-    // We have to remove the barColorProvider so that we can specify the right class manually
-    obj.remove("barColorProvider");
-
-    var prayerBar = gson.fromJson(obj, PrayerBar.class);
-    prayerBar.setBarColorProvider(gson.fromJson(providerJson, PrayerBarColorProvider.class));
-    return prayerBar;
+  @Override
+  protected StatChange getStatChange(Nameplate nameplate) {
+    return nameplate.getHoveredItemStatChange(Stats.PRAYER);
   }
 }

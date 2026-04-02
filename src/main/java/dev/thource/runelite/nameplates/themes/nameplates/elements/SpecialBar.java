@@ -6,31 +6,30 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import net.runelite.client.plugins.itemstats.StatChange;
-import net.runelite.client.plugins.itemstats.stats.Stats;
 
 @Getter
 @Setter
 @SuperBuilder
-public class HealthBar extends Bar {
-  @Builder.Default HealthBarColorProvider barColorProvider = new HealthBarColorProvider();
+public class SpecialBar extends Bar {
+  @Builder.Default SpecialBarColorProvider barColorProvider = new SpecialBarColorProvider();
 
   @Override
   public boolean shouldDraw(Nameplate nameplate) {
-    return nameplate.shouldDrawHealthBar();
+    return nameplate.shouldDrawSpecialBar();
   }
 
   @Override
   protected int getCurrentValue(Nameplate nameplate) {
-    return nameplate.getCurrentHealth();
+    return nameplate.getCurrentSpecial();
   }
 
   @Override
   protected int getMaxValue(Nameplate nameplate) {
-    return nameplate.getMaxHealth();
+    return 100;
   }
 
   @Override
   protected StatChange getStatChange(Nameplate nameplate) {
-    return nameplate.getHoveredItemStatChange(Stats.HITPOINTS);
+    return null;
   }
 }

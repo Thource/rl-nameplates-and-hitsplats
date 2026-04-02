@@ -4,13 +4,18 @@ import lombok.Getter;
 import net.runelite.api.Player;
 import net.runelite.api.Skill;
 import net.runelite.api.gameval.VarPlayerID;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.plugins.itemstats.StatChange;
+import net.runelite.client.plugins.itemstats.stats.Stat;
+import net.runelite.client.plugins.party.data.PartyData;
 
 @Getter
 public class PlayerNameplate extends Nameplate {
+  private PartyData partyData;
+
   public PlayerNameplate(NameplatesPlugin plugin, Player actor) {
     super(plugin, actor);
-    this.maxHealth = 99;
+    this.maxHealth = 100;
   }
 
   @Override
@@ -23,42 +28,42 @@ public class PlayerNameplate extends Nameplate {
   }
 
   @Override
-  public int getCurrentPrayer() {
-    if (actor != plugin.getClient().getLocalPlayer()) {
-      return super.getCurrentPrayer();
+  public boolean hasVengeance() {
+    if (actor == plugin.getClient().getLocalPlayer()) {
+      return plugin.getClient().getVarbitValue(VarbitID.VENGEANCE_REBOUND) == 1;
     }
 
-    return plugin.getClient().getBoostedSkillLevel(Skill.PRAYER);
+    if (partyData != null) {
+      return partyData.isVengeanceActive();
+    }
+
+    return false;
+  }
+
+  @Override
+  public int getCurrentPrayer() {
+    if (actor == plugin.getClient().getLocalPlayer()) {
+      return plugin.getClient().getBoostedSkillLevel(Skill.PRAYER);
+    }
+
+    if (partyData != null) {
+      return partyData.getPrayer();
+    }
+
+    return super.getCurrentPrayer();
   }
 
   @Override
   public int getMaxPrayer() {
-    if (actor != plugin.getClient().getLocalPlayer()) {
-      return super.getMaxPrayer();
+    if (actor == plugin.getClient().getLocalPlayer()) {
+      return plugin.getClient().getRealSkillLevel(Skill.PRAYER);
     }
 
-    return plugin.getClient().getRealSkillLevel(Skill.PRAYER);
-  }
-
-  @Override
-  public String getPrayerString() {
-    if (actor != plugin.getClient().getLocalPlayer()) {
-      return null;
+    if (partyData != null) {
+      return partyData.getMaxPrayer();
     }
 
-    return getCurrentPrayer() + " / " + getMaxPrayer();
-  }
-
-  @Override
-  public float getPrayerPercentage() {
-    if (actor != plugin.getClient().getLocalPlayer()) {
-      return 0;
-    }
-
-    int currentPrayer = plugin.getClient().getBoostedSkillLevel(Skill.PRAYER);
-    int maxPrayer = plugin.getClient().getRealSkillLevel(Skill.PRAYER);
-
-    return (float) currentPrayer / maxPrayer;
+    return super.getMaxPrayer();
   }
 
   @Override
@@ -86,6 +91,19 @@ public class PlayerNameplate extends Nameplate {
 
     if (actor == client.getLocalPlayer()) {
       maxHealth = client.getRealSkillLevel(Skill.HITPOINTS);
+      return;
+    }
+
+    var partyMember = plugin.getPartyService().getMemberByDisplayName(name);
+    if (partyMember == null) {
+      partyData = null;
+
+      return;
+    }
+
+    partyData = plugin.getPartyDataMap().get(partyMember.getMemberId());
+    if (partyData != null) {
+      maxHealth = partyData.getMaxHitpoints();
     }
   }
 
@@ -95,39 +113,85 @@ public class PlayerNameplate extends Nameplate {
   }
 
   @Override
-  public boolean drawHealthAsPercentage() {
-    return actor != plugin.getClient().getLocalPlayer();
+  public boolean shouldDrawPrayerBar() {
+    return getMaxPrayer() != -1;
   }
 
   @Override
-  public boolean shouldDrawPrayerBar() {
-    return actor == plugin.getClient().getLocalPlayer();
+  public boolean shouldDrawEnergyBar() {
+    return getCurrentEnergy() != -1;
+  }
+
+  @Override
+  public int getCurrentEnergy() {
+    var client = plugin.getClient();
+    if (actor == client.getLocalPlayer()) {
+      return client.getEnergy() / 100;
+    }
+
+    if (partyData != null) {
+      return partyData.getRunEnergy();
+    }
+
+    return -1;
+  }
+
+  @Override
+  public boolean isRunActive() {
+    var client = plugin.getClient();
+    if (actor == client.getLocalPlayer()) {
+      return client.getVarpValue(VarPlayerID.OPTION_RUN) == 1;
+    }
+
+    return false;
+  }
+
+  @Override
+  public int getCurrentSpecial() {
+    var client = plugin.getClient();
+    if (actor == client.getLocalPlayer()) {
+      return client.getVarpValue(VarPlayerID.SA_ENERGY) / 10;
+    }
+
+    if (partyData != null) {
+      return partyData.getSpecEnergy();
+    }
+
+    return -1;
+  }
+
+  @Override
+  public boolean isSpecialActive() {
+    var client = plugin.getClient();
+    if (actor == client.getLocalPlayer()) {
+      return client.getVarpValue(VarPlayerID.SA_ATTACK) == 1;
+    }
+
+    return false;
+  }
+
+  @Override
+  public boolean shouldDrawSpecialBar() {
+    return getCurrentSpecial() != -1;
   }
 
   @Override
   public boolean isSameTeam() {
-    return ((Player) actor).getTeam() == plugin.getClient().getLocalPlayer().getTeam();
+    var team = ((Player) actor).getTeam();
+    return team > 0 && team == plugin.getClient().getLocalPlayer().getTeam();
   }
 
   @Override
-  public StatChange getHoveredItemHpChange() {
-    var client = plugin.getClient();
-
-    if (actor == client.getLocalPlayer()) {
-      return plugin.getHoveredItemHpChange();
+  public StatChange getHoveredItemStatChange(Stat stat) {
+    if (actor == plugin.getClient().getLocalPlayer()) {
+      return plugin.getHoveredItemStatChange(stat);
     }
 
     return null;
   }
 
   @Override
-  public StatChange getHoveredItemPrayerChange() {
-    var client = plugin.getClient();
-
-    if (actor == client.getLocalPlayer()) {
-      return plugin.getHoveredItemPrayerChange();
-    }
-
-    return null;
+  public boolean isPercentageHealth() {
+    return maxHealth == 100;
   }
 }

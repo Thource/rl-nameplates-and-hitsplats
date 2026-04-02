@@ -1,6 +1,5 @@
 package dev.thource.runelite.nameplates.themes.nameplates;
 
-import dev.thource.runelite.nameplates.Nameplate;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,13 +16,7 @@ public class PositionProvider {
     this.value = value;
   }
 
-  protected int getValue(Nameplate nameplate) {
-    return value;
-  }
-
-  public int get(Nameplate nameplate, int dimensionValue) {
-    var value = getValue(nameplate);
-
+  public int get(int dimensionValue) {
     switch (anchor) {
       case START:
         return value;

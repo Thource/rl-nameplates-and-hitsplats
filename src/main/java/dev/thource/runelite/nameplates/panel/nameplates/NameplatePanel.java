@@ -88,14 +88,9 @@ public class NameplatePanel extends JPanel {
     var dummyActor = new DummyPlayer();
     var nameplate = new DummyNameplate(plugin, dummyActor);
 
-    final var itemHpChange = new StatChange();
-    itemHpChange.setRelative(4);
-    itemHpChange.setTheoretical(4);
-    nameplate.setHoveredItemHpChange(itemHpChange);
-    final var itemPrayerChange = new StatChange();
-    itemPrayerChange.setRelative(4);
-    itemPrayerChange.setTheoretical(4);
-    nameplate.setHoveredItemPrayerChange(itemPrayerChange);
+    final var itemStatChange = new StatChange();
+    itemStatChange.setTheoretical(4);
+    nameplate.setHoveredItemStatChange(itemStatChange);
 
     final var previewWidth = 220;
     final var maxOffset = bgImage.getWidth() - previewWidth;
@@ -152,13 +147,36 @@ public class NameplatePanel extends JPanel {
         new IntInput(
             "Combat level",
             nameplate.getCombatLevel(),
-            1,
+            0,
             9_999,
             (level) -> {
               nameplate.setCombatLevel(level);
               preview.repaint();
             });
     previewOptions.addToPanel(levelInput);
+
+    var consumableDelta =
+        new IntInput(
+            "Consumable delta",
+            itemStatChange.getTheoretical(),
+            -99,
+            99,
+            value -> {
+              itemStatChange.setTheoretical(value);
+              nameplate.setHoveredItemStatChange(itemStatChange);
+              preview.repaint();
+            });
+    previewOptions.addToPanel(consumableDelta);
+
+    var healthBarInput =
+        new CheckboxInput(
+            "Health bar",
+            nameplate.shouldDrawHealthBar(),
+            (value) -> {
+              nameplate.setDrawHealthBar(value);
+              preview.repaint();
+            });
+    previewOptions.addToPanel(healthBarInput);
 
     var healthState =
         new DropdownInput<>(
@@ -175,16 +193,11 @@ public class NameplatePanel extends JPanel {
         new IntInput(
             "Current HP",
             nameplate.getCurrentHealth(),
-            1,
+            0,
             99,
             (value) -> {
               nameplate.setCurrentHealth(value);
-              itemHpChange.setRelative(
-                  Math.max(
-                      -nameplate.getCurrentHealth(),
-                      Math.min(
-                          itemHpChange.getTheoretical(),
-                          Math.max(0, nameplate.getMaxHealth() - nameplate.getCurrentHealth()))));
+              nameplate.refreshConsumableRelatives();
               preview.repaint();
             });
     previewOptions.addToPanel(currentHealthInput);
@@ -194,36 +207,13 @@ public class NameplatePanel extends JPanel {
             "Max HP",
             nameplate.getMaxHealth(),
             1,
-            99,
+            9_999,
             (value) -> {
               nameplate.setMaxHealth(value);
-              itemHpChange.setRelative(
-                  Math.max(
-                      -nameplate.getCurrentHealth(),
-                      Math.min(
-                          itemHpChange.getTheoretical(),
-                          Math.max(0, nameplate.getMaxHealth() - nameplate.getCurrentHealth()))));
+              nameplate.refreshConsumableRelatives();
               preview.repaint();
             });
     previewOptions.addToPanel(maxHealthInput);
-
-    var healthConsumableDelta =
-        new IntInput(
-            "HP consumable delta",
-            itemHpChange.getTheoretical(),
-            -99,
-            99,
-            value -> {
-              itemHpChange.setTheoretical(value);
-              itemHpChange.setRelative(
-                  Math.max(
-                      -nameplate.getCurrentHealth(),
-                      Math.min(
-                          itemHpChange.getTheoretical(),
-                          Math.max(0, nameplate.getMaxHealth() - nameplate.getCurrentHealth()))));
-              preview.repaint();
-            });
-    previewOptions.addToPanel(healthConsumableDelta);
 
     var prayerBarInput =
         new CheckboxInput(
@@ -239,16 +229,11 @@ public class NameplatePanel extends JPanel {
         new IntInput(
             "Current PP",
             nameplate.getCurrentPrayer(),
-            1,
+            0,
             99,
             (value) -> {
               nameplate.setCurrentPrayer(value);
-              itemPrayerChange.setRelative(
-                  Math.max(
-                      -nameplate.getCurrentPrayer(),
-                      Math.min(
-                          itemPrayerChange.getTheoretical(),
-                          Math.max(0, nameplate.getMaxPrayer() - nameplate.getCurrentPrayer()))));
+              nameplate.refreshConsumableRelatives();
               preview.repaint();
             });
     previewOptions.addToPanel(currentPrayerInput);
@@ -261,33 +246,55 @@ public class NameplatePanel extends JPanel {
             99,
             (value) -> {
               nameplate.setMaxPrayer(value);
-              itemPrayerChange.setRelative(
-                  Math.max(
-                      -nameplate.getCurrentPrayer(),
-                      Math.min(
-                          itemPrayerChange.getTheoretical(),
-                          Math.max(0, nameplate.getMaxPrayer() - nameplate.getCurrentPrayer()))));
+              nameplate.refreshConsumableRelatives();
               preview.repaint();
             });
     previewOptions.addToPanel(maxPrayerInput);
 
-    var prayerConsumableDelta =
-        new IntInput(
-            "PP consumable delta",
-            itemPrayerChange.getTheoretical(),
-            -99,
-            99,
-            value -> {
-              itemPrayerChange.setTheoretical(value);
-              itemPrayerChange.setRelative(
-                  Math.max(
-                      -nameplate.getCurrentPrayer(),
-                      Math.min(
-                          itemPrayerChange.getTheoretical(),
-                          Math.max(0, nameplate.getMaxPrayer() - nameplate.getCurrentPrayer()))));
+    var energyBarInput =
+        new CheckboxInput(
+            "Energy bar",
+            nameplate.shouldDrawEnergyBar(),
+            (value) -> {
+              nameplate.setDrawEnergyBar(value);
               preview.repaint();
             });
-    previewOptions.addToPanel(prayerConsumableDelta);
+    previewOptions.addToPanel(energyBarInput);
+
+    var currentEnergyInput =
+        new IntInput(
+            "Current energy",
+            nameplate.getCurrentEnergy(),
+            0,
+            100,
+            (value) -> {
+              nameplate.setCurrentEnergy(value);
+              nameplate.refreshConsumableRelatives();
+              preview.repaint();
+            });
+    previewOptions.addToPanel(currentEnergyInput);
+
+    var specialBarInput =
+        new CheckboxInput(
+            "Special bar",
+            nameplate.shouldDrawSpecialBar(),
+            (value) -> {
+              nameplate.setDrawSpecialBar(value);
+              preview.repaint();
+            });
+    previewOptions.addToPanel(specialBarInput);
+
+    var currentSpecialInput =
+        new IntInput(
+            "Current special",
+            nameplate.getCurrentSpecial(),
+            0,
+            100,
+            (value) -> {
+              nameplate.setCurrentSpecial(value);
+              preview.repaint();
+            });
+    previewOptions.addToPanel(currentSpecialInput);
 
     var overheadInput =
         new DropdownInput<>(
@@ -340,6 +347,16 @@ public class NameplatePanel extends JPanel {
               preview.repaint();
             });
     previewOptions.addToPanel(hintArrowInput);
+
+    var vengeanceInput =
+        new CheckboxInput(
+            "Vengeance",
+            nameplate.hasVengeance(),
+            (value) -> {
+              nameplate.setVengeance(value);
+              preview.repaint();
+            });
+    previewOptions.addToPanel(vengeanceInput);
 
     themeListSelector =
         new NameplateThemeSelector(
