@@ -16,7 +16,7 @@ public class EnergyBar extends Bar {
 
   @Override
   public boolean shouldDraw(Nameplate nameplate) {
-    return nameplate.shouldDrawEnergyBar();
+    return super.shouldDraw(nameplate) && nameplate.shouldDrawEnergyBar();
   }
 
   @Override

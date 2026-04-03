@@ -10,9 +10,6 @@ import dev.thource.runelite.nameplates.themes.nameplates.NameplateTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.OSRSTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Icon;
 import java.awt.Component;
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -53,7 +50,8 @@ import net.runelite.api.gameval.VarPlayerID;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
-import net.runelite.client.callback.Hooks;
+import net.runelite.client.callback.RenderCallback;
+import net.runelite.client.callback.RenderCallbackManager;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.NPCManager;
@@ -72,7 +70,6 @@ import net.runelite.client.plugins.itemstats.stats.Stat;
 import net.runelite.client.plugins.party.data.PartyData;
 import net.runelite.client.plugins.party.messages.StatusUpdate;
 import net.runelite.client.ui.ClientToolbar;
-import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -86,8 +83,6 @@ import net.runelite.client.util.Text;
     description = "Adds nameplates to NPCs.",
     tags = {"nameplates", "health", "npcs"})
 public class NameplatesPlugin extends Plugin {
-  @Getter static Font RUNESCAPE_CHAT_FONT;
-
   private static final int NORMAL_HP_REGEN_TICKS = 100;
   @Getter @Inject private Client client;
   @Getter @Inject private Gson gson;
@@ -103,7 +98,7 @@ public class NameplatesPlugin extends Plugin {
   @Getter @Inject private ConfigManager configManager;
   @Getter @Inject private ColorPickerManager colorPickerManager;
   @Getter @Inject private PartyService partyService;
-  @Inject private Hooks hooks;
+  @Inject private RenderCallbackManager renderCallbackManager;
 
   @Getter private final HashMap<Integer, HpCacheEntry> hpCache = new HashMap<>();
   @Getter private final HashMap<Integer, Nameplate> nameplates = new HashMap<>();
@@ -122,7 +117,13 @@ public class NameplatesPlugin extends Plugin {
   @Getter private final Map<String, NameplateTheme> nameplateThemes = new HashMap<>();
   @Getter private NameplateTheme activeNameplateTheme;
 
-  private final Hooks.RenderableDrawListener drawListener = this::shouldDraw;
+  private final RenderCallback renderCallback =
+      new RenderCallback() {
+        @Override
+        public boolean addEntity(Renderable renderable, boolean ui) {
+          return !ui || (!(renderable instanceof Player) && !(renderable instanceof NPC));
+        }
+      };
 
   public static boolean getConfirmation(
       Component parentComponent, String text, String confirmText, int messageType) {
@@ -142,20 +143,6 @@ public class NameplatesPlugin extends Plugin {
 
   @Override
   protected void startUp() {
-    if (RUNESCAPE_CHAT_FONT == null) {
-      try(var inRunescapeChatFont = NameplatesPlugin.class.getResourceAsStream("RuneScape-Bold-12.ttf")) {
-        RUNESCAPE_CHAT_FONT = Font.createFont(Font.TRUETYPE_FONT, inRunescapeChatFont);
-      }
-      catch (FontFormatException ex)
-      {
-        throw new RuntimeException("Font loaded, but format incorrect.", ex);
-      }
-      catch (IOException ex)
-      {
-        throw new RuntimeException("Font file not found.", ex);
-      }
-    }
-
     loadThemes();
 
     if (panel == null) {
@@ -193,7 +180,7 @@ public class NameplatesPlugin extends Plugin {
       clientToolbar.addNavigation(navButton);
     }
 
-    hooks.registerRenderableDrawListener(drawListener);
+    renderCallbackManager.register(renderCallback);
   }
 
   private void loadThemes() {
@@ -233,7 +220,7 @@ public class NameplatesPlugin extends Plugin {
 
   @Override
   protected void shutDown() {
-    hooks.unregisterRenderableDrawListener(drawListener);
+    renderCallbackManager.unregister(renderCallback);
 
     if (navButton != null) {
       clientToolbar.removeNavigation(navButton);
@@ -454,10 +441,6 @@ public class NameplatesPlugin extends Plugin {
     Actor actor = actorDeath.getActor();
 
     hpCache.remove(getActorId(actor));
-  }
-
-  boolean shouldDraw(Renderable renderable, boolean drawingUI) {
-    return !drawingUI || (!(renderable instanceof Player) && !(renderable instanceof NPC));
   }
 
   @Subscribe

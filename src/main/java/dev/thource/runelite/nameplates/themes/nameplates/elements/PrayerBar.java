@@ -16,7 +16,7 @@ public class PrayerBar extends Bar {
 
   @Override
   public boolean shouldDraw(Nameplate nameplate) {
-    return nameplate.shouldDrawPrayerBar();
+    return super.shouldDraw(nameplate) && nameplate.shouldDrawPrayerBar();
   }
 
   @Override

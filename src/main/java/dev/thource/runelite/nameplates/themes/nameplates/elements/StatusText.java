@@ -188,12 +188,20 @@ public class StatusText extends Text {
     return editInputs;
   }
 
+  private boolean shouldDraw(Nameplate nameplate) {
+    if (!nameplate.getPlugin().shouldDrawFor(nameplate)) {
+      return false;
+    }
+
+    return (statusType == StatusType.HEALTH && nameplate.shouldDrawHealthBar())
+        || (statusType == StatusType.PRAYER && nameplate.shouldDrawPrayerBar())
+        || (statusType == StatusType.ENERGY && nameplate.shouldDrawEnergyBar())
+        || (statusType == StatusType.SPECIAL && nameplate.shouldDrawSpecialBar());
+  }
+
   @Override
   public void draw(Nameplate nameplate, Graphics2D graphics, int x, int y) {
-    if ((statusType == StatusType.HEALTH && !nameplate.shouldDrawHealthBar())
-        || (statusType == StatusType.PRAYER && !nameplate.shouldDrawPrayerBar())
-        || (statusType == StatusType.ENERGY && !nameplate.shouldDrawEnergyBar())
-        || (statusType == StatusType.SPECIAL && !nameplate.shouldDrawSpecialBar())) {
+    if (!shouldDraw(nameplate)) {
       return;
     }
 

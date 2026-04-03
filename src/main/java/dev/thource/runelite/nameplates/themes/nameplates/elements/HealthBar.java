@@ -16,7 +16,7 @@ public class HealthBar extends Bar {
 
   @Override
   public boolean shouldDraw(Nameplate nameplate) {
-    return nameplate.shouldDrawHealthBar();
+    return super.shouldDraw(nameplate) && nameplate.shouldDrawHealthBar();
   }
 
   @Override

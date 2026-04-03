@@ -15,7 +15,7 @@ public class SpecialBar extends Bar {
 
   @Override
   public boolean shouldDraw(Nameplate nameplate) {
-    return nameplate.shouldDrawSpecialBar();
+    return super.shouldDraw(nameplate) && nameplate.shouldDrawSpecialBar();
   }
 
   @Override

@@ -9,12 +9,12 @@ public enum NameplateDisplayMode {
   NEVER;
 
   public boolean shouldDraw(Client client, Nameplate nameplate) {
-    if (this == NameplateDisplayMode.ALWAYS) {
-      return true;
-    }
-
     if (this == NameplateDisplayMode.NEVER || nameplate == null) {
       return false;
+    }
+
+    if (this == NameplateDisplayMode.ALWAYS) {
+      return true;
     }
 
     if (this == NameplateDisplayMode.IN_COMBAT) {
