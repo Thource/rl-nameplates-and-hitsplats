@@ -21,7 +21,7 @@ public class FlatDarkTheme extends NameplateTheme {
 
     name = "Flat Dark";
     width = 120;
-    height = 26;
+    height = 12;
     order = -100;
     stacking = true;
 

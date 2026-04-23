@@ -6,8 +6,11 @@ import dev.thource.runelite.nameplates.panel.NameplatesPluginPanel;
 import dev.thource.runelite.nameplates.themes.nameplates.CustomNameplateTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkFullInfoTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkTheme;
+import dev.thource.runelite.nameplates.themes.nameplates.HitsplatOptions;
+import dev.thource.runelite.nameplates.themes.nameplates.HitsplatTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.NameplateTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.OSRSTheme;
+import dev.thource.runelite.nameplates.themes.nameplates.SpriteOrImage;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Icon;
 import java.awt.Component;
 import java.time.Duration;
@@ -16,6 +19,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -46,6 +50,7 @@ import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.PlayerDespawned;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.SpriteID;
 import net.runelite.api.gameval.VarPlayerID;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.Widget;
@@ -101,7 +106,7 @@ public class NameplatesPlugin extends Plugin {
   @Inject private RenderCallbackManager renderCallbackManager;
 
   @Getter private final HashMap<Integer, HpCacheEntry> hpCache = new HashMap<>();
-  @Getter private final HashMap<Integer, Nameplate> nameplates = new HashMap<>();
+  @Getter private final HashMap<Integer, PluginActor> actors = new HashMap<>();
 
   @Getter
   private final Map<Long, PartyData> partyDataMap = Collections.synchronizedMap(new HashMap<>());
@@ -116,6 +121,7 @@ public class NameplatesPlugin extends Plugin {
 
   @Getter private final Map<String, NameplateTheme> nameplateThemes = new HashMap<>();
   @Getter private NameplateTheme activeNameplateTheme;
+  @Getter private HitsplatTheme activeHitsplatTheme;
 
   private final RenderCallback renderCallback =
       new RenderCallback() {
@@ -216,6 +222,9 @@ public class NameplatesPlugin extends Plugin {
     activeNameplateTheme =
         nameplateThemes.getOrDefault(
             config.activeNameplateThemeId(), nameplateThemes.get(FlatDarkTheme.ID));
+
+    activeHitsplatTheme = new HitsplatTheme("id") {};
+    activeHitsplatTheme.setPlugin(this);
   }
 
   @Override
@@ -291,7 +300,21 @@ public class NameplatesPlugin extends Plugin {
   }
 
   Nameplate getNameplateForActor(Actor actor) {
-    return nameplates.get(getActorId(actor));
+    var actorId = getActorId(actor);
+    if (!actors.containsKey(actorId)) {
+      return null;
+    }
+
+    return actors.get(actorId).getNameplate();
+  }
+
+  List<PluginHitsplat> getHitsplatsForActor(Actor actor) {
+    var actorId = getActorId(actor);
+    if (!actors.containsKey(actorId)) {
+      return null;
+    }
+
+    return actors.get(actorId).getHitsplats();
   }
 
   private void updateHpCache(Actor actor) {
@@ -333,16 +356,23 @@ public class NameplatesPlugin extends Plugin {
     }
   }
 
+  private PluginActor instantiateActor(Actor actor) {
+    Nameplate nameplate;
+    if (actor instanceof Player) {
+      nameplate = new PlayerNameplate(this, (Player) actor);
+    } else {
+      nameplate = new NPCNameplate(this, (NPC) actor);
+    }
+
+    var pluginActor = new PluginActor(actor, nameplate);
+    actors.put(getActorId(actor), pluginActor);
+    return pluginActor;
+  }
+
   private void updateNameplate(Actor actor) {
     Nameplate nameplate = getNameplateForActor(actor);
     if (nameplate == null) {
-      if (actor instanceof Player) {
-        nameplate = new PlayerNameplate(this, (Player) actor);
-      } else {
-        nameplate = new NPCNameplate(this, (NPC) actor);
-      }
-
-      nameplates.put(getActorId(actor), nameplate);
+      nameplate = instantiateActor(actor).getNameplate();
     }
 
     int hp;
@@ -380,7 +410,7 @@ public class NameplatesPlugin extends Plugin {
     }
 
     hpCache.clear();
-    nameplates.clear();
+    actors.clear();
   }
 
   @Subscribe
@@ -428,12 +458,12 @@ public class NameplatesPlugin extends Plugin {
 
   @Subscribe
   public void onNpcDespawned(NpcDespawned npcDespawned) {
-    nameplates.remove(getActorId(npcDespawned.getNpc()));
+    actors.remove(getActorId(npcDespawned.getNpc()));
   }
 
   @Subscribe
   public void onPlayerDespawned(PlayerDespawned playerDespawned) {
-    nameplates.remove(getActorId(playerDespawned.getPlayer()));
+    actors.remove(getActorId(playerDespawned.getPlayer()));
   }
 
   @Subscribe
@@ -445,10 +475,10 @@ public class NameplatesPlugin extends Plugin {
 
   @Subscribe
   public void onHitsplatApplied(HitsplatApplied hitsplatApplied) {
-    Hitsplat hitsplat = hitsplatApplied.getHitsplat();
-    Actor actor = hitsplatApplied.getActor();
+    var hitsplat = hitsplatApplied.getHitsplat();
+    var actor = hitsplatApplied.getActor();
 
-    Nameplate nameplate = getNameplateForActor(actor);
+    var nameplate = getNameplateForActor(actor);
     if (nameplate != null) {
       nameplate.setLastHitsplat(client.getTickCount());
 
@@ -459,12 +489,25 @@ public class NameplatesPlugin extends Plugin {
       if (actor instanceof NPC) {
         checkHitsplatForNoLoot(hitsplat, (NPC) actor);
 
-        if (((NPCNameplate) nameplate).isPercentageHealth()
+        if (nameplate.isPercentageHealth()
             || ((NPCNameplate) nameplate).getPercentageHealthOverride() > 0) {
           ((NPCNameplate) nameplate)
               .setDamageTaken(((NPCNameplate) nameplate).getDamageTaken() + hitsplat.getAmount());
         }
       }
+    }
+
+    var hitsplats = getHitsplatsForActor(actor);
+    if (hitsplats != null) {
+      hitsplats.add(
+          new PluginHitsplat(
+              hitsplat.getHitsplatType(),
+              hitsplat.getAmount(),
+              client.getTickCount(),
+              (int)
+                  hitsplats.stream()
+                      .filter(h -> h.getServerTick() == client.getTickCount())
+                      .count()));
     }
   }
 
