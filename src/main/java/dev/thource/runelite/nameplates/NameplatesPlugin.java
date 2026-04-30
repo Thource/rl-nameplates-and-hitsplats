@@ -6,11 +6,9 @@ import dev.thource.runelite.nameplates.panel.NameplatesPluginPanel;
 import dev.thource.runelite.nameplates.themes.nameplates.CustomNameplateTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkFullInfoTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkTheme;
-import dev.thource.runelite.nameplates.themes.nameplates.HitsplatOptions;
 import dev.thource.runelite.nameplates.themes.nameplates.HitsplatTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.NameplateTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.OSRSTheme;
-import dev.thource.runelite.nameplates.themes.nameplates.SpriteOrImage;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Icon;
 import java.awt.Component;
 import java.time.Duration;
@@ -50,7 +48,6 @@ import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.PlayerDespawned;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.gameval.InterfaceID;
-import net.runelite.api.gameval.SpriteID;
 import net.runelite.api.gameval.VarPlayerID;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.Widget;
@@ -501,6 +498,7 @@ public class NameplatesPlugin extends Plugin {
     if (hitsplats != null) {
       hitsplats.add(
           new PluginHitsplat(
+              client,
               hitsplat.getHitsplatType(),
               hitsplat.getAmount(),
               client.getTickCount(),

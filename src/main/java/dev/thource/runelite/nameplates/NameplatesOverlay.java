@@ -266,6 +266,7 @@ public class NameplatesOverlay extends Overlay {
                 entry -> {
                   var splat =
                       new PluginHitsplat(
+                          client,
                           entry.getKey(),
                           entry.getValue(),
                           firstSplat.getServerTick(),
