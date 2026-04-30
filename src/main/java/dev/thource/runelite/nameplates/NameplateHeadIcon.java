@@ -10,7 +10,7 @@ import net.runelite.api.Actor;
 import net.runelite.api.HeadIcon;
 import net.runelite.api.NPC;
 import net.runelite.api.Player;
-import net.runelite.api.SpriteID;
+import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.game.SpriteManager;
 
 @RequiredArgsConstructor
@@ -56,7 +56,27 @@ public enum NameplateHeadIcon implements Nameable {
   }
 
   public static NameplateHeadIcon get(NPC npc) {
-    return map.get(npc);
+    var overheadArchives = npc.getOverheadArchiveIds();
+    var overheadSprites = npc.getOverheadSpriteIds();
+
+    if (overheadArchives != null && overheadArchives.length != 0) {
+      assert overheadSprites != null;
+
+      for (int archiveIndex = 0; archiveIndex < overheadArchives.length; archiveIndex++) {
+        if (overheadArchives[archiveIndex] != SpriteID.HEADICONS_PRAYER) {
+          continue;
+        }
+
+        var spriteId = overheadSprites[archiveIndex];
+        if (archiveIndex >= HeadIcon.values().length) {
+          continue;
+        }
+
+        return map.get(HeadIcon.values()[spriteId]);
+      }
+    }
+
+    return null;
   }
 
   public static NameplateHeadIcon get(Actor actor) {
@@ -72,6 +92,6 @@ public enum NameplateHeadIcon implements Nameable {
       return;
     }
 
-    image = spriteManager.getSprite(SpriteID.OVERHEAD_PROTECT_FROM_MELEE, overheadFileId);
+    image = spriteManager.getSprite(SpriteID.HEADICONS_PRAYER, overheadFileId);
   }
 }
