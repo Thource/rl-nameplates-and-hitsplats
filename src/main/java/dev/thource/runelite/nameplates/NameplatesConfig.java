@@ -114,4 +114,23 @@ public interface NameplatesConfig extends Config {
   default HoverIndicatorMode hoverIndicatorMode() {
     return HoverIndicatorMode.BUSY_RIGHT_CLICK;
   }
+
+  @ConfigItem(
+      keyName = "combineHitsplats",
+      name = "Combine same type hitsplats",
+      description =
+          "Whether to combine hitsplats of the same type into one hitsplat with combined"
+              + " value.<br><br>Example: If an NPC takes 2 separate hits of 4 damage, instead of"
+              + " showing 2 hitsplats of 4 damage, it will show 1 hitsplat of 8 damage.")
+  default boolean combineHitsplats() {
+    return false;
+  }
+
+  @ConfigItem(
+      keyName = "hideZeroHitsplats",
+      name = "Hide zero hitsplats",
+      description = "Whether to hide hitsplats that have a value of 0 (like misses).")
+  default boolean hideZeroHitsplats() {
+    return false;
+  }
 }

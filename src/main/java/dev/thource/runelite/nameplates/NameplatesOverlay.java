@@ -250,36 +250,44 @@ public class NameplatesOverlay extends Overlay {
       return;
     }
 
-    // TODO: config option for combining hitsplats
-    // TODO: config option for hiding BLOCK_OTHER hitsplats
+    var config = plugin.getConfig();
+    var hideZeroHitsplats = config.hideZeroHitsplats();
+    var modifiedHitsplats =
+        hitsplats.stream()
+            .filter(h -> h.getAmount() > 0 || !hideZeroHitsplats)
+            .collect(Collectors.toList());
+    var combineHitsplats = config.combineHitsplats();
+
     var tickIndex = new AtomicInteger();
     var firstSplat = hitsplats.get(0);
-    var combinedHitsplats =
-        hitsplats.stream()
-            .collect(
-                Collectors.groupingBy(
-                    PluginHitsplat::getHitsplatType,
-                    Collectors.summingInt(PluginHitsplat::getAmount)))
-            .entrySet()
-            .stream()
-            .map(
-                entry -> {
-                  var splat =
-                      new PluginHitsplat(
-                          client,
-                          entry.getKey(),
-                          entry.getValue(),
-                          firstSplat.getServerTick(),
-                          tickIndex.getAndIncrement());
+    if (combineHitsplats) {
+      modifiedHitsplats =
+          modifiedHitsplats.stream()
+              .collect(
+                  Collectors.groupingBy(
+                      PluginHitsplat::getHitsplatType,
+                      Collectors.summingInt(PluginHitsplat::getAmount)))
+              .entrySet()
+              .stream()
+              .map(
+                  entry -> {
+                    var splat =
+                        new PluginHitsplat(
+                            client,
+                            entry.getKey(),
+                            entry.getValue(),
+                            firstSplat.getServerTick(),
+                            tickIndex.getAndIncrement());
 
-                  splat.setCreatedAt(firstSplat.getCreatedAt());
+                    splat.setCreatedAt(firstSplat.getCreatedAt());
 
-                  return splat;
-                })
-            .sorted(Comparator.comparingLong(PluginHitsplat::getCreatedAt))
-            .collect(Collectors.toList());
+                    return splat;
+                  })
+              .sorted(Comparator.comparingLong(PluginHitsplat::getCreatedAt))
+              .collect(Collectors.toList());
+    }
 
-    plugin.getActiveHitsplatTheme().drawHitsplats(graphics, combinedHitsplats, point);
+    plugin.getActiveHitsplatTheme().drawHitsplats(graphics, modifiedHitsplats, point);
   }
 
   // returns rendered nameplate height
