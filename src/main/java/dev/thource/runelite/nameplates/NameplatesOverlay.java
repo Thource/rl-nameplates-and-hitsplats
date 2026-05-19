@@ -106,6 +106,10 @@ public class NameplatesOverlay extends Overlay {
         continue;
       }
 
+      if (!plugin.getAlwaysDrawName(nameplate.getActor()) && !plugin.shouldDrawFor(nameplate)) {
+        continue;
+      }
+
       stackHeight +=
           renderNameplate(graphics, nameplate, new Point(point.getX(), point.getY() - stackHeight))
               + 4;
