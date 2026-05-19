@@ -80,6 +80,22 @@ public class NPCNameplate extends Nameplate {
     }
 
     this.percentageHealth = maxHealth <= 0 && percentageHealthOverride <= 0;
+    if (percentageHealth && composition != null) {
+      var isAttackable = false;
+      for (String action : composition.getActions()) {
+        if (action != null && action.equals("Attack")) {
+          isAttackable = true;
+          break;
+        }
+      }
+
+      // If the NPC doesn't have an attack option, it's likely not a combat NPC and we shouldn't show a health bar for
+      // it. By setting percentageHealth to false, maxHealth will be set to 0, hiding the health bar.
+      if (!isAttackable) {
+        this.percentageHealth = false;
+      }
+    }
+
     this.maxHealth = this.percentageHealth ? 100 : maxHealth;
   }
 
