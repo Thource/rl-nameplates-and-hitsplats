@@ -370,6 +370,15 @@ public class NameplatesPlugin extends Plugin {
   }
 
   private void updateNameplate(Actor actor) {
+    if (actor instanceof NPC) {
+      var npc = (NPC) actor;
+
+      // Don't make nameplates for pets
+      if (npc.getComposition().isFollower()) {
+        return;
+      }
+    }
+
     Nameplate nameplate = getNameplateForActor(actor);
     if (nameplate == null) {
       nameplate = instantiateActor(actor).getNameplate();
