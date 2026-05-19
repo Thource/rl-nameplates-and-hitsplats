@@ -6,7 +6,7 @@ import dev.thource.runelite.nameplates.panel.NameplatesPluginPanel;
 import dev.thource.runelite.nameplates.themes.nameplates.CustomNameplateTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkFullInfoTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkTheme;
-import dev.thource.runelite.nameplates.themes.nameplates.HitsplatTheme;
+import dev.thource.runelite.nameplates.themes.hitsplats.HitsplatTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.NameplateTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.OSRSTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Icon;

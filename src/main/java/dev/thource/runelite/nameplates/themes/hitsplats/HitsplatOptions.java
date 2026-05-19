@@ -1,12 +1,9 @@
-package dev.thource.runelite.nameplates.themes.nameplates;
+package dev.thource.runelite.nameplates.themes.hitsplats;
 
 import dev.thource.runelite.nameplates.panel.Nameable;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import lombok.Builder;
 import net.runelite.api.HitsplatID;
-import net.runelite.client.callback.ClientThread;
-import net.runelite.client.game.SpriteManager;
 import net.runelite.client.ui.FontManager;
 
 public class HitsplatOptions implements Nameable {

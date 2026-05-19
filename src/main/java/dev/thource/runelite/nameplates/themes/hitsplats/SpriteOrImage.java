@@ -1,4 +1,4 @@
-package dev.thource.runelite.nameplates.themes.nameplates;
+package dev.thource.runelite.nameplates.themes.hitsplats;
 
 import dev.thource.runelite.nameplates.panel.Nameable;
 import java.awt.Graphics2D;

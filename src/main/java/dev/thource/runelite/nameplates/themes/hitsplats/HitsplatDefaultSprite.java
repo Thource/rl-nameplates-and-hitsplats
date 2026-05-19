@@ -1,4 +1,4 @@
-package dev.thource.runelite.nameplates.themes.nameplates;
+package dev.thource.runelite.nameplates.themes.hitsplats;
 
 import java.util.Arrays;
 import java.util.Map;

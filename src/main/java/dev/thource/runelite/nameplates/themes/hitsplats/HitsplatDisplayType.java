@@ -1,4 +1,4 @@
-package dev.thource.runelite.nameplates.themes.nameplates;
+package dev.thource.runelite.nameplates.themes.hitsplats;
 
 import dev.thource.runelite.nameplates.PluginHitsplat;
 import java.awt.Graphics2D;
