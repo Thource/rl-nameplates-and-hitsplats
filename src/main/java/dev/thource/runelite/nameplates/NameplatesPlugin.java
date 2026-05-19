@@ -327,7 +327,10 @@ public class NameplatesPlugin extends Plugin {
                 || ((NPCNameplate) nameplate).getPercentageHealthOverride() > 0)
             && ((NPCNameplate) nameplate).getDamageTaken() > 0) {
           ((NPCNameplate) nameplate).recalculatePercentageHealth(this);
-          getHpCacheEntryForActor(actor).setHp(nameplate.getMaxHealth());
+          var hpCacheEntry =  getHpCacheEntryForActor(actor);
+          if (hpCacheEntry != null) {
+            hpCacheEntry.setHp(nameplate.getMaxHealth());
+          }
         }
       }
 
