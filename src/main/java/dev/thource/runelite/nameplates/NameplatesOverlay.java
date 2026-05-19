@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -146,15 +145,15 @@ public class NameplatesOverlay extends Overlay {
       }
     }
 
-    actors.stream()
-        .map(actor -> plugin.getHitsplatsForActor(actor))
-        .filter(Objects::nonNull)
-        .flatMap(List::stream)
-        .sorted(Comparator.comparingLong(PluginHitsplat::getCreatedAt))
-        .collect(
-            Collectors.groupingBy(PluginHitsplat::getServerTick, TreeMap::new, Collectors.toList()))
-        .values()
-        .forEach(hitsplats -> renderHitsplats(graphics, hitsplats, point));
+    renderHitsplats(
+        graphics,
+        actors.stream()
+            .map(actor -> plugin.getHitsplatsForActor(actor))
+            .filter(Objects::nonNull)
+            .flatMap(List::stream)
+            .sorted(Comparator.comparingLong(PluginHitsplat::getCreatedAt))
+            .collect(Collectors.toList()),
+        point);
   }
 
   @Override
