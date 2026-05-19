@@ -17,7 +17,7 @@ public abstract class Text extends Element {
   @Override
   public void draw(Nameplate nameplate, Graphics2D graphics, int x, int y) {
     var text = getText(nameplate);
-    if (text.trim().isEmpty()) {
+    if (text.trim().isEmpty() || text.equals("null")) {
       return;
     }
 
