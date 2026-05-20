@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.ui.ColorScheme;
@@ -38,6 +39,7 @@ public class NameplatesPluginPanel extends PluginPanel {
       new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "set-active.png"));
 
   private final NameplatePanel nameplatePanel;
+  private final JPanel hitsplatPanel;
 
   public NameplatesPluginPanel(NameplatesPlugin plugin) {
     super(false);
@@ -57,6 +59,11 @@ public class NameplatesPluginPanel extends PluginPanel {
     bodyPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
 
     nameplatePanel = new NameplatePanel(plugin);
+    // todo: add hitsplats panel
+    hitsplatPanel = new JPanel();
+    hitsplatPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
+    hitsplatPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
+    hitsplatPanel.add(new JLabel("Coming soon!"));
 
     JButton wideButton1 = new JButton("Nameplates");
     wideButton1.setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -121,8 +128,8 @@ public class NameplatesPluginPanel extends PluginPanel {
             return;
           }
 
-          // todo: add hitsplats panel
           EnhancedSwingUtilities.fastRemoveAll(bodyPanel);
+          bodyPanel.add(hitsplatPanel);
           bodyPanel.revalidate();
           bodyPanel.repaint();
 
