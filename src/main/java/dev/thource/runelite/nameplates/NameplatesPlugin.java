@@ -684,7 +684,8 @@ public class NameplatesPlugin extends Plugin {
     return null;
   }
 
-  public NameplateDisplayMode getDisplayMode(Actor actor) {
+  private NameplateDisplayMode getDisplayMode(Nameplate nameplate) {
+    var actor = nameplate.getActor();
     if (actor.getHash() == -123L) {
       return NameplateDisplayMode.ALWAYS;
     }
@@ -692,6 +693,10 @@ public class NameplatesPlugin extends Plugin {
     if (actor instanceof Player) {
       if (actor == client.getLocalPlayer()) {
         return config.ownNameplateDisplayMode();
+      }
+
+      if (nameplate.getPartyData() != null) {
+        return config.partyNameplateDisplayMode();
       }
 
       return config.playerNameplateDisplayMode();
@@ -707,14 +712,36 @@ public class NameplatesPlugin extends Plugin {
         return config.alwaysDrawOwnName();
       }
 
+      if (nameplate.getPartyData() != null) {
+        return config.alwaysDrawPartyNames();
+      }
+
       return config.alwaysDrawPlayerNames();
     }
 
     return config.alwaysDrawNPCNames();
   }
 
+  public boolean shouldDrawBars(Nameplate nameplate) {
+    return getDisplayMode(nameplate).shouldDraw(client, nameplate);
+  }
+
   public boolean shouldDrawFor(Nameplate nameplate) {
-    return getDisplayMode(nameplate.getActor()).shouldDraw(client, nameplate);
+    var overheadIcon = NameplateHeadIcon.get(nameplate.getActor());
+    if (overheadIcon != null && overheadIcon != NameplateHeadIcon.NONE) {
+      return true;
+    }
+
+    var skullIcon = NameplateSkullIcon.get(nameplate.getActor());
+    if (skullIcon != null && skullIcon != NameplateSkullIcon.NONE) {
+      return true;
+    }
+
+    return nameplate.isNoLoot()
+        || nameplate.isHovered()
+        || nameplate.hasVengeance()
+        || nameplate.hasHintArrow()
+        || shouldDrawBars(nameplate);
   }
 
   public void saveNameplateThemes() {

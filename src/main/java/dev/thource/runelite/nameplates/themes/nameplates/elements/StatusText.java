@@ -189,7 +189,7 @@ public class StatusText extends Text {
   }
 
   private boolean shouldDraw(Nameplate nameplate) {
-    if (!nameplate.getPlugin().shouldDrawFor(nameplate)) {
+    if (!nameplate.getPlugin().shouldDrawBars(nameplate)) {
       return false;
     }
 

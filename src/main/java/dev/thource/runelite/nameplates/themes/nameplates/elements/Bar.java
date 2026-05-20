@@ -31,7 +31,7 @@ public abstract class Bar extends Element {
   @Builder.Default protected Color consumableNegativeColor = new Color(80, 30, 20);
 
   public boolean shouldDraw(Nameplate nameplate) {
-    return nameplate.getPlugin().shouldDrawFor(nameplate);
+    return nameplate.getPlugin().shouldDrawBars(nameplate);
   }
 
   protected abstract BarColorProvider getBarColorProvider();

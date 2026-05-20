@@ -73,11 +73,19 @@ public interface NameplatesConfig extends Config {
   }
 
   @ConfigItem(
+      keyName = "partyNameplateDisplayMode",
+      name = "Party member nameplate display behaviour",
+      description = "Defines when party member nameplates will be visible.")
+  default NameplateDisplayMode partyNameplateDisplayMode() {
+    return NameplateDisplayMode.IN_COMBAT;
+  }
+
+  @ConfigItem(
       keyName = "ownNameplateDisplayMode",
       name = "Own nameplate display behaviour",
       description = "Defines when local player nameplate will be visible.")
   default NameplateDisplayMode ownNameplateDisplayMode() {
-    return NameplateDisplayMode.ALWAYS;
+    return NameplateDisplayMode.IN_COMBAT;
   }
 
   @ConfigItem(
@@ -104,6 +112,15 @@ public interface NameplatesConfig extends Config {
       description =
           "Still draw own name when nameplate display behaviour is set to hide the nameplate.")
   default boolean alwaysDrawOwnName() {
+    return false;
+  }
+
+  @ConfigItem(
+      keyName = "alwaysDrawPartyNames",
+      name = "Always draw party member names",
+      description =
+          "Still draw party member names when nameplate display behaviour is set to hide the nameplate.")
+  default boolean alwaysDrawPartyNames() {
     return false;
   }
 
