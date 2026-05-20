@@ -240,7 +240,8 @@ public class NameplatesOverlay extends Overlay {
   }
 
   private void updateHoveredActor() {
-    MenuEntry[] menuEntries = client.getMenuEntries();
+    var menu = client.getMenu();
+    var menuEntries = menu.getMenuEntries();
     if (menuEntries.length == 0) {
       hoveredActor = null;
       return;
@@ -369,9 +370,10 @@ public class NameplatesOverlay extends Overlay {
   }
 
   private MenuEntry getHoveredMenuEntry(final MenuEntry[] menuEntries) {
-    final int menuX = client.getMenuX();
-    final int menuY = client.getMenuY();
-    final int menuWidth = client.getMenuWidth();
+    var menu = client.getMenu();
+    var menuX = menu.getMenuX();
+    var menuY = menu.getMenuY();
+    var menuWidth = menu.getMenuWidth();
     final Point mousePosition = client.getMouseCanvasPosition();
 
     int dy = mousePosition.getY() - menuY;
