@@ -21,8 +21,8 @@ import net.runelite.api.Client;
 import net.runelite.api.IndexedObjectSet;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
+import net.runelite.api.Player;
 import net.runelite.api.Point;
-import net.runelite.api.WorldView;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.Overlay;
@@ -45,12 +45,22 @@ public class NameplatesOverlay extends Overlay {
   }
 
   private Map<LocalPoint, List<Actor>> getLocalPointActorMap() {
-    HashMap<LocalPoint, List<Actor>> map = new HashMap<>();
+    var localPlayer = client.getLocalPlayer();
+    var worldView = localPlayer.getWorldView();
 
-    WorldView worldView = client.getLocalPlayer().getWorldView();
-
+    // TODO: try to sort so that nameplate stack matches the right click menu
+    var map = new HashMap<LocalPoint, List<Actor>>();
     Stream.of(worldView.players(), worldView.npcs())
         .flatMap(IndexedObjectSet::stream)
+        .sorted(
+            Comparator.comparingInt(
+                a -> {
+                  if (a instanceof Player && a == localPlayer) {
+                    return 0;
+                  }
+
+                  return 1;
+                }))
         .forEach(
             (actor) ->
                 map.computeIfAbsent(actor.getLocalLocation(), (k) -> new ArrayList<>()).add(actor));
