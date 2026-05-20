@@ -104,6 +104,8 @@ public class NameplatesOverlay extends Overlay {
       stackHeight += (int) textBounds.getHeight();
     }
 
+    // Initial drawing loop draws only non-stacking nameplates
+    var maxNonStackingHeight = 0;
     for (Actor actor : actors) {
       Nameplate nameplate = plugin.getNameplateForActor(actor);
       if (nameplate == null) {
@@ -115,14 +117,55 @@ public class NameplatesOverlay extends Overlay {
         continue;
       }
 
-      if (!plugin.getAlwaysDrawName(nameplate.getActor()) && !plugin.shouldDrawFor(nameplate)) {
+      if (!plugin.getAlwaysDrawName(nameplate) && !plugin.shouldDrawFor(nameplate)) {
         continue;
       }
 
-      stackHeight +=
-          renderNameplate(graphics, nameplate, new Point(point.getX(), point.getY() - stackHeight))
-              + 4;
+      var theme = getActiveNameplateThemeForNameplate(nameplate);
+      if (theme.isStacking()) {
+        continue;
+      }
+
       nameplate.getHpAnimationData().progressBy(deltaMs);
+
+      var plateHeight =
+          theme.drawNameplate(
+              graphics, nameplate, new Point(point.getX(), point.getY() - stackHeight));
+      maxNonStackingHeight = Math.max(maxNonStackingHeight, plateHeight);
+    }
+
+    if (maxNonStackingHeight > 0) {
+      stackHeight += maxNonStackingHeight + 4;
+    }
+
+    // Second drawing loop draws only stacking nameplates
+    for (Actor actor : actors) {
+      Nameplate nameplate = plugin.getNameplateForActor(actor);
+      if (nameplate == null) {
+        continue;
+      }
+
+      var point = actor.getCanvasTextLocation(graphics, " ", firstActorHeight + 15);
+      if (point == null) {
+        continue;
+      }
+
+      if (!plugin.getAlwaysDrawName(nameplate) && !plugin.shouldDrawFor(nameplate)) {
+        continue;
+      }
+
+      var theme = getActiveNameplateThemeForNameplate(nameplate);
+      if (!theme.isStacking()) {
+        continue;
+      }
+
+      nameplate.getHpAnimationData().progressBy(deltaMs);
+
+      var plateHeight =
+          theme.drawNameplate(
+              graphics, nameplate, new Point(point.getX(), point.getY() - stackHeight));
+
+      stackHeight += plateHeight + 4;
     }
   }
 

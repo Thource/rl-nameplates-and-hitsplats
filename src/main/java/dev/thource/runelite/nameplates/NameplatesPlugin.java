@@ -688,7 +688,8 @@ public class NameplatesPlugin extends Plugin {
     return config.npcNameplateDisplayMode();
   }
 
-  public boolean getAlwaysDrawName(Actor actor) {
+  public boolean getAlwaysDrawName(Nameplate nameplate) {
+    var actor = nameplate.getActor();
     if (actor instanceof Player) {
       if (actor == client.getLocalPlayer()) {
         return config.alwaysDrawOwnName();
