@@ -133,12 +133,12 @@ public class NameplatesPluginPanel extends PluginPanel {
 
     JButton supportButton = new JButton("");
     supportButton.setIcon(
-        new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "kofi.png")));
+        new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "support.png")));
     supportButton.setBackground(ColorScheme.DARKER_GRAY_COLOR);
     supportButton.setForeground(Color.WHITE);
     supportButton.setPreferredSize(new Dimension(30, 24));
     supportButton.setBorder(new EmptyBorder(6, 6, 6, 6));
-    supportButton.addActionListener(e -> LinkBrowser.browse("https://ko-fi.com/thource"));
+    supportButton.addActionListener(e -> LinkBrowser.browse("https://linktr.ee/thource"));
     supportButton.setToolTipText("Buy me a coffee? :)");
     supportButton.addMouseListener(
         new MouseAdapter() {
