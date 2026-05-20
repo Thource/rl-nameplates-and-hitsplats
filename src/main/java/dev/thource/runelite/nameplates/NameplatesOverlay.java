@@ -323,24 +323,29 @@ public class NameplatesOverlay extends Overlay {
           modifiedHitsplats.stream()
               .collect(
                   Collectors.groupingBy(
-                      PluginHitsplat::getHitsplatType,
-                      Collectors.summingInt(PluginHitsplat::getAmount)))
+                      PluginHitsplat::getServerTick,
+                      Collectors.groupingBy(
+                          PluginHitsplat::getHitsplatType,
+                          Collectors.summingInt(PluginHitsplat::getAmount))))
               .entrySet()
               .stream()
-              .map(
-                  entry -> {
-                    var splat =
-                        new PluginHitsplat(
-                            client,
-                            entry.getKey(),
-                            entry.getValue(),
-                            firstSplat.getServerTick(),
-                            tickIndex.getAndIncrement());
+              .flatMap(
+                  tickEntry ->
+                      tickEntry.getValue().entrySet().stream()
+                          .map(
+                              entry -> {
+                                var splat =
+                                    new PluginHitsplat(
+                                        client,
+                                        entry.getKey(),
+                                        entry.getValue(),
+                                        firstSplat.getServerTick(),
+                                        tickIndex.getAndIncrement());
 
-                    splat.setCreatedAt(firstSplat.getCreatedAt());
+                                splat.setCreatedAt(firstSplat.getCreatedAt());
 
-                    return splat;
-                  })
+                                return splat;
+                              }))
               .sorted(Comparator.comparingLong(PluginHitsplat::getCreatedAt))
               .collect(Collectors.toList());
     }
