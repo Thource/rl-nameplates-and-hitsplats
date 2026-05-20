@@ -4,26 +4,14 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-/** ImprovedContextMenuConfig manages the config for the plugin. */
+/** NameplatesConfig manages the config for the plugin. */
 @SuppressWarnings("SameReturnValue")
 @ConfigGroup("nameplates")
 public interface NameplatesConfig extends Config {
 
   // TODO list
   // =========
-  // add options for when nameplates should show up
-  // add another theme (possibly a minimal one)
-  // add combat level to name only draws
-
-  // RL dependency list
-  // NPC.getOverheadIcon() - required so that overheads can be drawn on NPC nameplates
-  // Player.getSkullIcon() for non-local players (including blue Forinthry Surge buff skull)
-  // Overriding of overhead icons and skull icons
-
-  // draw nameplates for players
-  // draw nameplates for npcs
   // draw nameplates on hover
-  // draw nameplates for npcs in combat
   // draw nameplates for npcs targetting you
   // draw nameplates for npcs that recently targetted you
   // nameplate draw range (excluding hover)
@@ -33,11 +21,38 @@ public interface NameplatesConfig extends Config {
   String CONFIG_GROUP = "nameplates";
 
   @ConfigItem(
-      keyName = "activeNameplateThemeId",
-      name = "Active nameplate theme ID",
-      description = "The ID of the active nameplate theme.",
+      keyName = "activeNameplateThemeForSelfId",
+      name = "Active nameplate theme for self ID",
+      description = "The ID of the active nameplate theme for self.",
       hidden = true)
-  default String activeNameplateThemeId() {
+  default String activeNameplateThemeForSelfId() {
+    return "flatDarkTheme";
+  }
+
+  @ConfigItem(
+      keyName = "activeNameplateThemeForPartyId",
+      name = "Active nameplate theme for party ID",
+      description = "The ID of the active nameplate theme for party members.",
+      hidden = true)
+  default String activeNameplateThemeForPartyId() {
+    return "flatDarkTheme";
+  }
+
+  @ConfigItem(
+      keyName = "activeNameplateThemeForPlayersId",
+      name = "Active nameplate theme for players ID",
+      description = "The ID of the active nameplate theme for players.",
+      hidden = true)
+  default String activeNameplateThemeForPlayersId() {
+    return "flatDarkTheme";
+  }
+
+  @ConfigItem(
+      keyName = "activeNameplateThemeForNPCsId",
+      name = "Active nameplate theme for NPCs ID",
+      description = "The ID of the active nameplate theme for NPCs.",
+      hidden = true)
+  default String activeNameplateThemeForNPCsId() {
     return "flatDarkTheme";
   }
 

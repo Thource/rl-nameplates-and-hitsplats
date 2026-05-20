@@ -89,8 +89,9 @@ public class NPCNameplate extends Nameplate {
         }
       }
 
-      // If the NPC doesn't have an attack option, it's likely not a combat NPC and we shouldn't show a health bar for
-      // it. By setting percentageHealth to false, maxHealth will be set to 0, hiding the health bar.
+      // If the NPC doesn't have an attack option, it's likely not a combat NPC and we shouldn't
+      // show a health bar for it. By setting percentageHealth to false, maxHealth will be set to 0,
+      // hiding the health bar.
       if (!isAttackable) {
         this.percentageHealth = false;
       }

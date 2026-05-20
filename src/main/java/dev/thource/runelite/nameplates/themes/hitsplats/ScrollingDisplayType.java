@@ -22,7 +22,12 @@ public class ScrollingDisplayType extends HitsplatDisplayType {
 
   @Override
   public void drawHitsplats(
-      Graphics2D graphics, List<PluginHitsplat> hitsplats, Point point, int width, int height, Map<Integer, HitsplatOptions> hitsplatOptionsMap) {
+      Graphics2D graphics,
+      List<PluginHitsplat> hitsplats,
+      Point point,
+      int width,
+      int height,
+      Map<Integer, HitsplatOptions> hitsplatOptionsMap) {
 
     var x = point.getX();
     var y = point.getY();

@@ -8,5 +8,10 @@ import net.runelite.api.Point;
 
 public abstract class HitsplatDisplayType {
   public abstract void drawHitsplats(
-      Graphics2D graphics, List<PluginHitsplat> hitsplats, Point point, int width, int height, Map<Integer, HitsplatOptions> hitsplatOptionsMap);
+      Graphics2D graphics,
+      List<PluginHitsplat> hitsplats,
+      Point point,
+      int width,
+      int height,
+      Map<Integer, HitsplatOptions> hitsplatOptionsMap);
 }

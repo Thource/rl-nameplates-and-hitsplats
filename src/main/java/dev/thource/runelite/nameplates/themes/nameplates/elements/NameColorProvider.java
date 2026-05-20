@@ -2,7 +2,6 @@ package dev.thource.runelite.nameplates.themes.nameplates.elements;
 
 import dev.thource.runelite.nameplates.Nameplate;
 import dev.thource.runelite.nameplates.NameplatesPlugin;
-import dev.thource.runelite.nameplates.PlayerNameplate;
 import dev.thource.runelite.nameplates.panel.components.CheckboxInput;
 import dev.thource.runelite.nameplates.panel.components.ColorInput;
 import dev.thource.runelite.nameplates.panel.components.LabelledInput;

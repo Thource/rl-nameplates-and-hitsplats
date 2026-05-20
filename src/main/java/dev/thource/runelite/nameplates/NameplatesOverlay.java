@@ -346,9 +346,21 @@ public class NameplatesOverlay extends Overlay {
     plugin.getActiveHitsplatTheme().drawHitsplats(graphics, modifiedHitsplats, point);
   }
 
-  // returns rendered nameplate height
-  public int renderNameplate(Graphics2D graphics, Nameplate nameplate, Point point) {
-    return plugin.getActiveNameplateTheme().drawNameplate(graphics, nameplate, point);
+  public NameplateTheme getActiveNameplateThemeForNameplate(Nameplate nameplate) {
+    var actor = nameplate.getActor();
+    if (actor instanceof Player) {
+      if (nameplate.getActor() == client.getLocalPlayer()) {
+        return plugin.getActiveNameplateThemeForSelf();
+      }
+
+      if (nameplate.getPartyData() != null) {
+        return plugin.getActiveNameplateThemeForParty();
+      }
+
+      return plugin.getActiveNameplateThemeForPlayers();
+    }
+
+    return plugin.getActiveNameplateThemeForNPCs();
   }
 
   public void renderNameplate(

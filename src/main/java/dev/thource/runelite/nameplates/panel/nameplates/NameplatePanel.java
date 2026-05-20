@@ -69,7 +69,7 @@ public class NameplatePanel extends JPanel {
     this.plugin = plugin;
 
     var themes = plugin.getNameplateThemes();
-    previewTheme = plugin.getActiveNameplateTheme();
+    previewTheme = plugin.getActiveNameplateThemeForSelf();
 
     setBorder(new EmptyBorder(0, 0, 0, 0));
     setBackground(ColorScheme.DARK_GRAY_COLOR);

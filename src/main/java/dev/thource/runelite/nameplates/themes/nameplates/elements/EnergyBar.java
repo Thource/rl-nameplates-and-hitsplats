@@ -1,7 +1,6 @@
 package dev.thource.runelite.nameplates.themes.nameplates.elements;
 
 import dev.thource.runelite.nameplates.Nameplate;
-import java.awt.Graphics2D;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

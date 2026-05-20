@@ -3,10 +3,10 @@ package dev.thource.runelite.nameplates;
 import com.google.gson.Gson;
 import com.google.inject.Provides;
 import dev.thource.runelite.nameplates.panel.NameplatesPluginPanel;
+import dev.thource.runelite.nameplates.themes.hitsplats.HitsplatTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.CustomNameplateTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkFullInfoTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkTheme;
-import dev.thource.runelite.nameplates.themes.hitsplats.HitsplatTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.NameplateTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.OSRSTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Icon;
@@ -117,7 +117,10 @@ public class NameplatesPlugin extends Plugin {
   @Getter private Instant nextPoisonTick;
 
   @Getter private final Map<String, NameplateTheme> nameplateThemes = new HashMap<>();
-  @Getter private NameplateTheme activeNameplateTheme;
+  @Getter private NameplateTheme activeNameplateThemeForSelf;
+  @Getter private NameplateTheme activeNameplateThemeForParty;
+  @Getter private NameplateTheme activeNameplateThemeForPlayers;
+  @Getter private NameplateTheme activeNameplateThemeForNPCs;
   @Getter private HitsplatTheme activeHitsplatTheme;
 
   private final RenderCallback renderCallback =
@@ -216,9 +219,18 @@ public class NameplatesPlugin extends Plugin {
 
     nameplateThemes.values().forEach(theme -> theme.setPlugin(this));
 
-    activeNameplateTheme =
+    activeNameplateThemeForSelf =
         nameplateThemes.getOrDefault(
-            config.activeNameplateThemeId(), nameplateThemes.get(FlatDarkTheme.ID));
+            config.activeNameplateThemeForSelfId(), nameplateThemes.get(FlatDarkTheme.ID));
+    activeNameplateThemeForParty =
+        nameplateThemes.getOrDefault(
+            config.activeNameplateThemeForPartyId(), nameplateThemes.get(FlatDarkTheme.ID));
+    activeNameplateThemeForPlayers =
+        nameplateThemes.getOrDefault(
+            config.activeNameplateThemeForPlayersId(), nameplateThemes.get(FlatDarkTheme.ID));
+    activeNameplateThemeForNPCs =
+        nameplateThemes.getOrDefault(
+            config.activeNameplateThemeForNPCsId(), nameplateThemes.get(FlatDarkTheme.ID));
 
     activeHitsplatTheme = new HitsplatTheme("id") {};
     activeHitsplatTheme.setPlugin(this);
@@ -327,7 +339,7 @@ public class NameplatesPlugin extends Plugin {
                 || ((NPCNameplate) nameplate).getPercentageHealthOverride() > 0)
             && ((NPCNameplate) nameplate).getDamageTaken() > 0) {
           ((NPCNameplate) nameplate).recalculatePercentageHealth(this);
-          var hpCacheEntry =  getHpCacheEntryForActor(actor);
+          var hpCacheEntry = getHpCacheEntryForActor(actor);
           if (hpCacheEntry != null) {
             hpCacheEntry.setHp(nameplate.getMaxHealth());
           }
@@ -719,8 +731,17 @@ public class NameplatesPlugin extends Plugin {
   public void addNameplateTheme(NameplateTheme theme) {
     nameplateThemes.put(theme.getId(), theme);
 
-    if (activeNameplateTheme.getId().equals(theme.getId())) {
-      activeNameplateTheme = theme;
+    if (activeNameplateThemeForSelf.getId().equals(theme.getId())) {
+      activeNameplateThemeForSelf = theme;
+    }
+    if (activeNameplateThemeForParty.getId().equals(theme.getId())) {
+      activeNameplateThemeForParty = theme;
+    }
+    if (activeNameplateThemeForPlayers.getId().equals(theme.getId())) {
+      activeNameplateThemeForPlayers = theme;
+    }
+    if (activeNameplateThemeForNPCs.getId().equals(theme.getId())) {
+      activeNameplateThemeForNPCs = theme;
     }
   }
 
@@ -728,10 +749,28 @@ public class NameplatesPlugin extends Plugin {
     configManager.unsetConfiguration(NameplatesConfig.CONFIG_GROUP, "themes.nameplates." + id);
   }
 
-  public void setActiveNameplateTheme(NameplateTheme theme) {
+  public void setActiveNameplateThemeForSelf(NameplateTheme theme) {
     configManager.setConfiguration(
-        NameplatesConfig.CONFIG_GROUP, "activeNameplateThemeId", theme.getId());
-    activeNameplateTheme = theme;
+        NameplatesConfig.CONFIG_GROUP, "activeNameplateThemeForSelfId", theme.getId());
+    activeNameplateThemeForSelf = theme;
+  }
+
+  public void setActiveNameplateThemeForParty(NameplateTheme theme) {
+    configManager.setConfiguration(
+        NameplatesConfig.CONFIG_GROUP, "activeNameplateThemeForPartyId", theme.getId());
+    activeNameplateThemeForParty = theme;
+  }
+
+  public void setActiveNameplateThemeForPlayers(NameplateTheme theme) {
+    configManager.setConfiguration(
+        NameplatesConfig.CONFIG_GROUP, "activeNameplateThemeForPlayersId", theme.getId());
+    activeNameplateThemeForPlayers = theme;
+  }
+
+  public void setActiveNameplateThemeForNPCs(NameplateTheme theme) {
+    configManager.setConfiguration(
+        NameplatesConfig.CONFIG_GROUP, "activeNameplateThemeForNPCsId", theme.getId());
+    activeNameplateThemeForNPCs = theme;
   }
 
   @Provides

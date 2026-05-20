@@ -40,8 +40,8 @@ public enum HitsplatDefaultSprite {
   DAMAGE_MAX_ME_POISE(HitsplatID.DAMAGE_MAX_ME_POISE, SpriteID.Hitmark._31),
   CORRUPTION(HitsplatID.CORRUPTION, SpriteID.Hitmark._17),
   PRAYER_DRAIN(HitsplatID.PRAYER_DRAIN, SpriteID.Hitmark._32),
-//  PRAYER_DRAIN_OTHER(HitsplatID.PRAYER_DRAIN_OTHER, SpriteID.Hitmark._33),
-//  PRAYER_DRAIN_MAX(HitsplatID.PRAYER_DRAIN_MAX, SpriteID.Hitmark._34),
+  //  PRAYER_DRAIN_OTHER(HitsplatID.PRAYER_DRAIN_OTHER, SpriteID.Hitmark._33),
+  //  PRAYER_DRAIN_MAX(HitsplatID.PRAYER_DRAIN_MAX, SpriteID.Hitmark._34),
   BLEED(HitsplatID.BLEED, SpriteID.Hitmark._35),
   SANITY_DRAIN(HitsplatID.SANITY_DRAIN, SpriteID.Hitmark._38),
   SANITY_RESTORE(HitsplatID.SANITY_RESTORE, SpriteID.Hitmark._39),
@@ -59,7 +59,6 @@ public enum HitsplatDefaultSprite {
   // _45 = sailing me
   // _46 = sailing other
   // _47 = sailing max
-
 
   private final int hitsplatType;
   private final int spriteId;
