@@ -20,16 +20,16 @@ public class FlatDarkFullInfoTheme extends NameplateTheme {
     super(ID);
 
     name = "Flat Dark Full Info";
-    width = 120;
-    height = 12;
-    order = -99;
+    width = 60;
+    height = 13;
+    order = -100;
     stacking = true;
 
     elements.add(
         NameText.builder()
             .name("Name without level")
             .displayMode(NameTextDisplayMode.WITHOUT_COMBAT_LEVEL)
-            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 60))
+            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 30))
             .build());
     elements.add(
         NameText.builder()
@@ -39,13 +39,13 @@ public class FlatDarkFullInfoTheme extends NameplateTheme {
     elements.add(
         CombatLevelText.builder()
             .name("Combat level")
-            .xPositionProvider(new PositionProvider(OffsetAnchor.END, 120))
+            .xPositionProvider(new PositionProvider(OffsetAnchor.END, 60))
             .build());
 
     elements.add(
         IconContainer.builder()
             .name("Overhead vengeance")
-            .xPositionProvider(new PositionProvider(OffsetAnchor.START, 124))
+            .xPositionProvider(new PositionProvider(OffsetAnchor.START, 64))
             .iconTypes(List.of(IconType.OVERHEAD, IconType.VENGEANCE))
             .build());
     elements.add(
@@ -59,51 +59,59 @@ public class FlatDarkFullInfoTheme extends NameplateTheme {
     elements.add(
         HealthBar.builder()
             .name("Health bar")
-            .yPositionProvider(new PositionProvider(OffsetAnchor.START, 12))
+            .width(60)
+            .yPositionProvider(new PositionProvider(OffsetAnchor.START, 13))
             .build());
     elements.add(
         StatusText.builder()
             .name("Health text")
-            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 60))
-            .yPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 19))
+            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 30))
+            .yPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 20))
+            .showMax(false)
             .build());
 
     elements.add(
         PrayerBar.builder()
             .name("Prayer bar")
-            .yPositionProvider(new PositionProvider(OffsetAnchor.START, 24))
+            .width(60)
+            .yPositionProvider(new PositionProvider(OffsetAnchor.START, 25))
             .build());
     elements.add(
         StatusText.builder()
             .name("Prayer text")
-            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 60))
-            .yPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 31))
+            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 30))
+            .yPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 32))
+            .showMax(false)
             .statusType(StatusType.PRAYER)
             .build());
 
     elements.add(
         EnergyBar.builder()
             .name("Energy bar")
-            .yPositionProvider(new PositionProvider(OffsetAnchor.START, 36))
+            .width(60)
+            .yPositionProvider(new PositionProvider(OffsetAnchor.START, 37))
             .build());
     elements.add(
         StatusText.builder()
             .name("Energy text")
-            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 60))
-            .yPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 43))
+            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 30))
+            .yPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 44))
+            .showMax(false)
             .statusType(StatusType.ENERGY)
             .build());
 
     elements.add(
         SpecialBar.builder()
             .name("Special bar")
-            .yPositionProvider(new PositionProvider(OffsetAnchor.START, 48))
+            .width(60)
+            .yPositionProvider(new PositionProvider(OffsetAnchor.START, 49))
             .build());
     elements.add(
         StatusText.builder()
             .name("Special text")
-            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 60))
-            .yPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 55))
+            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 30))
+            .yPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 56))
+            .showMax(false)
             .statusType(StatusType.SPECIAL)
             .build());
   }

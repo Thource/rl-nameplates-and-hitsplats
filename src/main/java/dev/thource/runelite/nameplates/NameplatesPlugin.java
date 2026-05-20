@@ -5,6 +5,7 @@ import com.google.inject.Provides;
 import dev.thource.runelite.nameplates.panel.NameplatesPluginPanel;
 import dev.thource.runelite.nameplates.themes.hitsplats.HitsplatTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.CustomNameplateTheme;
+import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkExtendedTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkFullInfoTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.NameplateTheme;
@@ -195,6 +196,7 @@ public class NameplatesPlugin extends Plugin {
     // add static themes
     nameplateThemes.put(FlatDarkTheme.ID, new FlatDarkTheme());
     nameplateThemes.put(FlatDarkFullInfoTheme.ID, new FlatDarkFullInfoTheme());
+    nameplateThemes.put(FlatDarkExtendedTheme.ID, new FlatDarkExtendedTheme());
     nameplateThemes.put(OSRSTheme.ID, new OSRSTheme());
 
     // load user-defined themes

@@ -11,23 +11,23 @@ import dev.thource.runelite.nameplates.themes.nameplates.elements.StatusText;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.StatusType;
 import java.util.List;
 
-public class FlatDarkTheme extends NameplateTheme {
-  public static final String ID = "flatDarkTheme";
+public class FlatDarkExtendedTheme extends NameplateTheme {
+  public static final String ID = "flatDarkExtendedTheme";
 
-  public FlatDarkTheme() {
+  public FlatDarkExtendedTheme() {
     super(ID);
 
-    name = "Flat Dark";
-    width = 60;
+    name = "Flat Dark Extended";
+    width = 80;
     height = 13;
-    order = -101;
+    order = -99;
     stacking = true;
 
     elements.add(
         NameText.builder()
             .name("Name without level")
             .displayMode(NameTextDisplayMode.WITHOUT_COMBAT_LEVEL)
-            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 30))
+            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 40))
             .build());
     elements.add(
         NameText.builder()
@@ -37,13 +37,13 @@ public class FlatDarkTheme extends NameplateTheme {
     elements.add(
         CombatLevelText.builder()
             .name("Combat level")
-            .xPositionProvider(new PositionProvider(OffsetAnchor.END, 60))
+            .xPositionProvider(new PositionProvider(OffsetAnchor.END, 80))
             .build());
 
     elements.add(
         IconContainer.builder()
             .name("Overhead vengeance")
-            .xPositionProvider(new PositionProvider(OffsetAnchor.START, 64))
+            .xPositionProvider(new PositionProvider(OffsetAnchor.START, 84))
             .iconTypes(List.of(IconType.OVERHEAD, IconType.VENGEANCE))
             .build());
     elements.add(
@@ -57,29 +57,27 @@ public class FlatDarkTheme extends NameplateTheme {
     elements.add(
         HealthBar.builder()
             .name("Health bar")
-            .width(60)
+            .width(80)
             .yPositionProvider(new PositionProvider(OffsetAnchor.START, 13))
             .build());
     elements.add(
         StatusText.builder()
             .name("Health text")
-            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 30))
+            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 40))
             .yPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 20))
-            .showMax(false)
             .build());
 
     elements.add(
         PrayerBar.builder()
             .name("Prayer bar")
-            .width(60)
+            .width(80)
             .yPositionProvider(new PositionProvider(OffsetAnchor.START, 25))
             .build());
     elements.add(
         StatusText.builder()
             .name("Prayer text")
-            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 30))
+            .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 40))
             .yPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 32))
-            .showMax(false)
             .statusType(StatusType.PRAYER)
             .build());
   }
