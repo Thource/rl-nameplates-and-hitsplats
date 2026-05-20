@@ -293,6 +293,7 @@ public class NameplatesOverlay extends Overlay {
       case PLAYER_SEVENTH_OPTION:
       case PLAYER_EIGHTH_OPTION:
       case RUNELITE_PLAYER:
+      case WALK:
         hoveredActor = entry.getActor();
         return;
       default:
