@@ -21,6 +21,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 import net.runelite.api.coords.Direction;
 
@@ -29,23 +30,46 @@ public class IconContainer extends Element {
   @Builder.Default protected int iconSize = 26;
   @Builder.Default protected int padding = 4;
   @Builder.Default protected boolean isVertical = false;
+  @Builder.Default protected boolean addHeightWhenDrawn = false;
+  @Getter @Builder.Default protected int heightAddedWhenDrawn = 0;
   @Builder.Default protected List<IconType> iconTypes = new ArrayList<>();
+
+  private IconType[] iconsToDraw(Nameplate nameplate) {
+    return iconTypes.stream()
+        .filter(iconType -> Icon.shouldDraw(nameplate, iconType))
+        .toArray(IconType[]::new);
+  }
+
+  public int getHeight(Nameplate nameplate) {
+    if (!isVertical) {
+      return iconSize;
+    }
+
+    var iconsToDraw = iconsToDraw(nameplate);
+    return iconSize * iconsToDraw.length + (iconsToDraw.length - 1) * padding;
+  }
+
+  public int getWidth(Nameplate nameplate) {
+    if (isVertical) {
+      return iconSize;
+    }
+
+    var iconsToDraw = iconsToDraw(nameplate);
+    return iconSize * iconsToDraw.length + (iconsToDraw.length - 1) * padding;
+  }
+
+  public boolean shouldDraw(Nameplate nameplate) {
+    return iconsToDraw(nameplate).length > 0;
+  }
 
   @Override
   public void draw(Nameplate nameplate, Graphics2D graphics, int x, int y) {
-    var iconsToDraw =
-        iconTypes.stream()
-            .filter(iconType -> Icon.shouldDraw(nameplate, iconType))
-            .toArray(IconType[]::new);
-    var totalSize = iconSize * iconsToDraw.length + (iconsToDraw.length - 1) * padding;
-
-    if (isVertical) {
-      x += xPositionProvider.get(iconSize);
-      y += yPositionProvider.get(totalSize);
-    } else {
-      x += xPositionProvider.get(totalSize);
-      y += yPositionProvider.get(iconSize);
+    if (!shouldDraw(nameplate)) {
+      return;
     }
+
+    x += xPositionProvider.get(getWidth(nameplate));
+    y += yPositionProvider.get(getHeight(nameplate));
 
     var direction = Direction.SOUTH;
     if (isVertical) {
@@ -60,6 +84,7 @@ public class IconContainer extends Element {
       }
     }
 
+    var iconsToDraw = iconsToDraw(nameplate);
     for (IconType type : iconsToDraw) {
       Icon.draw(nameplate, graphics, x, y, iconSize, type, direction);
 
@@ -76,6 +101,18 @@ public class IconContainer extends Element {
     var editInputs = super.getEditInputs(plugin);
 
     editInputs.add(new CheckboxInput("Vertical", isVertical, value -> isVertical = value));
+    editInputs.add(
+        new CheckboxInput(
+            "Add height above nameplate in stack when drawn",
+            addHeightWhenDrawn,
+            value -> addHeightWhenDrawn = value));
+    editInputs.add(
+        new IntInput(
+            "Extra height added when drawn",
+            heightAddedWhenDrawn,
+            0,
+            999,
+            value -> heightAddedWhenDrawn = value));
     editInputs.add(new IntInput("Icon size", iconSize, 1, 999, value -> iconSize = value));
     editInputs.add(new IntInput("Icon spacing", padding, 0, 999, value -> padding = value));
     var iconTypesSelector = new ListSelector<>("Icons", null, iconTypes);

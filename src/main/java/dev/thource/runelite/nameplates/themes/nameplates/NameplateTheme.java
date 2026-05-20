@@ -7,6 +7,7 @@ import dev.thource.runelite.nameplates.NameplatesPlugin;
 import dev.thource.runelite.nameplates.panel.Nameable;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Bar;
 import dev.thource.runelite.nameplates.themes.nameplates.elements.Element;
+import dev.thource.runelite.nameplates.themes.nameplates.elements.IconContainer;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,8 +55,15 @@ public abstract class NameplateTheme implements Nameable {
       element.draw(nameplate, graphics, x - width / 2, y - totalHeight);
     }
 
-    if (!stacking) {
-      return 0;
+    for (Element element : elements) {
+      if (element instanceof IconContainer) {
+        var iconContainer = (IconContainer) element;
+
+        if (iconContainer.shouldDraw(nameplate)) {
+          totalHeight +=
+              iconContainer.getHeight(nameplate) + iconContainer.getHeightAddedWhenDrawn();
+        }
+      }
     }
 
     return totalHeight;

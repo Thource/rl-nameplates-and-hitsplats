@@ -17,12 +17,15 @@ public class OSRSTheme extends NameplateTheme {
     width = 30;
     height = 4;
     order = -98;
+    stacking = false;
 
     elements.add(
         IconContainer.builder()
             .name("Overhead skull hint")
             .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 15))
             .yPositionProvider(new PositionProvider(OffsetAnchor.END, -4))
+            .addHeightWhenDrawn(true)
+            .heightAddedWhenDrawn(4)
             .isVertical(true)
             .iconTypes(List.of(IconType.HINT_ARROW, IconType.SKULL, IconType.OVERHEAD))
             .build());
