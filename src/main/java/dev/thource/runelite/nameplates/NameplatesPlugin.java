@@ -169,7 +169,7 @@ public class NameplatesPlugin extends Plugin {
           });
     }
 
-    clientThread.invoke(
+    clientThread.invokeLater(
         () -> {
           for (NameplateHeadIcon icon : NameplateHeadIcon.values()) {
             icon.loadImage(spriteManager);
