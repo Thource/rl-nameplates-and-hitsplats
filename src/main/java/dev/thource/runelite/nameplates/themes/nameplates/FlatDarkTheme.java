@@ -26,12 +26,14 @@ public class FlatDarkTheme extends NameplateTheme {
     elements.add(
         NameText.builder()
             .name("Name without level")
+            .maxWidth(60)
             .displayMode(NameTextDisplayMode.WITHOUT_COMBAT_LEVEL)
             .xPositionProvider(new PositionProvider(OffsetAnchor.MIDDLE, 30))
             .build());
     elements.add(
         NameText.builder()
             .name("Name with level")
+            .maxWidth(40)
             .displayMode(NameTextDisplayMode.WITH_COMBAT_LEVEL)
             .build());
     elements.add(
