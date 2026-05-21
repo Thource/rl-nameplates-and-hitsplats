@@ -39,6 +39,7 @@ public class PluginHitsplat {
   }
 
   private final Client client;
+  private final int actorId;
   private final int hitsplatType;
   private final int amount;
   private final int gameCycle;

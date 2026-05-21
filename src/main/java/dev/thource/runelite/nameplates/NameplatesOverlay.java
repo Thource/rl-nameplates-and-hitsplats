@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -169,44 +168,8 @@ public class NameplatesOverlay extends Overlay {
     }
   }
 
-  private void renderHitsplats(Graphics2D graphics, List<Actor> actors) {
-    var firstActor = actors.get(0);
-    if (firstActor == null) {
-      return;
-    }
-
-    var point = firstActor.getCanvasTextLocation(graphics, " ", firstActor.getLogicalHeight() / 2);
-    if (point == null) {
-      return;
-    }
-
-    var hitsplatLifetime = plugin.getConfig().hitsplatLifetime();
-    var gameCycle = client.getGameCycle();
-    for (Actor actor : actors) {
-      var hitsplats = plugin.getHitsplatsForActor(actor);
-      if (hitsplats == null) {
-        continue;
-      }
-
-      var hitsplatIterator = hitsplats.iterator();
-      while (hitsplatIterator.hasNext()) {
-        var hitsplat = hitsplatIterator.next();
-        if (hitsplat.getGameCycle() + (hitsplatLifetime / 20) >= gameCycle) {
-          break;
-        }
-
-        hitsplatIterator.remove();
-      }
-    }
-
-    renderHitsplats(
-        graphics,
-        actors.stream()
-            .map(actor -> plugin.getHitsplatsForActor(actor))
-            .filter(Objects::nonNull)
-            .flatMap(List::stream)
-            .collect(Collectors.toList()),
-        point);
+  private void renderHitsplats(Graphics2D graphics, Actor actor) {
+    plugin.getActiveHitsplatTheme().drawHitsplats(graphics, actor);
   }
 
   @Override
@@ -231,7 +194,20 @@ public class NameplatesOverlay extends Overlay {
     for (var entry : actorEntrySets) {
       var actors = entry.getValue();
       renderOverheadStack(graphics, actors, deltaMs);
-      renderHitsplats(graphics, actors);
+
+      actors.stream()
+          .sorted(
+              Comparator.comparingInt(
+                      (Actor actor) -> {
+                        // Draw own hitsplats last (on top)
+                        if (actor instanceof Player && actor == client.getLocalPlayer()) {
+                          return Integer.MIN_VALUE;
+                        }
+
+                        return actor.getLocalLocation().distanceTo(cameraPoint);
+                      })
+                  .reversed())
+          .forEachOrdered(actor -> renderHitsplats(graphics, actor));
     }
 
     lastRender = System.currentTimeMillis();
@@ -301,60 +277,6 @@ public class NameplatesOverlay extends Overlay {
     }
 
     hoveredActor = null;
-  }
-
-  public void renderHitsplats(Graphics2D graphics, List<PluginHitsplat> hitsplats, Point point) {
-    if (hitsplats.isEmpty()) {
-      return;
-    }
-
-    var config = plugin.getConfig();
-    var hideZeroHitsplats = config.hideZeroHitsplats();
-    var modifiedHitsplats =
-        hitsplats.stream()
-            .filter(h -> h.getAmount() > 0 || !hideZeroHitsplats)
-            .collect(Collectors.toList());
-    var combineHitsplats = config.combineHitsplats();
-
-    if (combineHitsplats) {
-      modifiedHitsplats =
-          modifiedHitsplats.stream()
-              .collect(
-                  Collectors.groupingBy(
-                      PluginHitsplat::getGameCycle,
-                      Collectors.groupingBy(
-                          PluginHitsplat::getHitsplatType,
-                          Collectors.summingInt(PluginHitsplat::getAmount))))
-              .entrySet()
-              .stream()
-              .flatMap(
-                  tickEntry -> {
-                    var gameCycle = tickEntry.getKey();
-                    var tickIndex = new AtomicInteger();
-                    return tickEntry.getValue().entrySet().stream()
-                        .map(
-                            entry ->
-                                new PluginHitsplat(
-                                    client,
-                                    entry.getKey(),
-                                    entry.getValue(),
-                                    gameCycle,
-                                    tickIndex.getAndIncrement()));
-                  })
-              .sorted(
-                  Comparator.comparingInt(PluginHitsplat::getGameCycle)
-                      .thenComparingInt(PluginHitsplat::getGameCycleIndex))
-              .collect(Collectors.toList());
-    } else {
-      modifiedHitsplats =
-          modifiedHitsplats.stream()
-              .sorted(
-                  Comparator.comparingInt(PluginHitsplat::getGameCycle)
-                      .thenComparingInt(PluginHitsplat::getGameCycleIndex))
-              .collect(Collectors.toList());
-    }
-
-    plugin.getActiveHitsplatTheme().drawHitsplats(graphics, modifiedHitsplats, point);
   }
 
   public NameplateTheme getActiveNameplateThemeForNameplate(Nameplate nameplate) {

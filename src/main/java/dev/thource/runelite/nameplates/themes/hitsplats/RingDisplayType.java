@@ -11,15 +11,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Point;
 
 @Slf4j
-public class RingDisplayType extends HitsplatDisplayType {
-  @Getter @Setter int hitsplatCap = 4;
-  @Getter @Setter protected int lifetime = 1100;
-
+public class RingDisplayType extends CappedDisplayType {
   @Override
-  public void drawHitsplats(
+  public void render(
       Graphics2D graphics,
-      List<PluginHitsplat> hitsplats,
       Point point,
+      List<PluginHitsplat> hitsplats,
       int width,
       int height,
       Map<Integer, HitsplatOptions> hitsplatOptionsMap) {
@@ -27,6 +24,10 @@ public class RingDisplayType extends HitsplatDisplayType {
     var cap = Math.min(hitsplatCap, hitsplats.size());
     for (int i = 0; i < cap; i++) {
       var hitsplat = hitsplats.get(i);
+      if (hitsplat == null) {
+        continue;
+      }
+
       var hitsplatOptions = hitsplatOptionsMap.get(hitsplat.getHitsplatType());
 
       var xDistance = cap == 1 ? 0 : (width / 2 + 2);

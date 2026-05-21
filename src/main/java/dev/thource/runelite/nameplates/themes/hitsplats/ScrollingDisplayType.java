@@ -19,10 +19,10 @@ public class ScrollingDisplayType extends HitsplatDisplayType {
   @Getter @Setter protected int durationStaggering = 20;
 
   @Override
-  public void drawHitsplats(
+  public void render(
       Graphics2D graphics,
-      List<PluginHitsplat> hitsplats,
       Point point,
+      List<PluginHitsplat> hitsplats,
       int width,
       int height,
       Map<Integer, HitsplatOptions> hitsplatOptionsMap) {

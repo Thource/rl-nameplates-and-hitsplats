@@ -15,11 +15,15 @@ import java.awt.Component;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -117,7 +121,7 @@ public class NameplatesPlugin extends Plugin {
   private Instant startOfLastTick = Instant.now();
   private int ticksSinceHPRegen;
   @Getter private Instant nextPoisonTick;
-  private int hitsplatsCreatedThisCycle = 0;
+  private final List<PluginHitsplat> hitsplatsCreatedThisCycle = new ArrayList<>();
 
   @Getter private final Map<String, NameplateTheme> nameplateThemes = new HashMap<>();
   @Getter private NameplateTheme activeNameplateThemeForSelf;
@@ -299,7 +303,7 @@ public class NameplatesPlugin extends Plugin {
     return (min + max + 1) / 2;
   }
 
-  static int getActorId(Actor actor) {
+  public static int getActorId(Actor actor) {
     if (actor instanceof NPC) {
       // Offset this by 2048 to avoid collisions with player ids
       return ((NPC) actor).getIndex() + 2048;
@@ -319,15 +323,6 @@ public class NameplatesPlugin extends Plugin {
     }
 
     return actors.get(actorId).getNameplate();
-  }
-
-  List<PluginHitsplat> getHitsplatsForActor(Actor actor) {
-    var actorId = getActorId(actor);
-    if (!actors.containsKey(actorId)) {
-      return null;
-    }
-
-    return actors.get(actorId).getHitsplats();
   }
 
   private void updateHpCache(Actor actor) {
@@ -483,12 +478,16 @@ public class NameplatesPlugin extends Plugin {
 
   @Subscribe
   public void onNpcDespawned(NpcDespawned npcDespawned) {
-    actors.remove(getActorId(npcDespawned.getNpc()));
+    var actorId = getActorId(npcDespawned.getNpc());
+    actors.remove(actorId);
+    activeHitsplatTheme.getDisplayType().unloadActor(actorId);
   }
 
   @Subscribe
   public void onPlayerDespawned(PlayerDespawned playerDespawned) {
-    actors.remove(getActorId(playerDespawned.getPlayer()));
+    var actorId = getActorId(playerDespawned.getPlayer());
+    actors.remove(actorId);
+    activeHitsplatTheme.getDisplayType().unloadActor(actorId);
   }
 
   @Subscribe
@@ -500,7 +499,65 @@ public class NameplatesPlugin extends Plugin {
 
   @Subscribe
   public void onClientTick(ClientTick clientTick) {
-    hitsplatsCreatedThisCycle = 0;
+    final var hideZeroHitsplats = config.hideZeroHitsplats();
+    var actorHitsplatsMap =
+        hitsplatsCreatedThisCycle.stream()
+            .filter(h -> h.getAmount() > 0 || !hideZeroHitsplats)
+            .collect(Collectors.groupingBy(PluginHitsplat::getActorId));
+    final var combineHitsplats = config.combineHitsplats();
+
+    actorHitsplatsMap.forEach(
+        (actorId, hitsplats) -> {
+          if (combineHitsplats) {
+            hitsplats =
+                hitsplats.stream()
+                    .collect(
+                        Collectors.groupingBy(
+                            PluginHitsplat::getGameCycle,
+                            Collectors.groupingBy(
+                                PluginHitsplat::getHitsplatType,
+                                Collectors.summingInt(PluginHitsplat::getAmount))))
+                    .entrySet()
+                    .stream()
+                    .flatMap(
+                        tickEntry -> {
+                          var gameCycle = tickEntry.getKey();
+                          var tickIndex = new AtomicInteger();
+                          return tickEntry.getValue().entrySet().stream()
+                              .map(
+                                  entry ->
+                                      new PluginHitsplat(
+                                          client,
+                                          actorId,
+                                          entry.getKey(),
+                                          entry.getValue(),
+                                          gameCycle,
+                                          tickIndex.getAndIncrement()));
+                        })
+                    .sorted(
+                        Comparator.comparingInt(PluginHitsplat::getGameCycle)
+                            .thenComparingInt(PluginHitsplat::getGameCycleIndex))
+                    .collect(Collectors.toList());
+          } else {
+            hitsplats =
+                hitsplats.stream()
+                    .sorted(
+                        Comparator.comparingInt(PluginHitsplat::getGameCycle)
+                            .thenComparingInt(PluginHitsplat::getGameCycleIndex))
+                    .collect(Collectors.toList());
+          }
+
+          var gameCycle = client.getGameCycle();
+          var hitsplatLifetime = config.hitsplatLifetime();
+          var hitsplatDisplayType = activeHitsplatTheme.getDisplayType();
+          for (PluginHitsplat hitsplat : hitsplats) {
+            if (!hitsplatDisplayType.addHitsplat(gameCycle, hitsplatLifetime, actorId, hitsplat)) {
+              break;
+            }
+          }
+        });
+
+    hitsplatsCreatedThisCycle.clear();
   }
 
   @Subscribe
@@ -528,16 +585,14 @@ public class NameplatesPlugin extends Plugin {
     }
 
     var gameCycle = client.getGameCycle();
-    var hitsplats = getHitsplatsForActor(actor);
-    if (hitsplats != null) {
-      hitsplats.add(
-          new PluginHitsplat(
-              client,
-              hitsplat.getHitsplatType(),
-              hitsplat.getAmount(),
-              gameCycle,
-              hitsplatsCreatedThisCycle++));
-    }
+    hitsplatsCreatedThisCycle.add(
+        new PluginHitsplat(
+            client,
+            getActorId(actor),
+            hitsplat.getHitsplatType(),
+            hitsplat.getAmount(),
+            gameCycle,
+            hitsplatsCreatedThisCycle.size()));
   }
 
   @Subscribe

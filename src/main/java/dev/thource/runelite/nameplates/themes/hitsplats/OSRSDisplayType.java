@@ -15,10 +15,10 @@ public class OSRSDisplayType extends HitsplatDisplayType {
   @Getter @Setter int hitsplatCap = 4;
 
   @Override
-  public void drawHitsplats(
+  public void render(
       Graphics2D graphics,
-      List<PluginHitsplat> hitsplats,
       Point point,
+      List<PluginHitsplat> hitsplats,
       int width,
       int height,
       Map<Integer, HitsplatOptions> hitsplatOptionsMap) {

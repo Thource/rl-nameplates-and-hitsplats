@@ -11,5 +11,4 @@ import net.runelite.api.Actor;
 public class PluginActor {
   private final Actor actor;
   private final Nameplate nameplate;
-  private final List<PluginHitsplat> hitsplats = new ArrayList<>();
 }
