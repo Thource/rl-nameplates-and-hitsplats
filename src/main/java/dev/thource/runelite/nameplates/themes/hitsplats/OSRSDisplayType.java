@@ -11,9 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Point;
 
 @Slf4j
-public class RingDisplayType extends HitsplatDisplayType {
+public class OSRSDisplayType extends HitsplatDisplayType {
   @Getter @Setter int hitsplatCap = 4;
-  @Getter @Setter protected int lifetime = 1100;
 
   @Override
   public void drawHitsplats(

@@ -42,6 +42,7 @@ import net.runelite.api.Renderable;
 import net.runelite.api.Skill;
 import net.runelite.api.WorldView;
 import net.runelite.api.events.ActorDeath;
+import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.HitsplatApplied;
@@ -116,6 +117,7 @@ public class NameplatesPlugin extends Plugin {
   private Instant startOfLastTick = Instant.now();
   private int ticksSinceHPRegen;
   @Getter private Instant nextPoisonTick;
+  private int hitsplatsCreatedThisCycle = 0;
 
   @Getter private final Map<String, NameplateTheme> nameplateThemes = new HashMap<>();
   @Getter private NameplateTheme activeNameplateThemeForSelf;
@@ -497,6 +499,11 @@ public class NameplatesPlugin extends Plugin {
   }
 
   @Subscribe
+  public void onClientTick(ClientTick clientTick) {
+    hitsplatsCreatedThisCycle = 0;
+  }
+
+  @Subscribe
   public void onHitsplatApplied(HitsplatApplied hitsplatApplied) {
     var hitsplat = hitsplatApplied.getHitsplat();
     var actor = hitsplatApplied.getActor();
@@ -520,6 +527,7 @@ public class NameplatesPlugin extends Plugin {
       }
     }
 
+    var gameCycle = client.getGameCycle();
     var hitsplats = getHitsplatsForActor(actor);
     if (hitsplats != null) {
       hitsplats.add(
@@ -527,11 +535,8 @@ public class NameplatesPlugin extends Plugin {
               client,
               hitsplat.getHitsplatType(),
               hitsplat.getAmount(),
-              client.getTickCount(),
-              (int)
-                  hitsplats.stream()
-                      .filter(h -> h.getServerTick() == client.getTickCount())
-                      .count()));
+              gameCycle,
+              hitsplatsCreatedThisCycle++));
     }
   }
 

@@ -3,6 +3,7 @@ package dev.thource.runelite.nameplates;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.Range;
 
 /** NameplatesConfig manages the config for the plugin. */
 @SuppressWarnings("SameReturnValue")
@@ -119,7 +120,8 @@ public interface NameplatesConfig extends Config {
       keyName = "alwaysDrawPartyNames",
       name = "Always draw party member names",
       description =
-          "Still draw party member names when nameplate display behaviour is set to hide the nameplate.")
+          "Still draw party member names when nameplate display behaviour is set to hide the"
+              + " nameplate.")
   default boolean alwaysDrawPartyNames() {
     return false;
   }
@@ -164,5 +166,17 @@ public interface NameplatesConfig extends Config {
       description = "Whether to hide hitsplats that have a value of 0 (like misses).")
   default boolean hideZeroHitsplats() {
     return false;
+  }
+
+  @Range(
+      min = 100,
+      max = 60000
+  )
+  @ConfigItem(
+      keyName = "hitsplatLifetime",
+      name = "Hitsplat lifetime (ms)",
+      description = "How long hitsplats should remain visible for.")
+  default int hitsplatLifetime() {
+    return 1000;
   }
 }

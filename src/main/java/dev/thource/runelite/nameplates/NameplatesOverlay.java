@@ -180,7 +180,8 @@ public class NameplatesOverlay extends Overlay {
       return;
     }
 
-    var currentTime = System.currentTimeMillis();
+    var hitsplatLifetime = plugin.getConfig().hitsplatLifetime();
+    var gameCycle = client.getGameCycle();
     for (Actor actor : actors) {
       var hitsplats = plugin.getHitsplatsForActor(actor);
       if (hitsplats == null) {
@@ -190,7 +191,7 @@ public class NameplatesOverlay extends Overlay {
       var hitsplatIterator = hitsplats.iterator();
       while (hitsplatIterator.hasNext()) {
         var hitsplat = hitsplatIterator.next();
-        if (hitsplat.getCreatedAt() + 1200 >= currentTime) {
+        if (hitsplat.getGameCycle() + (hitsplatLifetime / 20) >= gameCycle) {
           break;
         }
 
@@ -204,7 +205,6 @@ public class NameplatesOverlay extends Overlay {
             .map(actor -> plugin.getHitsplatsForActor(actor))
             .filter(Objects::nonNull)
             .flatMap(List::stream)
-            .sorted(Comparator.comparingLong(PluginHitsplat::getCreatedAt))
             .collect(Collectors.toList()),
         point);
   }
@@ -316,37 +316,41 @@ public class NameplatesOverlay extends Overlay {
             .collect(Collectors.toList());
     var combineHitsplats = config.combineHitsplats();
 
-    var tickIndex = new AtomicInteger();
-    var firstSplat = hitsplats.get(0);
     if (combineHitsplats) {
       modifiedHitsplats =
           modifiedHitsplats.stream()
               .collect(
                   Collectors.groupingBy(
-                      PluginHitsplat::getServerTick,
+                      PluginHitsplat::getGameCycle,
                       Collectors.groupingBy(
                           PluginHitsplat::getHitsplatType,
                           Collectors.summingInt(PluginHitsplat::getAmount))))
               .entrySet()
               .stream()
               .flatMap(
-                  tickEntry ->
-                      tickEntry.getValue().entrySet().stream()
-                          .map(
-                              entry -> {
-                                var splat =
-                                    new PluginHitsplat(
-                                        client,
-                                        entry.getKey(),
-                                        entry.getValue(),
-                                        firstSplat.getServerTick(),
-                                        tickIndex.getAndIncrement());
-
-                                splat.setCreatedAt(firstSplat.getCreatedAt());
-
-                                return splat;
-                              }))
-              .sorted(Comparator.comparingLong(PluginHitsplat::getCreatedAt))
+                  tickEntry -> {
+                    var gameCycle = tickEntry.getKey();
+                    var tickIndex = new AtomicInteger();
+                    return tickEntry.getValue().entrySet().stream()
+                        .map(
+                            entry ->
+                                new PluginHitsplat(
+                                    client,
+                                    entry.getKey(),
+                                    entry.getValue(),
+                                    gameCycle,
+                                    tickIndex.getAndIncrement()));
+                  })
+              .sorted(
+                  Comparator.comparingInt(PluginHitsplat::getGameCycle)
+                      .thenComparingInt(PluginHitsplat::getGameCycleIndex))
+              .collect(Collectors.toList());
+    } else {
+      modifiedHitsplats =
+          modifiedHitsplats.stream()
+              .sorted(
+                  Comparator.comparingInt(PluginHitsplat::getGameCycle)
+                      .thenComparingInt(PluginHitsplat::getGameCycleIndex))
               .collect(Collectors.toList());
     }
 

@@ -16,9 +16,7 @@ public class ScrollingDisplayType extends HitsplatDisplayType {
   @Getter @Setter protected int horizontalCap = 3;
   @Getter @Setter protected int verticalCap = 0;
   @Getter @Setter protected int scrollSpeed = 60;
-  @Getter @Setter protected int lifetime = 600;
-  @Getter @Setter protected int fadeOutDuration = 200;
-  @Getter @Setter protected int durationStaggering = 40;
+  @Getter @Setter protected int durationStaggering = 20;
 
   @Override
   public void drawHitsplats(
@@ -32,20 +30,17 @@ public class ScrollingDisplayType extends HitsplatDisplayType {
     var x = point.getX();
     var y = point.getY();
 
-    var currentTime = System.currentTimeMillis();
     var totalCap = verticalCap == 0 ? Integer.MAX_VALUE : horizontalCap * verticalCap;
     var xOffset = -(Math.min(hitsplats.size(), horizontalCap) * width) / 2;
     for (int i = 0; i < Math.min(totalCap, hitsplats.size()); i++) {
       var column = i % horizontalCap;
       var row = i / horizontalCap;
       var hitsplat = hitsplats.get(i);
-
-      var adjustedCreatedAt = hitsplat.getCreatedAt() + (long) i * durationStaggering;
-      if (adjustedCreatedAt > currentTime) {
-        return;
+      var gameCycle = hitsplat.getClient().getGameCycle();
+      var timePassed = (gameCycle - hitsplat.getGameCycle()) * 20;
+      if (timePassed < i * durationStaggering) {
+        break;
       }
-
-      var lifetime = currentTime - adjustedCreatedAt;
 
       var hitsplatOptions = hitsplatOptionsMap.get(hitsplat.getHitsplatType());
       if (hitsplatOptions != null) {
@@ -53,7 +48,7 @@ public class ScrollingDisplayType extends HitsplatDisplayType {
             graphics,
             String.valueOf(hitsplat.getAmount()),
             x + xOffset + (width + horizontalPadding) * column,
-            y + (height + verticalPadding) * row - (int) ((lifetime / 1000f) * scrollSpeed),
+            y + (height + verticalPadding) * row - (int) ((timePassed / 1000f) * scrollSpeed),
             width,
             height);
       } else {
@@ -62,7 +57,7 @@ public class ScrollingDisplayType extends HitsplatDisplayType {
         graphics.drawString(
             String.valueOf(hitsplat.getAmount()),
             x + xOffset + (width + horizontalPadding) * column,
-            y + (height + verticalPadding) * row - (int) ((lifetime / 1000f) * scrollSpeed));
+            y + (height + verticalPadding) * row - (int) ((timePassed / 1000f) * scrollSpeed));
       }
     }
   }

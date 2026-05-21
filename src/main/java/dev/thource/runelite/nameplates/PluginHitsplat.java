@@ -41,9 +41,8 @@ public class PluginHitsplat {
   private final Client client;
   private final int hitsplatType;
   private final int amount;
-  private final long serverTick;
-  private final int tickIndex;
-  @Setter private Long createdAt = System.currentTimeMillis();
+  private final int gameCycle;
+  private final int gameCycleIndex;
 
   private boolean isMaxHitsplat() {
     return maxToNormalHitsplatTypes.containsKey(hitsplatType);
