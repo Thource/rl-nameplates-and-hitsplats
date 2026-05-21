@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import net.runelite.client.plugins.itemstats.StatChange;
+import net.runelite.client.plugins.itemstats.stats.Stats;
 
 @Getter
 @Setter
@@ -30,6 +31,6 @@ public class EnergyBar extends Bar {
 
   @Override
   protected StatChange getStatChange(Nameplate nameplate) {
-    return null;
+    return nameplate.getHoveredItemStatChange(Stats.RUN_ENERGY);
   }
 }
