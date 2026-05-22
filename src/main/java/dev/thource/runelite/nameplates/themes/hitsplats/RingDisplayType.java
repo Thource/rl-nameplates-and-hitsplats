@@ -9,6 +9,12 @@ import net.runelite.api.Point;
 
 @Slf4j
 public class RingDisplayType extends CappedDisplayType {
+  protected RingDisplayType() {
+    super();
+
+    hitsplatCap = 6;
+  }
+
   @Override
   public void render(
       Graphics2D graphics,

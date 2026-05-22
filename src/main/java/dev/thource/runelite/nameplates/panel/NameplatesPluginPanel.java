@@ -1,6 +1,7 @@
 package dev.thource.runelite.nameplates.panel;
 
 import dev.thource.runelite.nameplates.NameplatesPlugin;
+import dev.thource.runelite.nameplates.panel.hitsplats.HitsplatPanel;
 import dev.thource.runelite.nameplates.panel.nameplates.NameplatePanel;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -39,7 +40,7 @@ public class NameplatesPluginPanel extends PluginPanel {
       new ImageIcon(ImageUtil.loadImageResource(NameplatesPluginPanel.class, "set-active.png"));
 
   private final NameplatePanel nameplatePanel;
-  private final JPanel hitsplatPanel;
+  private final HitsplatPanel hitsplatPanel;
 
   public NameplatesPluginPanel(NameplatesPlugin plugin) {
     super(false);
@@ -59,11 +60,7 @@ public class NameplatesPluginPanel extends PluginPanel {
     bodyPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
 
     nameplatePanel = new NameplatePanel(plugin);
-    // todo: add hitsplats panel
-    hitsplatPanel = new JPanel();
-    hitsplatPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
-    hitsplatPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
-    hitsplatPanel.add(new JLabel("Coming soon!"));
+    hitsplatPanel = new HitsplatPanel(plugin);
 
     JButton wideButton1 = new JButton("Nameplates");
     wideButton1.setBackground(ColorScheme.DARKER_GRAY_COLOR);

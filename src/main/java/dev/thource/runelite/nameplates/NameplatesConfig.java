@@ -58,6 +58,15 @@ public interface NameplatesConfig extends Config {
   }
 
   @ConfigItem(
+      keyName = "activeHitsplatThemeId",
+      name = "Active hitsplat theme ID",
+      description = "The ID of the active hitsplat theme.",
+      hidden = true)
+  default String activeHitsplatThemeId() {
+    return "osrsTheme";
+  }
+
+  @ConfigItem(
       keyName = "npcNameplateDisplayMode",
       name = "NPC nameplate display behaviour",
       description = "Defines when NPC nameplates will be visible.")

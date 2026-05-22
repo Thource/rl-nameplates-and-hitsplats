@@ -4,6 +4,9 @@ import com.google.gson.Gson;
 import com.google.inject.Provides;
 import dev.thource.runelite.nameplates.panel.NameplatesPluginPanel;
 import dev.thource.runelite.nameplates.themes.hitsplats.HitsplatTheme;
+import dev.thource.runelite.nameplates.themes.hitsplats.OSRSHitsplatTheme;
+import dev.thource.runelite.nameplates.themes.hitsplats.RingHitsplatTheme;
+import dev.thource.runelite.nameplates.themes.hitsplats.ScrollingHitsplatTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.CustomNameplateTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkExtendedTheme;
 import dev.thource.runelite.nameplates.themes.nameplates.FlatDarkFullInfoTheme;
@@ -128,6 +131,8 @@ public class NameplatesPlugin extends Plugin {
   @Getter private NameplateTheme activeNameplateThemeForParty;
   @Getter private NameplateTheme activeNameplateThemeForPlayers;
   @Getter private NameplateTheme activeNameplateThemeForNPCs;
+
+  @Getter private final Map<String, HitsplatTheme> hitsplatThemes = new HashMap<>();
   @Getter private HitsplatTheme activeHitsplatTheme;
 
   private final RenderCallback renderCallback =
@@ -198,12 +203,17 @@ public class NameplatesPlugin extends Plugin {
 
   private void loadThemes() {
     nameplateThemes.clear();
+    hitsplatThemes.clear();
 
     // add static themes
     nameplateThemes.put(FlatDarkTheme.ID, new FlatDarkTheme());
     nameplateThemes.put(FlatDarkFullInfoTheme.ID, new FlatDarkFullInfoTheme());
     nameplateThemes.put(FlatDarkExtendedTheme.ID, new FlatDarkExtendedTheme());
     nameplateThemes.put(OSRSTheme.ID, new OSRSTheme());
+
+    hitsplatThemes.put(OSRSHitsplatTheme.ID, new OSRSHitsplatTheme());
+    hitsplatThemes.put(RingHitsplatTheme.ID, new RingHitsplatTheme());
+    hitsplatThemes.put(ScrollingHitsplatTheme.ID, new ScrollingHitsplatTheme());
 
     // load user-defined themes
     configManager
@@ -226,6 +236,7 @@ public class NameplatesPlugin extends Plugin {
             });
 
     nameplateThemes.values().forEach(theme -> theme.setPlugin(this));
+    hitsplatThemes.values().forEach(theme -> theme.setPlugin(this));
 
     activeNameplateThemeForSelf =
         nameplateThemes.getOrDefault(
@@ -240,8 +251,9 @@ public class NameplatesPlugin extends Plugin {
         nameplateThemes.getOrDefault(
             config.activeNameplateThemeForNPCsId(), nameplateThemes.get(FlatDarkTheme.ID));
 
-    activeHitsplatTheme = new HitsplatTheme("id") {};
-    activeHitsplatTheme.setPlugin(this);
+    activeHitsplatTheme =
+        hitsplatThemes.getOrDefault(
+            config.activeHitsplatThemeId(), hitsplatThemes.get(OSRSHitsplatTheme.ID));
   }
 
   @Override
@@ -862,6 +874,12 @@ public class NameplatesPlugin extends Plugin {
     configManager.setConfiguration(
         NameplatesConfig.CONFIG_GROUP, "activeNameplateThemeForNPCsId", theme.getId());
     activeNameplateThemeForNPCs = theme;
+  }
+
+  public void setActiveHitsplatTheme(HitsplatTheme theme) {
+    configManager.setConfiguration(
+        NameplatesConfig.CONFIG_GROUP, "activeHitsplatThemeId", theme.getId());
+    activeHitsplatTheme = theme;
   }
 
   @Provides
