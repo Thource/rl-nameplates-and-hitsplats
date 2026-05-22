@@ -15,13 +15,23 @@ public abstract class CappedDisplayType extends HitsplatDisplayType {
       return;
     }
 
+    var onlyNulls = true;
     var iterator = hitsplats.listIterator();
     while (iterator.hasNext()) {
       var hitsplat = iterator.next();
 
-      if (hitsplat != null && hitsplat.getGameCycle() + (hitsplatLifetime / 20) < gameCycle) {
-        iterator.set(null);
+      if (hitsplat != null) {
+        if (hitsplat.getGameCycle() + (hitsplatLifetime / 20) < gameCycle) {
+          iterator.set(null);
+          continue;
+        }
+
+        onlyNulls = false;
       }
+    }
+
+    if (onlyNulls) {
+      hitsplats.clear();
     }
   }
 
