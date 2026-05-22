@@ -47,8 +47,9 @@ public abstract class HitsplatDisplayType {
       int height,
       Map<Integer, HitsplatOptions> hitsplatOptionsMap);
 
-  // Returns true if the hitsplat was successfully added AND there is still room for more hitsplats (optionally)
-  public boolean addHitsplat(int gameCycle, int hitsplatLifetime, int actorId, PluginHitsplat hitsplat) {
+  /** Returns true if the hitsplat was successfully added */
+  public boolean addHitsplat(
+      int gameCycle, int hitsplatLifetime, int actorId, PluginHitsplat hitsplat) {
     hitsplatsMap.computeIfAbsent(actorId, k -> new ArrayList<>()).add(hitsplat);
 
     return true;

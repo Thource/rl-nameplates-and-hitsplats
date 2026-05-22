@@ -168,10 +168,7 @@ public interface NameplatesConfig extends Config {
     return false;
   }
 
-  @Range(
-      min = 100,
-      max = 60000
-  )
+  @Range(min = 100, max = 60000)
   @ConfigItem(
       keyName = "hitsplatLifetime",
       name = "Hitsplat lifetime (ms)",

@@ -26,11 +26,12 @@ public abstract class CappedDisplayType extends HitsplatDisplayType {
   }
 
   @Override
-  public boolean addHitsplat(int gameCycle, int hitsplatLifetime, int actorId, PluginHitsplat hitsplat) {
+  public boolean addHitsplat(
+      int gameCycle, int hitsplatLifetime, int actorId, PluginHitsplat hitsplat) {
     var hitsplats = hitsplatsMap.computeIfAbsent(actorId, k -> new ArrayList<>());
     if (hitsplats.size() < hitsplatCap) {
       hitsplats.add(hitsplat);
-      return hitsplats.size() < hitsplatCap;
+      return true;
     }
 
     var iterator = hitsplats.listIterator();

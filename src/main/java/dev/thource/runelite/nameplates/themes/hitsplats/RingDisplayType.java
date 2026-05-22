@@ -4,9 +4,6 @@ import dev.thource.runelite.nameplates.PluginHitsplat;
 import java.awt.Graphics2D;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Point;
 

@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import net.runelite.api.Client;
 import net.runelite.api.HitsplatID;
 import net.runelite.api.gameval.VarbitID;
