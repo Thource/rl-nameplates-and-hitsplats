@@ -8,10 +8,8 @@ import java.awt.Graphics2D;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Actor;
 
-@Slf4j
 public abstract class HitsplatTheme implements Nameable {
   protected transient NameplatesPlugin plugin;
   protected transient NameplatesConfig config;

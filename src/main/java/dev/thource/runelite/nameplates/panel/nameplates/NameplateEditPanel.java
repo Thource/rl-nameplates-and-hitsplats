@@ -38,10 +38,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.DynamicGridLayout;
 
-@Slf4j
 public class NameplateEditPanel extends JPanel {
   private static class ElementFactory {
     private final String label;
