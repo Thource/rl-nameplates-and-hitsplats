@@ -6,9 +6,10 @@ import dev.thource.runelite.nameplates.panel.nameplates.NameplatePanel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -49,7 +50,8 @@ public class NameplatesPluginPanel extends PluginPanel {
     setBackground(ColorScheme.DARK_GRAY_COLOR);
 
     JPanel tabsPanel = new JPanel();
-    tabsPanel.setLayout(new BoxLayout(tabsPanel, BoxLayout.X_AXIS));
+    tabsPanel.setLayout(new GridBagLayout());
+    GridBagConstraints gridBagConstraints = new GridBagConstraints();
     tabsPanel.setPreferredSize(new Dimension(230, 34));
     tabsPanel.setBackground(new Color(0, 0, 0, 0));
     tabsPanel.setBorder(new EmptyBorder(0, 0, 8, 0));
@@ -82,7 +84,7 @@ public class NameplatesPluginPanel extends PluginPanel {
                     : ColorScheme.DARKER_GRAY_COLOR);
           }
         });
-    tabsPanel.add(wideButton1, BorderLayout.WEST);
+    tabsPanel.add(wideButton1, gridBagConstraints);
 
     JButton wideButton2 = new JButton("Hitsplats");
     wideButton2.setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -132,7 +134,7 @@ public class NameplatesPluginPanel extends PluginPanel {
           wideButton1.setBackground(ColorScheme.DARKER_GRAY_COLOR);
           wideButton2.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
         });
-    tabsPanel.add(wideButton2, BorderLayout.WEST);
+    tabsPanel.add(wideButton2, gridBagConstraints);
 
     JButton supportButton = new JButton("");
     supportButton.setIcon(
@@ -155,7 +157,7 @@ public class NameplatesPluginPanel extends PluginPanel {
             supportButton.setBackground(ColorScheme.DARKER_GRAY_COLOR);
           }
         });
-    tabsPanel.add(supportButton, BorderLayout.EAST);
+    tabsPanel.add(supportButton, gridBagConstraints);
 
     add(bodyPanel, BorderLayout.CENTER);
 
