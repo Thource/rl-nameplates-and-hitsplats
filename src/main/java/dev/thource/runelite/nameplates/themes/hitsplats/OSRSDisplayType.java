@@ -10,9 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Point;
 
 @Slf4j
-public class OSRSDisplayType extends HitsplatDisplayType {
-  @Getter @Setter int hitsplatCap = 4;
-
+public class OSRSDisplayType extends CappedDisplayType {
   @Override
   public void render(
       Graphics2D graphics,
@@ -25,19 +23,21 @@ public class OSRSDisplayType extends HitsplatDisplayType {
     var cap = Math.min(hitsplatCap, hitsplats.size());
     for (int i = 0; i < cap; i++) {
       var hitsplat = hitsplats.get(i);
-      var hitsplatOptions = hitsplatOptionsMap.get(hitsplat.getHitsplatType());
-
-      var xDistance = cap == 1 ? 0 : (width / 2 + 2);
-      var yDistance = cap == 1 ? 0 : (height / 2 + 2);
-
-      if (cap > 4) {
-        xDistance = (int) (xDistance * (1f + (cap - 4) * 0.15f));
-        yDistance = (int) (yDistance * (1f + (cap - 4) * 0.15f));
+      if (hitsplat == null) {
+        continue;
       }
 
-      var progress = ((float) i / cap) * Math.PI * 2;
-      var x = (int) (point.getX() + Math.cos(progress) * xDistance);
-      var y = (int) (point.getY() + Math.sin(progress) * yDistance);
+      var hitsplatOptions = hitsplatOptionsMap.get(hitsplat.getHitsplatType());
+
+      var xDistance = width / 2 + 4;
+      var yDistance = height / 2 - 2;
+
+      // TODO: find a way to support > 4 splats
+      var yMul = i == 0 ? 1 : i == 1 ? -1 : 0;
+      var xMul = i == 2 ? -1 : i == 3 ? 1 : 0;
+
+      var x = (point.getX() + xMul * xDistance);
+      var y = (int) (point.getY() + (yMul - 0.6f) * yDistance);
 
       if (hitsplatOptions != null) {
         hitsplatOptions.draw(graphics, String.valueOf(hitsplat.getAmount()), x, y, width, height);
