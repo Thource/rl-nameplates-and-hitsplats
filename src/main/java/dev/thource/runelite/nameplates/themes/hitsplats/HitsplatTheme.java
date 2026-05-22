@@ -21,7 +21,7 @@ public abstract class HitsplatTheme implements Nameable {
   @Getter @Setter protected String name;
   @Getter @Setter protected int width = 25;
   @Getter @Setter protected int height = 25;
-  @Getter @Setter protected HitsplatDisplayType displayType = new RingDisplayType();
+  @Getter @Setter protected HitsplatDisplayType displayType = new OSRSDisplayType();
 
   @Getter
   protected Map<Integer, HitsplatOptions> hitsplatOptionsMap = HitsplatDefaultSprite.defaultMap();

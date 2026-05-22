@@ -585,14 +585,16 @@ public class NameplatesPlugin extends Plugin {
     }
 
     var gameCycle = client.getGameCycle();
+    var actorId = getActorId(actor);
     hitsplatsCreatedThisCycle.add(
         new PluginHitsplat(
             client,
-            getActorId(actor),
+            actorId,
             hitsplat.getHitsplatType(),
             hitsplat.getAmount(),
             gameCycle,
-            hitsplatsCreatedThisCycle.size()));
+            (int)
+                hitsplatsCreatedThisCycle.stream().filter(h -> h.getActorId() == actorId).count()));
   }
 
   @Subscribe

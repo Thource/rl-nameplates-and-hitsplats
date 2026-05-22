@@ -35,6 +35,10 @@ public abstract class Nameplate {
   }
 
   public void updateFromActor(NameplatesPlugin plugin) {
+    if (actor == null || actor.getName() == null) {
+      return;
+    }
+
     name = Text.removeTags(actor.getName());
     combatLevel = actor.getCombatLevel();
   }
