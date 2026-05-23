@@ -38,7 +38,7 @@ public class NameplatesOverlay extends Overlay {
   NameplatesOverlay() {
     setPosition(OverlayPosition.DYNAMIC);
     setLayer(OverlayLayer.ABOVE_SCENE);
-    setPriority(PRIORITY_MED);
+    setPriority(PRIORITY_HIGH);
 
     lastRender = System.currentTimeMillis();
   }
