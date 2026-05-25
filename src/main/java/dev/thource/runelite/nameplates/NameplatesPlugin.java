@@ -23,8 +23,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -66,6 +68,7 @@ import net.runelite.client.callback.RenderCallback;
 import net.runelite.client.callback.RenderCallbackManager;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.NPCManager;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.hiscore.HiscoreClient;
@@ -137,6 +140,11 @@ public class NameplatesPlugin extends Plugin {
   @Getter private final Map<String, HitsplatTheme> hitsplatThemes = new HashMap<>();
   @Getter private HitsplatTheme activeHitsplatTheme;
 
+  private Set<Integer> npcIdWhitelist = new HashSet<>();
+  private Set<String> npcNameWhitelist = new HashSet<>();
+  private Set<Integer> npcIdBlacklist = new HashSet<>();
+  private Set<String> npcNameBlacklist = new HashSet<>();
+
   private boolean isCheckingShouldDraw;
   private final RenderCallback renderCallback =
       new RenderCallback() {
@@ -176,6 +184,8 @@ public class NameplatesPlugin extends Plugin {
   protected void startUp() {
     loadThemes();
 
+    updateNpcWhitelistAndBlacklist();
+
     if (panel == null) {
       // edt
       SwingUtilities.invokeLater(
@@ -212,6 +222,69 @@ public class NameplatesPlugin extends Plugin {
     }
 
     renderCallbackManager.register(renderCallback);
+  }
+
+  @Subscribe
+  public void onConfigChanged(ConfigChanged configChanged) {
+    if (!configChanged.getGroup().equals(NameplatesConfig.CONFIG_GROUP)) {
+      return;
+    }
+
+    var key = configChanged.getKey();
+    if (!key.equals("npcIdsWhitelist")
+        && !key.equals("npcNamesWhitelist")
+        && !key.equals("npcIdsBlacklist")
+        && !key.equals("npcNamesBlacklist")) {
+      return;
+    }
+
+    updateNpcWhitelistAndBlacklist();
+  }
+
+  private void updateNpcWhitelistAndBlacklist() {
+    npcIdWhitelist =
+        Stream.of(config.npcIdsWhitelist().split(","))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .map(
+                s -> {
+                  try {
+                    return Integer.parseInt(s);
+                  } catch (NumberFormatException e) {
+                    return -1;
+                  }
+                })
+            .filter(i -> i >= 0)
+            .collect(Collectors.toCollection(HashSet::new));
+
+    npcNameWhitelist =
+        Stream.of(config.npcNamesWhitelist().split(","))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .map(String::toLowerCase)
+            .collect(Collectors.toCollection(HashSet::new));
+
+    npcIdBlacklist =
+        Stream.of(config.npcIdsBlacklist().split(","))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .map(
+                s -> {
+                  try {
+                    return Integer.parseInt(s);
+                  } catch (NumberFormatException e) {
+                    return -1;
+                  }
+                })
+            .filter(i -> i >= 0)
+            .collect(Collectors.toCollection(HashSet::new));
+
+    npcNameBlacklist =
+        Stream.of(config.npcNamesBlacklist().split(","))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .map(String::toLowerCase)
+            .collect(Collectors.toCollection(HashSet::new));
   }
 
   private void loadThemes() {
@@ -796,6 +869,22 @@ public class NameplatesPlugin extends Plugin {
 
   public boolean getAlwaysDrawName(Nameplate nameplate) {
     var actor = nameplate.getActor();
+    if (actor instanceof NPC) {
+      var id = ((NPC) actor).getId();
+
+      if (npcIdBlacklist.contains(id)) {
+        return false;
+      }
+
+      var name = nameplate.getName();
+      if (name != null) {
+        var lowerName = name.toLowerCase();
+        if (npcNameBlacklist.contains(lowerName)) {
+          return false;
+        }
+      }
+    }
+
     if (actor instanceof Player) {
       if (actor == client.getLocalPlayer()) {
         return config.alwaysDrawOwnName();
@@ -816,6 +905,31 @@ public class NameplatesPlugin extends Plugin {
   }
 
   public boolean shouldDrawFor(Nameplate nameplate) {
+    var actor = nameplate.getActor();
+    if (actor instanceof NPC) {
+      var id = ((NPC) actor).getId();
+
+      if (npcIdWhitelist.contains(id)) {
+        return true;
+      }
+
+      if (npcIdBlacklist.contains(id)) {
+        return false;
+      }
+
+      var name = nameplate.getName();
+      if (name != null) {
+        var lowerName = name.toLowerCase();
+        if (npcNameWhitelist.contains(lowerName)) {
+          return true;
+        }
+
+        if (npcNameBlacklist.contains(lowerName)) {
+          return false;
+        }
+      }
+    }
+
     var overheadIcon = NameplateHeadIcon.get(nameplate.getActor());
     if (overheadIcon != null && overheadIcon != NameplateHeadIcon.NONE) {
       return true;

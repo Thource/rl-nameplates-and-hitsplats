@@ -3,6 +3,7 @@ package dev.thource.runelite.nameplates;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.ConfigSection;
 import net.runelite.client.config.Range;
 
 /** NameplatesConfig manages the config for the plugin. */
@@ -20,6 +21,12 @@ public interface NameplatesConfig extends Config {
   // show full nameplate when hovering "attack"
 
   String CONFIG_GROUP = "nameplates";
+
+  @ConfigSection(name = "Nameplates", description = "Settings related to nameplates", position = 1)
+  String NAMEPLATES_SECTION = "Nameplates";
+
+  @ConfigSection(name = "Hitsplats", description = "Settings related to hitsplats", position = 2)
+  String HITSPLATS_SECTION = "Hitsplats";
 
   @ConfigItem(
       keyName = "activeNameplateThemeForSelfId",
@@ -67,62 +74,24 @@ public interface NameplatesConfig extends Config {
   }
 
   @ConfigItem(
-      keyName = "npcNameplateDisplayMode",
-      name = "NPC nameplate display behaviour",
-      description = "Defines when NPC nameplates will be visible.")
-  default NameplateDisplayMode npcNameplateDisplayMode() {
-    return NameplateDisplayMode.IN_COMBAT;
-  }
-
-  @ConfigItem(
-      keyName = "playerNameplateDisplayMode",
-      name = "Player nameplate display behaviour",
-      description = "Defines when player nameplates will be visible.")
-  default NameplateDisplayMode playerNameplateDisplayMode() {
-    return NameplateDisplayMode.IN_COMBAT;
-  }
-
-  @ConfigItem(
-      keyName = "partyNameplateDisplayMode",
-      name = "Party member nameplate display behaviour",
-      description = "Defines when party member nameplates will be visible.")
-  default NameplateDisplayMode partyNameplateDisplayMode() {
-    return NameplateDisplayMode.IN_COMBAT;
+      keyName = "alwaysDrawOwnName",
+      name = "Always draw own name",
+      description =
+          "Still draw own name when nameplate display behaviour is set to hide the nameplate.",
+      position = 1,
+      section = NAMEPLATES_SECTION)
+  default boolean alwaysDrawOwnName() {
+    return false;
   }
 
   @ConfigItem(
       keyName = "ownNameplateDisplayMode",
       name = "Own nameplate display behaviour",
-      description = "Defines when local player nameplate will be visible.")
+      description = "Defines when local player nameplate will be visible.",
+      position = 1,
+      section = NAMEPLATES_SECTION)
   default NameplateDisplayMode ownNameplateDisplayMode() {
     return NameplateDisplayMode.IN_COMBAT;
-  }
-
-  @ConfigItem(
-      keyName = "alwaysDrawNPCNames",
-      name = "Always draw NPC names",
-      description =
-          "Still draw NPC names when nameplate display behaviour is set to hide the nameplates.")
-  default boolean alwaysDrawNPCNames() {
-    return true;
-  }
-
-  @ConfigItem(
-      keyName = "alwaysDrawPlayerNames",
-      name = "Always draw player names",
-      description =
-          "Still draw player names when nameplate display behaviour is set to hide the nameplates.")
-  default boolean alwaysDrawPlayerNames() {
-    return true;
-  }
-
-  @ConfigItem(
-      keyName = "alwaysDrawOwnName",
-      name = "Always draw own name",
-      description =
-          "Still draw own name when nameplate display behaviour is set to hide the nameplate.")
-  default boolean alwaysDrawOwnName() {
-    return false;
   }
 
   @ConfigItem(
@@ -130,20 +99,109 @@ public interface NameplatesConfig extends Config {
       name = "Always draw party member names",
       description =
           "Still draw party member names when nameplate display behaviour is set to hide the"
-              + " nameplate.")
+              + " nameplate.",
+      position = 2,
+      section = NAMEPLATES_SECTION)
   default boolean alwaysDrawPartyNames() {
     return false;
   }
 
   @ConfigItem(
-      keyName = "enableNoLootOtherGIMSplats",
-      name = "[GIM] Enable no-loot indicator for other hitsplats",
+      keyName = "partyNameplateDisplayMode",
+      name = "Party member nameplate display behaviour",
+      description = "Defines when party member nameplates will be visible.",
+      position = 2,
+      section = NAMEPLATES_SECTION)
+  default NameplateDisplayMode partyNameplateDisplayMode() {
+    return NameplateDisplayMode.IN_COMBAT;
+  }
+
+  @ConfigItem(
+      keyName = "alwaysDrawPlayerNames",
+      name = "Always draw player names",
       description =
-          "If enabled, NPCs will be tagged as no-loot if a tinted damage hitsplat appears<br>on"
-              + " them.<br><br>Disable this if you frequently PVM with your group members"
-              + " and the false<br>positive no-loot indicators are bothering you.")
-  default boolean enableNoLootOtherGIMSplats() {
+          "Still draw player names when nameplate display behaviour is set to hide the nameplates.",
+      position = 3,
+      section = NAMEPLATES_SECTION)
+  default boolean alwaysDrawPlayerNames() {
     return true;
+  }
+
+  @ConfigItem(
+      keyName = "playerNameplateDisplayMode",
+      name = "Player nameplate display behaviour",
+      description = "Defines when player nameplates will be visible.",
+      position = 3,
+      section = NAMEPLATES_SECTION)
+  default NameplateDisplayMode playerNameplateDisplayMode() {
+    return NameplateDisplayMode.IN_COMBAT;
+  }
+
+  @ConfigItem(
+      keyName = "alwaysDrawNPCNames",
+      name = "Always draw NPC names",
+      description =
+          "Still draw NPC names when nameplate display behaviour is set to hide the nameplates.",
+      position = 4,
+      section = NAMEPLATES_SECTION)
+  default boolean alwaysDrawNPCNames() {
+    return true;
+  }
+
+  @ConfigItem(
+      keyName = "npcNameplateDisplayMode",
+      name = "NPC nameplate display behaviour",
+      description = "Defines when NPC nameplates will be visible.",
+      position = 4,
+      section = NAMEPLATES_SECTION)
+  default NameplateDisplayMode npcNameplateDisplayMode() {
+    return NameplateDisplayMode.IN_COMBAT;
+  }
+
+  @ConfigItem(
+      keyName = "npcIdsWhitelist",
+      name = "NPC IDs whitelist",
+      description =
+          "ALWAYS draw nameplates or names for NPCs whose IDs are in this comma-separated list.",
+      position = 5,
+      section = NAMEPLATES_SECTION)
+  default String npcIdsWhitelist() {
+    return "";
+  }
+
+  @ConfigItem(
+      keyName = "npcNamesWhitelist",
+      name = "NPC names whitelist",
+      description =
+          "ALWAYS draw nameplates or names for NPCs whose names are in this comma-separated list."
+              + " Case-insensitive.",
+      position = 5,
+      section = NAMEPLATES_SECTION)
+  default String npcNamesWhitelist() {
+    return "";
+  }
+
+  @ConfigItem(
+      keyName = "npcIdsBlacklist",
+      name = "NPC IDs blacklist",
+      description =
+          "NEVER draw nameplates or names for NPCs whose IDs are in this comma-separated list.",
+      position = 6,
+      section = NAMEPLATES_SECTION)
+  default String npcIdsBlacklist() {
+    return "";
+  }
+
+  @ConfigItem(
+      keyName = "npcNamesBlacklist",
+      name = "NPC names blacklist",
+      description =
+          "NEVER draw nameplates or names for NPCs whose names are in this comma-separated list."
+              + " Case-insensitive.",
+      position = 6,
+      section = NAMEPLATES_SECTION)
+  default String npcNamesBlacklist() {
+    return "";
   }
 
   @ConfigItem(
@@ -153,9 +211,24 @@ public interface NameplatesConfig extends Config {
           "Sets when the hover indicator should show up.<br><br>Always: Always show while hovering"
               + " any NPC/player<br>Right-click: Only show when hovering entries in the right"
               + " click menu<br>Busy: Only show when multiple NPC/players are present in the"
-              + " right-click menu<br>Busy right-click: Combines Busy and Right-click mode")
+              + " right-click menu<br>Busy right-click: Combines Busy and Right-click mode",
+      position = 7,
+      section = NAMEPLATES_SECTION)
   default HoverIndicatorMode hoverIndicatorMode() {
     return HoverIndicatorMode.BUSY_RIGHT_CLICK;
+  }
+
+  @ConfigItem(
+      keyName = "enableNoLootOtherGIMSplats",
+      name = "[GIM] Enable no-loot indicator for other hitsplats",
+      description =
+          "If enabled, NPCs will be tagged as no-loot if a tinted damage hitsplat appears<br>on"
+              + " them.<br><br>Disable this if you frequently PVM with your group members"
+              + " and the false<br>positive no-loot indicators are bothering you.",
+      position = 10,
+      section = NAMEPLATES_SECTION)
+  default boolean enableNoLootOtherGIMSplats() {
+    return true;
   }
 
   @ConfigItem(
@@ -164,7 +237,8 @@ public interface NameplatesConfig extends Config {
       description =
           "Whether to combine hitsplats of the same type into one hitsplat with combined"
               + " value.<br><br>Example: If an NPC takes 2 separate hits of 4 damage, instead of"
-              + " showing 2 hitsplats of 4 damage, it will show 1 hitsplat of 8 damage.")
+              + " showing 2 hitsplats of 4 damage, it will show 1 hitsplat of 8 damage.",
+      section = HITSPLATS_SECTION)
   default boolean combineHitsplats() {
     return false;
   }
@@ -172,7 +246,8 @@ public interface NameplatesConfig extends Config {
   @ConfigItem(
       keyName = "hideZeroHitsplats",
       name = "Hide zero hitsplats",
-      description = "Whether to hide hitsplats that have a value of 0 (like misses).")
+      description = "Whether to hide hitsplats that have a value of 0 (like misses).",
+      section = HITSPLATS_SECTION)
   default boolean hideZeroHitsplats() {
     return false;
   }
@@ -181,7 +256,8 @@ public interface NameplatesConfig extends Config {
   @ConfigItem(
       keyName = "hitsplatLifetime",
       name = "Hitsplat lifetime (ms)",
-      description = "How long hitsplats should remain visible for.")
+      description = "How long hitsplats should remain visible for.",
+      section = HITSPLATS_SECTION)
   default int hitsplatLifetime() {
     return 1000;
   }
