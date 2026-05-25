@@ -3,7 +3,10 @@ package dev.thource.runelite.nameplates;
 import dev.thource.runelite.nameplates.themes.nameplates.NameplateTheme;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.font.TextAttribute;
+import java.text.AttributedString;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -11,13 +14,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Actor;
 import net.runelite.api.Client;
 import net.runelite.api.IndexedObjectSet;
+import net.runelite.api.IndexedSprite;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.Player;
@@ -27,12 +34,27 @@ import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
+import net.runelite.client.util.ColorUtil;
+import net.runelite.client.util.Text;
 
+@Slf4j
 public class NameplatesOverlay extends Overlay {
+  private static final Pattern CHAT_FORMAT_PATTERN =
+      Pattern.compile("<(col|img)=([0-9a-zA-Z]{6}|\\d+)>");
+  private static final Pattern CHAT_IMG_PATTERN = Pattern.compile("<img=(\\d+)>");
+  private static final float SPACE_CHAR_WIDTH = 4f;
+  private static final int EMPTY_IMG_TAG_LENGTH = 6;
+  private static final int COL_OPENING_TAG_LENGTH = 12;
+  private static final int COL_CLOSING_TAG_LENGTH = 6;
+
   @Inject private Client client;
   @Inject private NameplatesPlugin plugin;
   private long lastRender;
   @Getter private Actor hoveredActor;
+
+  // modIcons is a short-lived var that is conditionally populated, this is so that it's not being
+  // populated unnecessary when no chat images are being rendered
+  private IndexedSprite[] modIcons;
 
   @Inject
   NameplatesOverlay() {
@@ -67,41 +89,218 @@ public class NameplatesOverlay extends Overlay {
     return map;
   }
 
+  private int drawOverheadTexts(Graphics2D graphics, List<Actor> actors, int firstActorHeight) {
+    graphics.setFont(FontManager.getRunescapeBoldFont());
+    var fontMetrics = graphics.getFontMetrics();
+    var stackHeight = 0;
+    for (Actor actor : actors) {
+      stackHeight += drawOverheadText(graphics, actor, firstActorHeight, fontMetrics, stackHeight);
+    }
+    // reset the short-lived var
+    modIcons = null;
+
+    return stackHeight;
+  }
+
+  private void drawModIcon(Graphics2D graphics, IndexedSprite icon, int drawX, int drawY) {
+    var iconPixels = icon.getPixels();
+    var iconPalette = icon.getPalette();
+
+    for (int y = 0; y < icon.getHeight(); y++) {
+      for (int x = 0; x < icon.getWidth(); x++) {
+        var paletteIndex = iconPixels[y * icon.getWidth() + x] & 0xff;
+        if (paletteIndex == 0) {
+          continue;
+        }
+
+        var pixelColor = new Color(iconPalette[paletteIndex]);
+        graphics.setColor(pixelColor);
+        graphics.drawLine(drawX + x, drawY + y, drawX + x, drawY + y);
+      }
+    }
+  }
+
+  /** Record-like carrier for Java 11 that groups icon expansion outputs. */
+  @Getter
+  @RequiredArgsConstructor(access = lombok.AccessLevel.PRIVATE)
+  private static final class IconExpansionResult {
+    private final String expandedText;
+    private final int maxIconHeight;
+  }
+
+  private IconExpansionResult expandTextForIcons(String text) {
+    var formatMatcher = CHAT_IMG_PATTERN.matcher(text);
+    var maxIconHeight = 0;
+    var addedChars = 0;
+
+    while (formatMatcher.find()) {
+      var imgId = formatMatcher.group(1);
+      var matcherStart = formatMatcher.start();
+
+      if (modIcons == null) {
+        modIcons = client.getModIcons();
+      }
+
+      var imgIdInt = Integer.parseInt(imgId);
+      if (imgIdInt < 0 || imgIdInt >= modIcons.length) {
+        continue;
+      }
+
+      var icon = modIcons[imgIdInt];
+      if (icon == null) {
+        continue;
+      }
+
+      maxIconHeight = Math.max(maxIconHeight, icon.getHeight());
+
+      var charsWide = (int) Math.ceil(icon.getWidth() / SPACE_CHAR_WIDTH);
+      var stringBlank = " ".repeat(charsWide);
+      var tagLength = EMPTY_IMG_TAG_LENGTH + imgId.length();
+      text =
+          new StringBuilder(text)
+              .insert(matcherStart + addedChars + tagLength, stringBlank)
+              .toString();
+      addedChars += charsWide;
+    }
+
+    return new IconExpansionResult(text, maxIconHeight);
+  }
+
+  private int drawOverheadText(
+      Graphics2D graphics,
+      Actor actor,
+      int firstActorHeight,
+      FontMetrics fontMetrics,
+      int stackHeight) {
+    if (actor.getOverheadCycle() <= 0) {
+      return 0;
+    }
+
+    var point = actor.getCanvasTextLocation(graphics, " ", firstActorHeight + 15);
+    if (point == null) {
+      return 0;
+    }
+
+    var text = actor.getOverheadText();
+    if (text == null || text.isEmpty()) {
+      return 0;
+    }
+
+    var formatMatcher = CHAT_FORMAT_PATTERN.matcher(text);
+    if (!formatMatcher.find()) {
+      var strippedText = Text.removeFormattingTags(text).replace("<gt>", ">").replace("<lt>", "<");
+      var textBounds = fontMetrics.getStringBounds(strippedText, graphics);
+
+      graphics.setColor(Color.BLACK);
+      graphics.drawString(
+          strippedText,
+          point.getX() - ((int) (textBounds.getWidth() / 2)) + 1,
+          point.getY() - stackHeight + 1);
+
+      graphics.setColor(Color.YELLOW);
+      graphics.drawString(
+          strippedText,
+          point.getX() - ((int) (textBounds.getWidth() / 2)),
+          point.getY() - stackHeight);
+
+      return (int) textBounds.getHeight();
+    }
+
+    var expansion = expandTextForIcons(text);
+    text = expansion.getExpandedText();
+    var maxIconHeight = expansion.getMaxIconHeight();
+
+    var strippedText = Text.removeFormattingTags(text).replace("<gt>", ">").replace("<lt>", "<");
+    var textBounds = fontMetrics.getStringBounds(strippedText, graphics);
+    var textHeight = (int) textBounds.getHeight();
+    var lineHeight = Math.max(textHeight, maxIconHeight);
+
+    var attributedString = new AttributedString(strippedText);
+    if (!strippedText.isEmpty()) {
+      attributedString.addAttribute(TextAttribute.FONT, graphics.getFont());
+    }
+
+    var charOffset = 0;
+    // text was modified, so re-create the matcher
+    formatMatcher = CHAT_FORMAT_PATTERN.matcher(text);
+    while (formatMatcher.find()) {
+      var tag = formatMatcher.group(1);
+      var value = formatMatcher.group(2);
+      var matcherStart = formatMatcher.start();
+
+      if (tag.equals("col")) {
+        if (strippedText.isEmpty()) {
+          continue;
+        }
+
+        var endColIndex = text.indexOf("</col>", matcherStart + COL_OPENING_TAG_LENGTH);
+        if (endColIndex == -1) {
+          charOffset += COL_OPENING_TAG_LENGTH;
+          continue;
+        }
+
+        var colColor = ColorUtil.fromHex(value);
+        var startIndex = matcherStart - charOffset;
+        var endIndex = endColIndex - charOffset - COL_OPENING_TAG_LENGTH;
+        if (endIndex > startIndex) {
+          attributedString.addAttribute(TextAttribute.FOREGROUND, colColor, startIndex, endIndex);
+        }
+
+        charOffset += COL_OPENING_TAG_LENGTH + COL_CLOSING_TAG_LENGTH;
+      } else /* img */ {
+        var valueInt = Integer.parseInt(value);
+        if (valueInt >= 0 && valueInt < modIcons.length) {
+          var icon = modIcons[valueInt];
+          if (icon != null) {
+            var currentTextBounds =
+                fontMetrics.getStringBounds(
+                    strippedText.substring(0, matcherStart - charOffset), graphics);
+            var spacingOffset =
+                ((int) Math.ceil(icon.getWidth() / SPACE_CHAR_WIDTH) * SPACE_CHAR_WIDTH
+                        - icon.getWidth())
+                    / 2;
+            var drawX =
+                (int)
+                    (point.getX()
+                        - textBounds.getWidth() / 2
+                        + currentTextBounds.getWidth()
+                        + spacingOffset);
+            var drawY =
+                point.getY() - stackHeight - lineHeight + (lineHeight - icon.getHeight()) / 2;
+
+            drawModIcon(graphics, icon, drawX, drawY);
+          }
+        }
+
+        charOffset += EMPTY_IMG_TAG_LENGTH + value.length();
+      }
+    }
+
+    // If the entire overhead text is just an image tag, there will be no stripped text to draw, so
+    // skip drawing the text in that case
+    if (!strippedText.isBlank()) {
+      graphics.setColor(Color.BLACK);
+      graphics.drawString(
+          strippedText,
+          point.getX() - ((int) (textBounds.getWidth() / 2)) + 1,
+          point.getY() - stackHeight + 1);
+
+      graphics.setColor(Color.YELLOW);
+      graphics.drawString(
+          attributedString.getIterator(),
+          point.getX() - ((int) (textBounds.getWidth() / 2)),
+          point.getY() - stackHeight);
+    }
+
+    return lineHeight;
+  }
+
   private void renderOverheadStack(Graphics2D graphics, List<Actor> actors, long deltaMs) {
     var firstActorHeight = actors.get(0).getLogicalHeight();
 
-    var stackHeight = 0;
-
     // Text has to be drawn here, because to hide overheads and skulls, we need to hide every 2d
     // ui element
-    graphics.setFont(FontManager.getRunescapeBoldFont());
-    var fontMetrics = graphics.getFontMetrics();
-    for (Actor actor : actors) {
-      if (actor.getOverheadCycle() <= 0) {
-        continue;
-      }
-
-      var point = actor.getCanvasTextLocation(graphics, " ", firstActorHeight + 15);
-      if (point == null) {
-        continue;
-      }
-
-      var text = actor.getOverheadText();
-      if (text == null || text.isEmpty()) {
-        continue;
-      }
-
-      var textBounds = fontMetrics.getStringBounds(text, graphics);
-      graphics.setColor(Color.BLACK);
-      graphics.drawString(
-          text,
-          point.getX() - ((int) (textBounds.getWidth() / 2)) + 1,
-          point.getY() - stackHeight + 1);
-      graphics.setColor(Color.YELLOW);
-      graphics.drawString(
-          text, point.getX() - ((int) (textBounds.getWidth() / 2)), point.getY() - stackHeight);
-      stackHeight += (int) textBounds.getHeight();
-    }
+    var stackHeight = drawOverheadTexts(graphics, actors, firstActorHeight);
 
     // Initial drawing loop draws only non-stacking nameplates
     var maxNonStackingHeight = 0;
