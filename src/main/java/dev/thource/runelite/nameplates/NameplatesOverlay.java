@@ -73,6 +73,7 @@ public class NameplatesOverlay extends Overlay {
     var map = new HashMap<LocalPoint, List<Actor>>();
     Stream.of(worldView.players(), worldView.npcs())
         .flatMap(IndexedObjectSet::stream)
+        .filter(plugin::shouldDrawOverlay)
         .sorted(
             Comparator.comparingInt(
                 a -> {
