@@ -46,7 +46,8 @@ public enum HitsplatDefaultSprite {
   SANITY_DRAIN(HitsplatID.SANITY_DRAIN, SpriteID.Hitmark._38),
   SANITY_RESTORE(HitsplatID.SANITY_RESTORE, SpriteID.Hitmark._39),
   DOOM(HitsplatID.DOOM, SpriteID.Hitmark.COLOSSEUM_DOOM),
-  BURN(HitsplatID.BURN, SpriteID.Hitmark.BURN_DAMAGE);
+  BURN(HitsplatID.BURN, SpriteID.Hitmark.BURN_DAMAGE),
+  DAMAGE_ME_SAILING(79, SpriteID.Hitmark._45);
 
   // _18 = dodged me
   // _19 = dodged other
