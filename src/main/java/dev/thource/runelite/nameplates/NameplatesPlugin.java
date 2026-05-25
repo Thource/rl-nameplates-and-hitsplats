@@ -61,6 +61,7 @@ import net.runelite.api.gameval.VarPlayerID;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.callback.Hooks;
 import net.runelite.client.callback.RenderCallback;
 import net.runelite.client.callback.RenderCallbackManager;
 import net.runelite.client.config.ConfigManager;
@@ -110,6 +111,7 @@ public class NameplatesPlugin extends Plugin {
   @Getter @Inject private ColorPickerManager colorPickerManager;
   @Getter @Inject private PartyService partyService;
   @Inject private RenderCallbackManager renderCallbackManager;
+  @Inject private Hooks hooks;
 
   @Getter private final HashMap<Integer, HpCacheEntry> hpCache = new HashMap<>();
   @Getter private final HashMap<Integer, PluginActor> actors = new HashMap<>();
@@ -135,13 +137,24 @@ public class NameplatesPlugin extends Plugin {
   @Getter private final Map<String, HitsplatTheme> hitsplatThemes = new HashMap<>();
   @Getter private HitsplatTheme activeHitsplatTheme;
 
+  private boolean isCheckingShouldDraw;
   private final RenderCallback renderCallback =
       new RenderCallback() {
         @Override
         public boolean addEntity(Renderable renderable, boolean ui) {
-          return !ui || (!(renderable instanceof Player) && !(renderable instanceof NPC));
+          return isCheckingShouldDraw
+              || !ui
+              || (!(renderable instanceof Player) && !(renderable instanceof NPC));
         }
       };
+
+  boolean shouldDrawOverlay(Actor actor) {
+    isCheckingShouldDraw = true;
+    var draw = hooks.draw(actor, true);
+    isCheckingShouldDraw = false;
+
+    return draw;
+  }
 
   public static boolean getConfirmation(
       Component parentComponent, String text, String confirmText, int messageType) {
