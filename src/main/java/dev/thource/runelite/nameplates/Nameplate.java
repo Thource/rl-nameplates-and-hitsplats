@@ -1,5 +1,6 @@
 package dev.thource.runelite.nameplates;
 
+import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.Actor;
@@ -23,6 +24,7 @@ public abstract class Nameplate {
   @Setter protected int lastLocalHitsplat = -100;
   protected final AnimationData hpAnimationData = new AnimationData();
   protected final NameplatesPlugin plugin;
+  @Setter protected AccessListStatus accessListStatus = AccessListStatus.UNCHECKED;
 
   public abstract boolean isPercentageHealth();
 
@@ -39,7 +41,11 @@ public abstract class Nameplate {
       return;
     }
 
-    name = Text.removeTags(actor.getName());
+    var newName = Text.removeTags(actor.getName());
+    if (!Objects.equals(newName, name)) {
+      name = newName;
+      accessListStatus = AccessListStatus.UNCHECKED;
+    }
     combatLevel = actor.getCombatLevel();
   }
 

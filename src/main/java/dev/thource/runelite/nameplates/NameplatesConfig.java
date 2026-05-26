@@ -87,7 +87,7 @@ public interface NameplatesConfig extends Config {
   @ConfigItem(
       keyName = "ownNameplateDisplayMode",
       name = "Own nameplate display behaviour",
-      description = "Defines when local player nameplate will be visible.",
+      description = "Defines when local player nameplate status bars will be visible.",
       position = 1,
       section = NAMEPLATES_SECTION)
   default NameplateDisplayMode ownNameplateDisplayMode() {
@@ -109,7 +109,7 @@ public interface NameplatesConfig extends Config {
   @ConfigItem(
       keyName = "partyNameplateDisplayMode",
       name = "Party member nameplate display behaviour",
-      description = "Defines when party member nameplates will be visible.",
+      description = "Defines when party member nameplates status bars will be visible.",
       position = 2,
       section = NAMEPLATES_SECTION)
   default NameplateDisplayMode partyNameplateDisplayMode() {
@@ -130,7 +130,7 @@ public interface NameplatesConfig extends Config {
   @ConfigItem(
       keyName = "playerNameplateDisplayMode",
       name = "Player nameplate display behaviour",
-      description = "Defines when player nameplates will be visible.",
+      description = "Defines when player nameplates status bars will be visible.",
       position = 3,
       section = NAMEPLATES_SECTION)
   default NameplateDisplayMode playerNameplateDisplayMode() {
@@ -151,7 +151,7 @@ public interface NameplatesConfig extends Config {
   @ConfigItem(
       keyName = "npcNameplateDisplayMode",
       name = "NPC nameplate display behaviour",
-      description = "Defines when NPC nameplates will be visible.",
+      description = "Defines when NPC nameplates status bars will be visible.",
       position = 4,
       section = NAMEPLATES_SECTION)
   default NameplateDisplayMode npcNameplateDisplayMode() {
@@ -159,48 +159,48 @@ public interface NameplatesConfig extends Config {
   }
 
   @ConfigItem(
-      keyName = "npcIdsWhitelist",
-      name = "NPC IDs whitelist",
+      keyName = "npcIdsAllowlist",
+      name = "NPC IDs allowlist",
       description =
           "ALWAYS draw nameplates or names for NPCs whose IDs are in this comma-separated list.",
       position = 5,
       section = NAMEPLATES_SECTION)
-  default String npcIdsWhitelist() {
+  default String npcIdsAllowlist() {
     return "";
   }
 
   @ConfigItem(
-      keyName = "npcNamesWhitelist",
-      name = "NPC names whitelist",
+      keyName = "npcNamesAllowlist",
+      name = "NPC names allowlist",
       description =
           "ALWAYS draw nameplates or names for NPCs whose names are in this comma-separated list."
               + " Case-insensitive.",
       position = 5,
       section = NAMEPLATES_SECTION)
-  default String npcNamesWhitelist() {
+  default String npcNamesAllowlist() {
     return "";
   }
 
   @ConfigItem(
-      keyName = "npcIdsBlacklist",
-      name = "NPC IDs blacklist",
+      keyName = "npcIdsDenylist",
+      name = "NPC IDs denylist",
       description =
           "NEVER draw nameplates or names for NPCs whose IDs are in this comma-separated list.",
       position = 6,
       section = NAMEPLATES_SECTION)
-  default String npcIdsBlacklist() {
+  default String npcIdsDenylist() {
     return "";
   }
 
   @ConfigItem(
-      keyName = "npcNamesBlacklist",
-      name = "NPC names blacklist",
+      keyName = "npcNamesDenylist",
+      name = "NPC names denylist",
       description =
           "NEVER draw nameplates or names for NPCs whose names are in this comma-separated list."
               + " Case-insensitive.",
       position = 6,
       section = NAMEPLATES_SECTION)
-  default String npcNamesBlacklist() {
+  default String npcNamesDenylist() {
     return "";
   }
 
