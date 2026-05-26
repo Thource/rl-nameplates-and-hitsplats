@@ -391,6 +391,8 @@ public class NameplatesOverlay extends Overlay {
                     .reversed())
             .collect(Collectors.toList());
 
+    plugin.updateNameplatesAccessListStatuses();
+
     for (var entry : actorEntrySets) {
       var actors = entry.getValue();
       renderOverheadStack(graphics, actors, deltaMs);

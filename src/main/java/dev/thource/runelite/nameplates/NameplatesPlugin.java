@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -140,10 +141,11 @@ public class NameplatesPlugin extends Plugin {
   @Getter private final Map<String, HitsplatTheme> hitsplatThemes = new HashMap<>();
   @Getter private HitsplatTheme activeHitsplatTheme;
 
-  private Set<Integer> npcIdWhitelist = new HashSet<>();
-  private Set<String> npcNameWhitelist = new HashSet<>();
-  private Set<Integer> npcIdBlacklist = new HashSet<>();
-  private Set<String> npcNameBlacklist = new HashSet<>();
+  private boolean accessListsDirty;
+  private Set<Integer> npcIdAllowlist = new HashSet<>();
+  private Set<String> npcNameAllowlist = new HashSet<>();
+  private Set<Integer> npcIdDenylist = new HashSet<>();
+  private Set<String> npcNameDenylist = new HashSet<>();
 
   private boolean isCheckingShouldDraw;
   private final RenderCallback renderCallback =
@@ -180,11 +182,43 @@ public class NameplatesPlugin extends Plugin {
     return result == JOptionPane.OK_OPTION;
   }
 
+  private void migrateAccessLists() {
+    var idAllowlist =
+        configManager.getConfiguration(NameplatesConfig.CONFIG_GROUP, "npcIdsWhitelist");
+    if (idAllowlist != null) {
+      configManager.setConfiguration(NameplatesConfig.CONFIG_GROUP, "npcIdsAllowlist", idAllowlist);
+      configManager.unsetConfiguration(NameplatesConfig.CONFIG_GROUP, "npcIdsWhitelist");
+    }
+    var nameAllowlist =
+        configManager.getConfiguration(NameplatesConfig.CONFIG_GROUP, "npcNamesWhitelist");
+    if (nameAllowlist != null) {
+      configManager.setConfiguration(
+          NameplatesConfig.CONFIG_GROUP, "npcNamesAllowlist", nameAllowlist);
+      configManager.unsetConfiguration(NameplatesConfig.CONFIG_GROUP, "npcNamesWhitelist");
+    }
+
+    var idDenylist =
+        configManager.getConfiguration(NameplatesConfig.CONFIG_GROUP, "npcIdsBlacklist");
+    if (idDenylist != null) {
+      configManager.setConfiguration(NameplatesConfig.CONFIG_GROUP, "npcIdsDenylist", idDenylist);
+      configManager.unsetConfiguration(NameplatesConfig.CONFIG_GROUP, "npcIdsBlacklist");
+    }
+    var nameDenylist =
+        configManager.getConfiguration(NameplatesConfig.CONFIG_GROUP, "npcNamesBlacklist");
+    if (nameDenylist != null) {
+      configManager.setConfiguration(
+          NameplatesConfig.CONFIG_GROUP, "npcNamesDenylist", nameDenylist);
+      configManager.unsetConfiguration(NameplatesConfig.CONFIG_GROUP, "npcNamesBlacklist");
+    }
+  }
+
   @Override
   protected void startUp() {
     loadThemes();
 
-    updateNpcWhitelistAndBlacklist();
+    migrateAccessLists();
+
+    updateNpcAccessLists();
 
     if (panel == null) {
       // edt
@@ -231,19 +265,19 @@ public class NameplatesPlugin extends Plugin {
     }
 
     var key = configChanged.getKey();
-    if (!key.equals("npcIdsWhitelist")
-        && !key.equals("npcNamesWhitelist")
-        && !key.equals("npcIdsBlacklist")
-        && !key.equals("npcNamesBlacklist")) {
+    if (!key.equals("npcIdsAllowlist")
+        && !key.equals("npcNamesAllowlist")
+        && !key.equals("npcIdsDenylist")
+        && !key.equals("npcNamesDenylist")) {
       return;
     }
 
-    updateNpcWhitelistAndBlacklist();
+    updateNpcAccessLists();
   }
 
-  private void updateNpcWhitelistAndBlacklist() {
-    npcIdWhitelist =
-        Stream.of(config.npcIdsWhitelist().split(","))
+  private void updateNpcAccessLists() {
+    npcIdAllowlist =
+        Stream.of(config.npcIdsAllowlist().split(","))
             .map(String::trim)
             .filter(s -> !s.isEmpty())
             .map(
@@ -257,15 +291,15 @@ public class NameplatesPlugin extends Plugin {
             .filter(i -> i >= 0)
             .collect(Collectors.toCollection(HashSet::new));
 
-    npcNameWhitelist =
-        Stream.of(config.npcNamesWhitelist().split(","))
+    npcNameAllowlist =
+        Stream.of(config.npcNamesAllowlist().split(","))
             .map(String::trim)
             .filter(s -> !s.isEmpty())
             .map(String::toLowerCase)
             .collect(Collectors.toCollection(HashSet::new));
 
-    npcIdBlacklist =
-        Stream.of(config.npcIdsBlacklist().split(","))
+    npcIdDenylist =
+        Stream.of(config.npcIdsDenylist().split(","))
             .map(String::trim)
             .filter(s -> !s.isEmpty())
             .map(
@@ -279,12 +313,14 @@ public class NameplatesPlugin extends Plugin {
             .filter(i -> i >= 0)
             .collect(Collectors.toCollection(HashSet::new));
 
-    npcNameBlacklist =
-        Stream.of(config.npcNamesBlacklist().split(","))
+    npcNameDenylist =
+        Stream.of(config.npcNamesDenylist().split(","))
             .map(String::trim)
             .filter(s -> !s.isEmpty())
             .map(String::toLowerCase)
             .collect(Collectors.toCollection(HashSet::new));
+
+    accessListsDirty = true;
   }
 
   private void loadThemes() {
@@ -868,23 +904,15 @@ public class NameplatesPlugin extends Plugin {
   }
 
   public boolean getAlwaysDrawName(Nameplate nameplate) {
-    var actor = nameplate.getActor();
-    if (actor instanceof NPC) {
-      var id = ((NPC) actor).getId();
-
-      if (npcIdBlacklist.contains(id)) {
-        return false;
-      }
-
-      var name = nameplate.getName();
-      if (name != null) {
-        var lowerName = name.toLowerCase();
-        if (npcNameBlacklist.contains(lowerName)) {
-          return false;
-        }
-      }
+    var accessListStatus = nameplate.getAccessListStatus();
+    if (accessListStatus == AccessListStatus.ALLOWLISTED) {
+      return true;
+    }
+    if (accessListStatus == AccessListStatus.DENYLISTED) {
+      return false;
     }
 
+    var actor = nameplate.getActor();
     if (actor instanceof Player) {
       if (actor == client.getLocalPlayer()) {
         return config.alwaysDrawOwnName();
@@ -901,33 +929,72 @@ public class NameplatesPlugin extends Plugin {
   }
 
   public boolean shouldDrawBars(Nameplate nameplate) {
+    var accessListStatus = nameplate.getAccessListStatus();
+    if (accessListStatus == AccessListStatus.ALLOWLISTED) {
+      return true;
+    }
+    if (accessListStatus == AccessListStatus.DENYLISTED) {
+      return false;
+    }
+
     return getDisplayMode(nameplate).shouldDraw(client, nameplate);
   }
 
-  public boolean shouldDrawFor(Nameplate nameplate) {
+  public void updateNameplatesAccessListStatuses() {
+    actors.values().stream()
+        .map(PluginActor::getNameplate)
+        .filter(Objects::nonNull)
+        .forEach(this::updateNameplateAccessListStatus);
+
+    accessListsDirty = false;
+  }
+
+  private void updateNameplateAccessListStatus(Nameplate nameplate) {
     var actor = nameplate.getActor();
-    if (actor instanceof NPC) {
-      var id = ((NPC) actor).getId();
+    if (!(actor instanceof NPC)) {
+      return;
+    }
 
-      if (npcIdWhitelist.contains(id)) {
-        return true;
+    // Only refresh the status if the lists have changed or the status is currently unchecked
+    if (!accessListsDirty && nameplate.getAccessListStatus() != AccessListStatus.UNCHECKED) {
+      return;
+    }
+
+    var id = ((NPC) actor).getId();
+    if (npcIdAllowlist.contains(id)) {
+      nameplate.setAccessListStatus(AccessListStatus.ALLOWLISTED);
+      return;
+    }
+
+    if (npcIdDenylist.contains(id)) {
+      nameplate.setAccessListStatus(AccessListStatus.DENYLISTED);
+      return;
+    }
+
+    var name = nameplate.getName();
+    if (name != null) {
+      var lowerName = name.toLowerCase();
+      if (npcNameAllowlist.contains(lowerName)) {
+        nameplate.setAccessListStatus(AccessListStatus.ALLOWLISTED);
+        return;
       }
 
-      if (npcIdBlacklist.contains(id)) {
-        return false;
+      if (npcNameDenylist.contains(lowerName)) {
+        nameplate.setAccessListStatus(AccessListStatus.DENYLISTED);
+        return;
       }
+    }
 
-      var name = nameplate.getName();
-      if (name != null) {
-        var lowerName = name.toLowerCase();
-        if (npcNameWhitelist.contains(lowerName)) {
-          return true;
-        }
+    nameplate.setAccessListStatus(AccessListStatus.UNLISTED);
+  }
 
-        if (npcNameBlacklist.contains(lowerName)) {
-          return false;
-        }
-      }
+  public boolean shouldDrawFor(Nameplate nameplate) {
+    var accessListStatus = nameplate.getAccessListStatus();
+    if (accessListStatus == AccessListStatus.ALLOWLISTED) {
+      return true;
+    }
+    if (accessListStatus == AccessListStatus.DENYLISTED) {
+      return false;
     }
 
     var overheadIcon = NameplateHeadIcon.get(nameplate.getActor());
