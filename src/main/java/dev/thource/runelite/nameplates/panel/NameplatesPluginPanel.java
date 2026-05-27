@@ -163,10 +163,4 @@ public class NameplatesPluginPanel extends PluginPanel {
 
     bodyPanel.add(nameplatePanel);
   }
-
-  @Override
-  public void onActivate() {}
-
-  @Override
-  public void onDeactivate() {}
 }

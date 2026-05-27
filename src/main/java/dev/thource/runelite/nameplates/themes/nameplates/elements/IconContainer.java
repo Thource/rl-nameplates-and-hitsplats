@@ -20,19 +20,37 @@ import java.util.stream.Collectors;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import net.runelite.api.coords.Direction;
 
 @SuperBuilder
 public class IconContainer extends Element {
-  @Builder.Default protected int iconSize = 26;
-  @Builder.Default protected int padding = 4;
-  @Builder.Default protected boolean isVertical = false;
-  @Builder.Default protected boolean addHeightWhenDrawn = false;
-  @Getter @Builder.Default protected int heightAddedWhenDrawn = 0;
-  @Builder.Default protected List<IconType> iconTypes = new ArrayList<>();
+  @Setter(AccessLevel.PRIVATE)
+  @Builder.Default
+  private int iconSize = 26;
+
+  @Setter(AccessLevel.PRIVATE)
+  @Builder.Default
+  private int padding = 4;
+
+  @Setter(AccessLevel.PRIVATE)
+  @Builder.Default
+  private boolean isVertical = false;
+
+  @Setter(AccessLevel.PRIVATE)
+  @Builder.Default
+  private boolean addHeightWhenDrawn = false;
+
+  @Setter(AccessLevel.PRIVATE)
+  @Getter
+  @Builder.Default
+  private int heightAddedWhenDrawn = 0;
+
+  @Builder.Default private final List<IconType> iconTypes = new ArrayList<>();
 
   private IconType[] iconsToDraw(Nameplate nameplate) {
     return iconTypes.stream()
@@ -100,22 +118,22 @@ public class IconContainer extends Element {
   public List<LabelledInput> getEditInputs(NameplatesPlugin plugin) {
     var editInputs = super.getEditInputs(plugin);
 
-    editInputs.add(new CheckboxInput("Vertical", isVertical, value -> isVertical = value));
+    editInputs.add(new CheckboxInput("Vertical", isVertical, this::setVertical));
     editInputs.add(
         new CheckboxInput(
             "Add height above nameplate in stack when drawn",
             addHeightWhenDrawn,
-            value -> addHeightWhenDrawn = value));
+            this::setAddHeightWhenDrawn));
     editInputs.add(
         new IntInput(
             "Extra height added when drawn",
             heightAddedWhenDrawn,
             0,
             999,
-            value -> heightAddedWhenDrawn = value,
+            this::setHeightAddedWhenDrawn,
             "px"));
-    editInputs.add(new IntInput("Icon size", iconSize, 1, 999, value -> iconSize = value, "px"));
-    editInputs.add(new IntInput("Icon spacing", padding, 0, 999, value -> padding = value, "px"));
+    editInputs.add(new IntInput("Icon size", iconSize, 1, 999, this::setIconSize, "px"));
+    editInputs.add(new IntInput("Icon spacing", padding, 0, 999, this::setPadding, "px"));
     var iconTypesSelector = new ListSelector<>("Icons", null, iconTypes);
     iconTypesSelector.addChangeListener(
         sel -> {

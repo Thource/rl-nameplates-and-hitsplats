@@ -1,6 +1,5 @@
 package dev.thource.runelite.nameplates;
 
-import lombok.Getter;
 import net.runelite.api.Player;
 import net.runelite.api.Skill;
 import net.runelite.api.gameval.VarPlayerID;
@@ -9,7 +8,6 @@ import net.runelite.client.plugins.itemstats.StatChange;
 import net.runelite.client.plugins.itemstats.stats.Stat;
 import net.runelite.client.plugins.party.data.PartyData;
 
-@Getter
 public class PlayerNameplate extends Nameplate {
   private PartyData partyData;
 
@@ -193,5 +191,10 @@ public class PlayerNameplate extends Nameplate {
   @Override
   public boolean isPercentageHealth() {
     return maxHealth == 100;
+  }
+
+  @Override
+  public PartyData getPartyData() {
+    return partyData;
   }
 }

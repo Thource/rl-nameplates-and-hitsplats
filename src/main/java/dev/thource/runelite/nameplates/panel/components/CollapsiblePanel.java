@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import javax.annotation.Nonnull;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -42,19 +43,7 @@ public class CollapsiblePanel extends JPanel {
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     setBackground(ColorScheme.DARK_GRAY_COLOR);
 
-    final var header = new JPanel();
-    header.setLayout(new BorderLayout());
-    header.setMinimumSize(new Dimension(width, 0));
-    header.setPreferredSize(new Dimension(width, 30));
-    header.setMaximumSize(new Dimension(width, 30));
-    // For whatever reason, the header extends out by a single pixel when closed. Adding a single
-    // pixel of
-    // border on the right only affects the width when closed, fixing the issue.
-    header.setBackground(ColorScheme.DARK_GRAY_COLOR);
-    header.setBorder(
-        new CompoundBorder(
-            new MatteBorder(0, 0, 1, 0, ColorScheme.MEDIUM_GRAY_COLOR),
-            new EmptyBorder(0, 0, 3, 1)));
+    final var header = createHeader(width);
     add(header, BorderLayout.NORTH);
 
     button = new JButton(SECTION_EXPAND_ICON);
@@ -92,10 +81,25 @@ public class CollapsiblePanel extends JPanel {
     add(contents, BorderLayout.SOUTH);
   }
 
-  public Component addToPanel(Component comp) {
-    contents.add(comp);
+  @Nonnull
+  private static JPanel createHeader(int width) {
+    final var header = new JPanel();
+    header.setLayout(new BorderLayout());
+    header.setMinimumSize(new Dimension(width, 0));
+    header.setPreferredSize(new Dimension(width, 30));
+    header.setMaximumSize(new Dimension(width, 30));
+    // For whatever reason, the header extends out by a single pixel when closed. Adding a single
+    // pixel of border on the right only affects the width when closed, fixing the issue.
+    header.setBackground(ColorScheme.DARK_GRAY_COLOR);
+    header.setBorder(
+        new CompoundBorder(
+            new MatteBorder(0, 0, 1, 0, ColorScheme.MEDIUM_GRAY_COLOR),
+            new EmptyBorder(0, 0, 3, 1)));
+    return header;
+  }
 
-    return comp;
+  public void addToPanel(Component comp) {
+    contents.add(comp);
   }
 
   public void toggle() {

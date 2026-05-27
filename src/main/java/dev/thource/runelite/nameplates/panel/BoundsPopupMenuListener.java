@@ -1,10 +1,20 @@
 package dev.thource.runelite.nameplates.panel;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.plaf.basic.*;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Point;
+import javax.swing.JComboBox;
+import javax.swing.JList;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JViewport;
+import javax.swing.SwingUtilities;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
+import javax.swing.plaf.basic.BasicComboPopup;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * This class will change the bounds of the JComboBox popup menu to support different functionality.
@@ -14,13 +24,43 @@ import javax.swing.plaf.basic.*;
  * <p>Class will only work for a JComboBox that uses a BasicComboPop.
  */
 public class BoundsPopupMenuListener implements PopupMenuListener {
-  private boolean scrollBarRequired = true;
-  private boolean popupWider;
-  private int maximumWidth = -1;
-  private boolean popupAbove;
+  /**
+   * -- GETTER -- Determine if the horizontal scroll bar might be required for the popup
+   *
+   * <p>-- SETTER -- For some reason the default implementation of the popup removes the horizontal
+   * scrollBar from the popup scroll pane which can result in the truncation of the rendered items
+   * in the popop. Adding a scrollBar back to the scrollPane will allow horizontal scrolling if
+   * necessary.
+   */
+  @Setter @Getter private boolean scrollBarRequired = true;
+
+  /**
+   * -- GETTER -- Determine if the popup might be displayed wider than the combo box
+   *
+   * <p>-- SETTER -- Change the width of the popup to be the greater of the width of the combo box
+   * or the preferred width of the popup. Normally the popup width is always the same size as the
+   * combo box width.
+   */
+  @Setter @Getter private boolean popupWider;
+
+  /**
+   * -- GETTER -- Return the maximum width of the popup.
+   *
+   * <p>-- SETTER -- Set the maximum width for the popup. This value is only used when
+   * setPopupWider( true ) has been specified. A value of -1 indicates that there is no maximum.
+   */
+  @Setter @Getter private int maximumWidth = -1;
+
+  /**
+   * -- GETTER -- Determine if the popup should be displayed above the combo box.
+   *
+   * <p>-- SETTER -- Change the location of the popup relative to the combo box.
+   */
+  @Setter @Getter private boolean popupAbove;
+
   private JScrollPane scrollPane;
 
-  /** Convenience constructore to allow the display of a horizontal scrollbar when required. */
+  /** Convenience constructor to allow the display of a horizontal scrollbar when required. */
   public BoundsPopupMenuListener() {
     this(true, false, -1, false);
   }
@@ -63,100 +103,17 @@ public class BoundsPopupMenuListener implements PopupMenuListener {
     setPopupAbove(popupAbove);
   }
 
-  /**
-   * Return the maximum width of the popup.
-   *
-   * @return the maximumWidth value
-   */
-  public int getMaximumWidth() {
-    return maximumWidth;
-  }
-
-  /**
-   * Set the maximum width for the popup. This value is only used when setPopupWider( true ) has
-   * been specified. A value of -1 indicates that there is no maximum.
-   *
-   * @param maximumWidth the maximum width of the popup
-   */
-  public void setMaximumWidth(int maximumWidth) {
-    this.maximumWidth = maximumWidth;
-  }
-
-  /**
-   * Determine if the popup should be displayed above the combo box.
-   *
-   * @return the popupAbove value
-   */
-  public boolean isPopupAbove() {
-    return popupAbove;
-  }
-
-  /**
-   * Change the location of the popup relative to the combo box.
-   *
-   * @param popupAbove true display popup above the combo box, false display popup below the combo
-   *     box.
-   */
-  public void setPopupAbove(boolean popupAbove) {
-    this.popupAbove = popupAbove;
-  }
-
-  /**
-   * Determine if the popup might be displayed wider than the combo box
-   *
-   * @return the popupWider value
-   */
-  public boolean isPopupWider() {
-    return popupWider;
-  }
-
-  /**
-   * Change the width of the popup to be the greater of the width of the combo box or the preferred
-   * width of the popup. Normally the popup width is always the same size as the combo box width.
-   *
-   * @param popupWider true adjust the width as required.
-   */
-  public void setPopupWider(boolean popupWider) {
-    this.popupWider = popupWider;
-  }
-
-  /**
-   * Determine if the horizontal scroll bar might be required for the popup
-   *
-   * @return the scrollBarRequired value
-   */
-  public boolean isScrollBarRequired() {
-    return scrollBarRequired;
-  }
-
-  /**
-   * For some reason the default implementation of the popup removes the horizontal scrollBar from
-   * the popup scroll pane which can result in the truncation of the rendered items in the popop.
-   * Adding a scrollBar back to the scrollPane will allow horizontal scrolling if necessary.
-   *
-   * @param scrollBarRequired true add horizontal scrollBar to scrollPane false remove the
-   *     horizontal scrollBar
-   */
-  public void setScrollBarRequired(boolean scrollBarRequired) {
-    this.scrollBarRequired = scrollBarRequired;
-  }
-
   /** Alter the bounds of the popup just before it is made visible. */
   @Override
   public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-    JComboBox comboBox = (JComboBox) e.getSource();
+    JComboBox<?> comboBox = (JComboBox<?>) e.getSource();
 
     if (comboBox.getItemCount() == 0) return;
 
     final Object child = comboBox.getAccessibleContext().getAccessibleChild(0);
 
     if (child instanceof BasicComboPopup) {
-      SwingUtilities.invokeLater(
-          new Runnable() {
-            public void run() {
-              customizePopup((BasicComboPopup) child);
-            }
-          });
+      SwingUtilities.invokeLater(() -> customizePopup((BasicComboPopup) child));
     }
   }
 
@@ -188,7 +145,7 @@ public class BoundsPopupMenuListener implements PopupMenuListener {
    *  Adjust the width of the scrollpane used by the popup
    */
   protected void popupWider(BasicComboPopup popup) {
-    JList list = popup.getList();
+    JList<?> list = popup.getList();
 
     //  Determine the maximimum width to use:
     //  a) determine the popup preferred width
@@ -259,7 +216,7 @@ public class BoundsPopupMenuListener implements PopupMenuListener {
    *  Get the scroll pane used by the popup so its bounds can be adjusted
    */
   protected JScrollPane getScrollPane(BasicComboPopup popup) {
-    JList list = popup.getList();
+    JList<?> list = popup.getList();
     Container c = SwingUtilities.getAncestorOfClass(JScrollPane.class, list);
 
     return (JScrollPane) c;
@@ -271,7 +228,7 @@ public class BoundsPopupMenuListener implements PopupMenuListener {
    */
   protected int getScrollBarWidth(BasicComboPopup popup, JScrollPane scrollPane) {
     int scrollBarWidth = 0;
-    JComboBox comboBox = (JComboBox) popup.getInvoker();
+    JComboBox<?> comboBox = (JComboBox<?>) popup.getInvoker();
 
     if (comboBox.getItemCount() > comboBox.getMaximumRowCount()) {
       JScrollBar vertical = scrollPane.getVerticalScrollBar();
@@ -287,7 +244,7 @@ public class BoundsPopupMenuListener implements PopupMenuListener {
    */
   protected boolean horizontalScrollBarWillBeVisible(
       BasicComboPopup popup, JScrollPane scrollPane) {
-    JList list = popup.getList();
+    JList<?> list = popup.getList();
     int scrollBarWidth = getScrollBarWidth(popup, scrollPane);
     int popupWidth = list.getPreferredSize().width + scrollBarWidth;
 
