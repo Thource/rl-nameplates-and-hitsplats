@@ -1,5 +1,6 @@
 package dev.thource.runelite.nameplates.themes.nameplates.elements;
 
+import dev.thource.runelite.nameplates.NPCNameplate;
 import dev.thource.runelite.nameplates.Nameplate;
 import dev.thource.runelite.nameplates.NameplatesPlugin;
 import dev.thource.runelite.nameplates.panel.components.CheckboxInput;
@@ -116,7 +117,13 @@ public class StatusText extends Text {
       return null;
     }
 
-    return (showCurrent ? "/ " : "") + getMax(nameplate);
+    var maxText = String.valueOf(getMax(nameplate));
+
+    if (nameplate instanceof NPCNameplate && ((NPCNameplate) nameplate).getPercentageHealthOverride() > 0) {
+      maxText = "~" + maxText;
+    }
+
+    return (showCurrent ? "/ " : "") + maxText;
   }
 
   protected String getTextForPercentage(Nameplate nameplate, boolean forced) {
