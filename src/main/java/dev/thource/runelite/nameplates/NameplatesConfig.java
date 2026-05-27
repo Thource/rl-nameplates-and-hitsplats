@@ -26,9 +26,6 @@ public interface NameplatesConfig extends Config {
   @ConfigSection(name = "Nameplates", description = "Settings related to nameplates", position = 1)
   String NAMEPLATES_SECTION = "Nameplates";
 
-  @ConfigSection(name = "Hitsplats", description = "Settings related to hitsplats", position = 2)
-  String HITSPLATS_SECTION = "Hitsplats";
-
   @ConfigItem(
       keyName = "activeNameplateThemeForSelfId",
       name = "Active nameplate theme for self ID",
@@ -231,6 +228,9 @@ public interface NameplatesConfig extends Config {
   default boolean enableNoLootOtherGIMSplats() {
     return true;
   }
+
+  @ConfigSection(name = "Hitsplats", description = "Settings related to hitsplats", position = 2)
+  String HITSPLATS_SECTION = "Hitsplats";
 
   @ConfigItem(
       keyName = "combineHitsplats",

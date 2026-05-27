@@ -54,7 +54,7 @@ public abstract class Nameplate {
   }
 
   public boolean shouldDrawHealthBar() {
-    return maxHealth > 0;
+    return getMaxHealth() > 0;
   }
 
   public boolean shouldDrawPrayerBar() {
