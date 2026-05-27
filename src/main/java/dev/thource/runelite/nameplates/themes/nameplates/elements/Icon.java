@@ -155,7 +155,7 @@ public class Icon extends Element {
   public List<LabelledInput> getEditInputs(NameplatesPlugin plugin) {
     var inputs = super.getEditInputs(plugin);
 
-    inputs.add(new IntInput("Icon size", size, 1, 999, value -> size = value));
+    inputs.add(new IntInput("Icon size", size, 1, 999, value -> size = value, "px"));
 
     inputs.add(
         new DropdownInput<>("Icon type", iconType, IconType.values(), value -> iconType = value));

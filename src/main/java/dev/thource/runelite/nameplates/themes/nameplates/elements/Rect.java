@@ -52,9 +52,10 @@ public class Rect extends Element {
   public List<LabelledInput> getEditInputs(NameplatesPlugin plugin) {
     var editInputs = super.getEditInputs(plugin);
 
-    editInputs.add(new IntInput("Width", width, 1, 999, val -> width = val));
-    editInputs.add(new IntInput("Height", height, 1, 999, val -> height = val));
-    editInputs.add(new IntInput("Corner radius", cornerRadius, 0, 999, val -> cornerRadius = val));
+    editInputs.add(new IntInput("Width", width, 1, 999, val -> width = val, "px"));
+    editInputs.add(new IntInput("Height", height, 1, 999, val -> height = val, "px"));
+    editInputs.add(
+        new IntInput("Corner radius", cornerRadius, 0, 999, val -> cornerRadius = val, "px"));
     editInputs.add(new ColorInput("Color", color, val -> color = val, plugin));
 
     return editInputs;

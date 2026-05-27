@@ -117,17 +117,19 @@ public abstract class Bar extends Element {
   public List<LabelledInput> getEditInputs(NameplatesPlugin plugin) {
     var editInputs = super.getEditInputs(plugin);
 
-    editInputs.add(new IntInput("Width", width, 1, 999, this::setWidth));
-    editInputs.add(new IntInput("Height", height, 1, 999, this::setHeight));
+    editInputs.add(new IntInput("Width", width, 1, 999, this::setWidth, "px"));
+    editInputs.add(new IntInput("Height", height, 1, 999, this::setHeight, "px"));
     editInputs.add(
         new IntInput(
             "Height added to nameplate when drawn",
             heightAddedWhenDrawn,
             1,
             999,
-            this::setHeightAddedWhenDrawn));
-    editInputs.add(new IntInput("Corner radius", cornerRadius, 0, 999, this::setCornerRadius));
-    editInputs.add(new IntInput("Border size", borderSize, 0, 999, this::setBorderSize));
+            this::setHeightAddedWhenDrawn,
+            "px"));
+    editInputs.add(
+        new IntInput("Corner radius", cornerRadius, 0, 999, this::setCornerRadius, "px"));
+    editInputs.add(new IntInput("Border size", borderSize, 0, 999, this::setBorderSize, "px"));
     editInputs.add(new ColorInput("Border color", borderColor, this::setBorderColor, plugin));
     editInputs.add(
         new ColorInput("Background color", backgroundColor, this::setBackgroundColor, plugin));

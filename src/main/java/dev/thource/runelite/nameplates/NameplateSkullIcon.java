@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import net.runelite.api.Actor;
 import net.runelite.api.Player;
 import net.runelite.api.SkullIcon;
-import net.runelite.api.SpriteID;
+import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.game.SpriteManager;
 
 @RequiredArgsConstructor
@@ -68,7 +68,7 @@ public enum NameplateSkullIcon implements Nameable {
       return true;
     }
 
-    image = spriteManager.getSprite(SpriteID.PLAYER_KILLER_SKULL, skullIcon);
+    image = spriteManager.getSprite(SpriteID.HEADICONS_PK, skullIcon);
     return image != null;
   }
 }

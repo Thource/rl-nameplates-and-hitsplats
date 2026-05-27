@@ -112,9 +112,10 @@ public class IconContainer extends Element {
             heightAddedWhenDrawn,
             0,
             999,
-            value -> heightAddedWhenDrawn = value));
-    editInputs.add(new IntInput("Icon size", iconSize, 1, 999, value -> iconSize = value));
-    editInputs.add(new IntInput("Icon spacing", padding, 0, 999, value -> padding = value));
+            value -> heightAddedWhenDrawn = value,
+            "px"));
+    editInputs.add(new IntInput("Icon size", iconSize, 1, 999, value -> iconSize = value, "px"));
+    editInputs.add(new IntInput("Icon spacing", padding, 0, 999, value -> padding = value, "px"));
     var iconTypesSelector = new ListSelector<>("Icons", null, iconTypes);
     iconTypesSelector.addChangeListener(
         sel -> {

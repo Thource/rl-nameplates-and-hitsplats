@@ -119,7 +119,8 @@ public class NameplateEditPanel extends JPanel {
             (value) -> {
               editingTheme.setWidth(value);
               preview.repaint();
-            });
+            },
+            "px");
     themeConfigTab.add(widthInput);
 
     heightInput =
@@ -131,7 +132,8 @@ public class NameplateEditPanel extends JPanel {
             (value) -> {
               editingTheme.setHeight(value);
               preview.repaint();
-            });
+            },
+            "px");
     themeConfigTab.add(heightInput);
 
     stackInput =
