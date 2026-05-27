@@ -7,7 +7,6 @@ import java.io.ByteArrayInputStream;
 import java.util.Base64;
 import javax.imageio.ImageIO;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.client.callback.ClientThread;
 import net.runelite.client.game.SpriteManager;
 
 @Slf4j
@@ -20,12 +19,12 @@ public class SpriteOrImage implements Nameable {
     this.spriteArchiveId = spriteArchiveId;
   }
 
-  public void initialize(ClientThread clientThread, SpriteManager spriteManager) {
+  public void initialize(SpriteManager spriteManager) {
     if (spriteArchiveId == -1) {
       return;
     }
 
-    clientThread.invokeLater(() -> image = spriteManager.getSprite(spriteArchiveId, 0));
+    spriteManager.getSpriteAsync(spriteArchiveId, 0, img -> image = img);
   }
 
   public SpriteOrImage(String imageBase64) {

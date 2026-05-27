@@ -8,7 +8,7 @@ import net.runelite.client.ui.FontManager;
 
 public class HitsplatOptions implements Nameable {
   protected final int hitsplatType;
-  protected SpriteOrImage background;
+  protected final SpriteOrImage background;
 
   public HitsplatOptions(int hitsplatType, int spriteId) {
     this.hitsplatType = hitsplatType;
@@ -96,9 +96,7 @@ public class HitsplatOptions implements Nameable {
     var adjustedX = centerX - width / 2;
     var adjustedY = centerY - height / 2;
 
-    if (background != null) {
-      background.draw(graphics, adjustedX, adjustedY, width, height);
-    }
+    background.draw(graphics, adjustedX, adjustedY, width, height);
 
     graphics.setFont(FontManager.getRunescapeSmallFont());
     var fontMetrics = graphics.getFontMetrics();

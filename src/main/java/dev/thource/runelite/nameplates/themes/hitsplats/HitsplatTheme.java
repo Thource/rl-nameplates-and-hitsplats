@@ -14,7 +14,7 @@ public abstract class HitsplatTheme implements Nameable {
   protected transient NameplatesPlugin plugin;
   protected transient NameplatesConfig config;
 
-  @Getter protected String id;
+  @Getter protected final String id;
   @Getter @Setter protected int order;
   @Getter @Setter protected String name;
   @Getter @Setter protected int width = 25;
@@ -22,7 +22,8 @@ public abstract class HitsplatTheme implements Nameable {
   @Getter @Setter protected HitsplatDisplayType displayType = new OSRSDisplayType();
 
   @Getter
-  protected Map<Integer, HitsplatOptions> hitsplatOptionsMap = HitsplatDefaultSprite.defaultMap();
+  protected final Map<Integer, HitsplatOptions> hitsplatOptionsMap =
+      HitsplatDefaultSprite.defaultMap();
 
   protected HitsplatTheme(String id) {
     this.id = id;
@@ -32,10 +33,8 @@ public abstract class HitsplatTheme implements Nameable {
     this.plugin = plugin;
     config = plugin.getConfig();
 
-    var clientThread = plugin.getClientThread();
     var spriteManager = plugin.getSpriteManager();
-    hitsplatOptionsMap.forEach(
-        (id, options) -> options.background.initialize(clientThread, spriteManager));
+    hitsplatOptionsMap.forEach((id, options) -> options.background.initialize(spriteManager));
   }
 
   public void drawHitsplats(Graphics2D graphics, Actor actor) {

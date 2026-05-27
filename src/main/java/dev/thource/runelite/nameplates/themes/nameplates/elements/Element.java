@@ -22,8 +22,8 @@ public abstract class Element implements Nameable {
   protected final String elementType = getClass().getSimpleName();
 
   @Builder.Default @Getter @Setter protected String name = "Element";
-  @Builder.Default protected PositionProvider xPositionProvider = new PositionProvider();
-  @Builder.Default protected PositionProvider yPositionProvider = new PositionProvider();
+  @Builder.Default protected final PositionProvider xPositionProvider = new PositionProvider();
+  @Builder.Default protected final PositionProvider yPositionProvider = new PositionProvider();
 
   public abstract void draw(Nameplate nameplate, Graphics2D graphics, int x, int y);
 

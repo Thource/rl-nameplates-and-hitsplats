@@ -212,13 +212,25 @@ public class NameplatesPlugin extends Plugin {
     }
   }
 
+  private void loadSprites() {
+    for (NameplateHeadIcon icon : NameplateHeadIcon.values()) {
+      icon.loadImage(spriteManager);
+    }
+
+    for (NameplateSkullIcon icon : NameplateSkullIcon.values()) {
+      icon.loadImage(spriteManager);
+    }
+
+    Icon.initImages(spriteManager);
+  }
+
   @Override
   protected void startUp() {
     loadThemes();
 
     migrateAccessLists();
-
     updateNpcAccessLists();
+    loadSprites();
 
     if (panel == null) {
       // edt
@@ -236,8 +248,6 @@ public class NameplatesPlugin extends Plugin {
             clientToolbar.addNavigation(navButton);
           });
     }
-
-    clientThread.invokeLater(this::loadSpritesFromSpriteManager);
 
     overlayManager.add(nameplatesOverlay);
 
@@ -1069,25 +1079,5 @@ public class NameplatesPlugin extends Plugin {
   @Provides
   NameplatesConfig provideConfig(ConfigManager configManager) {
     return configManager.getConfig(NameplatesConfig.class);
-  }
-
-  private boolean loadSpritesFromSpriteManager() {
-    if (client.getGameState().ordinal() < GameState.LOGIN_SCREEN.ordinal()) {
-      return false;
-    }
-
-    var headIcons = NameplateHeadIcon.values();
-    for (NameplateHeadIcon icon : headIcons) {
-      if (!icon.loadImage(spriteManager)) {
-        return false;
-      }
-    }
-    for (NameplateSkullIcon icon : NameplateSkullIcon.values()) {
-      if (!icon.loadImage(spriteManager)) {
-        return false;
-      }
-    }
-
-    return Icon.initImages(spriteManager);
   }
 }

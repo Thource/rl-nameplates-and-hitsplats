@@ -18,7 +18,7 @@ import net.runelite.client.ui.FontManager;
 @SuperBuilder
 public class NameText extends Text {
   @Setter @Builder.Default protected int maxWidth = 0;
-  @Builder.Default protected NameColorProvider colorProvider = new NameColorProvider();
+  @Builder.Default protected final NameColorProvider colorProvider = new NameColorProvider();
   @Setter @Builder.Default protected NameTextDisplayMode displayMode = NameTextDisplayMode.ALWAYS;
 
   @Override

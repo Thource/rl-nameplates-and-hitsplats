@@ -334,10 +334,6 @@ public class DummyPlayer implements Player {
     return null;
   }
 
-  public Polygon[] getPolygons() {
-    return new Polygon[0];
-  }
-
   @Override
   public int getTeam() {
     return 0;

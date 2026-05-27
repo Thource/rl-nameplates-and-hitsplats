@@ -19,7 +19,7 @@ public abstract class NameplateTheme implements Nameable {
   protected transient NameplatesPlugin plugin;
   protected transient NameplatesConfig config;
 
-  @Getter protected String id;
+  @Getter protected final String id;
   @Getter @Setter protected int order;
   @Getter @Setter protected String name;
   @Getter @Setter protected int width;

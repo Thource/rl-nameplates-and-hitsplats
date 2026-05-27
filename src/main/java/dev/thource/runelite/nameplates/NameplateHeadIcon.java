@@ -87,13 +87,11 @@ public enum NameplateHeadIcon implements Nameable {
     return get((NPC) actor);
   }
 
-  /** returns true if there is no image to load, or if the image loaded successfully */
-  public boolean loadImage(SpriteManager spriteManager) {
+  public void loadImage(SpriteManager spriteManager) {
     if (image != null || overheadFileId == -1) {
-      return true;
+      return;
     }
 
-    image = spriteManager.getSprite(SpriteID.HEADICONS_PRAYER, overheadFileId);
-    return image != null;
+    spriteManager.getSpriteAsync(SpriteID.HEADICONS_PRAYER, overheadFileId, img -> image = img);
   }
 }
