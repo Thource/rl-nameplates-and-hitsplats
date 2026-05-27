@@ -62,11 +62,13 @@ public enum NameplateSkullIcon implements Nameable {
     return null;
   }
 
-  public void loadImage(SpriteManager spriteManager) {
+  /** returns true if there is no image to load, or if the image loaded successfully */
+  public boolean loadImage(SpriteManager spriteManager) {
     if (image != null || skullIcon == -1) {
-      return;
+      return true;
     }
 
     image = spriteManager.getSprite(SpriteID.PLAYER_KILLER_SKULL, skullIcon);
+    return image != null;
   }
 }
