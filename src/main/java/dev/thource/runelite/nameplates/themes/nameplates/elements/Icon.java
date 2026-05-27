@@ -27,7 +27,8 @@ public class Icon extends Element {
   private static BufferedImage LEFT_ARROW_IMAGE;
   private static BufferedImage VENGEANCE_IMAGE;
 
-  public static void initImages(SpriteManager spriteManager) {
+  /** returns true if all images loaded successfully */
+  public static boolean initImages(SpriteManager spriteManager) {
     DOWN_ARROW_IMAGE = spriteManager.getSprite(441, 0);
     RIGHT_ARROW_IMAGE = spriteManager.getSprite(772, 0);
     // Initialize LEFT_ARROW_IMAGE and UP_ARROW_IMAGE by rotating the existing ones
@@ -38,6 +39,8 @@ public class Icon extends Element {
       UP_ARROW_IMAGE = ImageUtil.rotateImage(DOWN_ARROW_IMAGE, Math.PI); // 180 degrees
     }
     VENGEANCE_IMAGE = spriteManager.getSprite(1961, 0);
+
+    return DOWN_ARROW_IMAGE != null && RIGHT_ARROW_IMAGE != null && VENGEANCE_IMAGE != null;
   }
 
   @Builder.Default protected int size = 26;
