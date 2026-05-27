@@ -73,7 +73,7 @@ public abstract class Bar extends Element {
           cornerRadius - borderSize);
     }
 
-    var fillWidth = (int) (innerWidth * getProgress(nameplate));
+    var fillWidth = (int) Math.ceil(innerWidth * getProgress(nameplate));
 
     var statChange = drawConsumableIndicator ? getStatChange(nameplate) : null;
     if (statChange != null && statChange.getRelative() > 0) {
