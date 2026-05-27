@@ -5,6 +5,7 @@ import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 import net.runelite.client.config.Range;
+import net.runelite.client.config.Units;
 
 /** NameplatesConfig manages the config for the plugin. */
 @SuppressWarnings("SameReturnValue")
@@ -252,10 +253,11 @@ public interface NameplatesConfig extends Config {
     return false;
   }
 
+  @Units(Units.MILLISECONDS)
   @Range(min = 100, max = 60000)
   @ConfigItem(
       keyName = "hitsplatLifetime",
-      name = "Hitsplat lifetime (ms)",
+      name = "Hitsplat lifetime",
       description = "How long hitsplats should remain visible for.",
       section = HITSPLATS_SECTION)
   default int hitsplatLifetime() {
