@@ -72,7 +72,7 @@ public class NameText extends Text {
     editInputs.add(
         new DropdownInput<>(
             "Display mode", displayMode, NameTextDisplayMode.values(), this::setDisplayMode));
-    editInputs.add(new IntInput("Max width", maxWidth, 0, 1000, this::setMaxWidth));
+    editInputs.add(new IntInput("Max width", maxWidth, 0, 1000, this::setMaxWidth, "px"));
     editInputs.addAll(colorProvider.getEditInputs(plugin));
 
     return editInputs;

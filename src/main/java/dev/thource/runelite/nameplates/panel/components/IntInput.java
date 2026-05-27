@@ -9,10 +9,14 @@ import net.runelite.client.ui.UnitFormatterFactory;
 
 public class IntInput extends LabelledInput {
   private final JSpinner input;
-  private String unit = null;
 
   public IntInput(
-      String name, int defaultValue, int minValue, int maxValue, Consumer<Integer> onChange) {
+      String name,
+      int defaultValue,
+      int minValue,
+      int maxValue,
+      Consumer<Integer> onChange,
+      String unit) {
     super(name);
 
     var model = new SpinnerNumberModel(defaultValue, minValue, maxValue, 1);
@@ -24,6 +28,11 @@ public class IntInput extends LabelledInput {
           new UnitFormatterFactory(inputEditor.getFormatterFactory(), unit));
     }
     inputPanel.add(input, BorderLayout.EAST);
+  }
+
+  public IntInput(
+      String name, int defaultValue, int minValue, int maxValue, Consumer<Integer> onChange) {
+    this(name, defaultValue, minValue, maxValue, onChange, null);
   }
 
   public void setValue(int value) {
