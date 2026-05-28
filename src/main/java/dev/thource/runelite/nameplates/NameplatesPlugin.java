@@ -897,6 +897,19 @@ public class NameplatesPlugin extends Plugin {
         return config.partyNameplateDisplayMode();
       }
 
+      var player = (Player) actor;
+      if (player.isFriend() && config.alwaysDrawFriendNames()) {
+        return config.friendNameplateDisplayMode();
+      }
+
+      if (player.isFriendsChatMember() && config.alwaysDrawFriendChatNames()) {
+        return config.friendChatNameplateDisplayMode();
+      }
+
+      if (player.isClanMember() && config.alwaysDrawClanNames()) {
+        return config.clanNameplateDisplayMode();
+      }
+
       return config.playerNameplateDisplayMode();
     }
 
@@ -914,12 +927,16 @@ public class NameplatesPlugin extends Plugin {
 
     var actor = nameplate.getActor();
     if (actor instanceof Player) {
-      if (actor == client.getLocalPlayer()) {
-        return config.alwaysDrawOwnName();
+      if ((actor == client.getLocalPlayer() && config.alwaysDrawOwnName())
+          || (nameplate.getPartyData() != null && config.alwaysDrawPartyNames())) {
+        return true;
       }
 
-      if (nameplate.getPartyData() != null) {
-        return config.alwaysDrawPartyNames();
+      var player = (Player) actor;
+      if ((player.isFriend() && config.alwaysDrawFriendNames())
+          || (player.isFriendsChatMember() && config.alwaysDrawFriendChatNames())
+          || (player.isClanMember() && config.alwaysDrawClanNames())) {
+        return true;
       }
 
       return config.alwaysDrawPlayerNames();
