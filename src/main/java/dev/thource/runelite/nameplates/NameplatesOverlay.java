@@ -297,7 +297,22 @@ public class NameplatesOverlay extends Overlay {
   }
 
   private void renderOverheadStack(Graphics2D graphics, List<Actor> actors, long deltaMs) {
-    var firstActorHeight = actors.get(0).getLogicalHeight();
+    var config = plugin.getConfig();
+    var nameplateStackXOffset = config.nameplateStackXOffset();
+    var nameplateStackYOffset = config.nameplateStackYOffset();
+    var nameplateStackPadding = config.nameplateStackPadding();
+
+    var firstActor = actors.get(0);
+    var firstActorHeight = firstActor.getLogicalHeight();
+    var firstActorPoint = firstActor.getCanvasTextLocation(graphics, " ", firstActorHeight + 15);
+    if (firstActorPoint == null) {
+      return;
+    }
+
+    var point =
+        new Point(
+            firstActorPoint.getX() + nameplateStackXOffset,
+            firstActorPoint.getY() + nameplateStackYOffset);
 
     // Text has to be drawn here, because to hide overheads and skulls, we need to hide every 2d
     // ui element
@@ -308,11 +323,6 @@ public class NameplatesOverlay extends Overlay {
     for (Actor actor : actors) {
       Nameplate nameplate = plugin.getNameplateForActor(actor);
       if (nameplate == null) {
-        continue;
-      }
-
-      var point = actor.getCanvasTextLocation(graphics, " ", firstActorHeight + 15);
-      if (point == null) {
         continue;
       }
 
@@ -334,18 +344,13 @@ public class NameplatesOverlay extends Overlay {
     }
 
     if (maxNonStackingHeight > 0) {
-      stackHeight += maxNonStackingHeight + 4;
+      stackHeight += maxNonStackingHeight + nameplateStackPadding;
     }
 
     // Second drawing loop draws only stacking nameplates
     for (Actor actor : actors) {
       Nameplate nameplate = plugin.getNameplateForActor(actor);
       if (nameplate == null) {
-        continue;
-      }
-
-      var point = actor.getCanvasTextLocation(graphics, " ", firstActorHeight + 15);
-      if (point == null) {
         continue;
       }
 
@@ -364,7 +369,7 @@ public class NameplatesOverlay extends Overlay {
           theme.drawNameplate(
               graphics, nameplate, new Point(point.getX(), point.getY() - stackHeight));
 
-      stackHeight += plateHeight + 4;
+      stackHeight += plateHeight + nameplateStackPadding;
     }
   }
 

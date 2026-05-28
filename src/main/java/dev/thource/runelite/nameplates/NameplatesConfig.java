@@ -71,12 +71,48 @@ public interface NameplatesConfig extends Config {
     return "osrsTheme";
   }
 
+  @Range(min = -999, max = 999)
+  @Units(Units.PIXELS)
+  @ConfigItem(
+      keyName = "nameplateStackXOffset",
+      name = "Stack X offset",
+      description = "Horizontal offset in pixels applied to the entire nameplate stack.",
+      position = 1,
+      section = NAMEPLATES_SECTION)
+  default int nameplateStackXOffset() {
+    return 0;
+  }
+
+  @Range(min = -999, max = 999)
+  @Units(Units.PIXELS)
+  @ConfigItem(
+      keyName = "nameplateStackYOffset",
+      name = "Stack Y offset",
+      description = "Vertical offset in pixels applied to the entire nameplate stack.",
+      position = 2,
+      section = NAMEPLATES_SECTION)
+  default int nameplateStackYOffset() {
+    return 0;
+  }
+
+  @Range(max = 999)
+  @Units(Units.PIXELS)
+  @ConfigItem(
+      keyName = "nameplateStackPadding",
+      name = "Stack padding",
+      description = "Defines how many pixels tall the gap should be between stacked nameplates.",
+      position = 3,
+      section = NAMEPLATES_SECTION)
+  default int nameplateStackPadding() {
+    return 4;
+  }
+
   @ConfigItem(
       keyName = "alwaysDrawOwnName",
       name = "Always draw own name",
       description =
           "Still draw own name when nameplate display behaviour is set to hide the nameplate.",
-      position = 1,
+      position = 4,
       section = NAMEPLATES_SECTION)
   default boolean alwaysDrawOwnName() {
     return false;
@@ -86,7 +122,7 @@ public interface NameplatesConfig extends Config {
       keyName = "ownNameplateDisplayMode",
       name = "Own nameplate display behaviour",
       description = "Defines when local player nameplate status bars will be visible.",
-      position = 1,
+      position = 5,
       section = NAMEPLATES_SECTION)
   default NameplateDisplayMode ownNameplateDisplayMode() {
     return NameplateDisplayMode.IN_COMBAT;
@@ -98,7 +134,7 @@ public interface NameplatesConfig extends Config {
       description =
           "Still draw party member names when nameplate display behaviour is set to hide the"
               + " nameplate.",
-      position = 2,
+      position = 6,
       section = NAMEPLATES_SECTION)
   default boolean alwaysDrawPartyNames() {
     return false;
@@ -108,7 +144,7 @@ public interface NameplatesConfig extends Config {
       keyName = "partyNameplateDisplayMode",
       name = "Party member nameplate display behaviour",
       description = "Defines when party member nameplates status bars will be visible.",
-      position = 2,
+      position = 7,
       section = NAMEPLATES_SECTION)
   default NameplateDisplayMode partyNameplateDisplayMode() {
     return NameplateDisplayMode.IN_COMBAT;
@@ -120,7 +156,7 @@ public interface NameplatesConfig extends Config {
       description =
           "Still draw friend names when nameplate display behaviour is set to hide the"
               + " nameplates.",
-      position = 3,
+      position = 8,
       section = NAMEPLATES_SECTION)
   default boolean alwaysDrawFriendNames() {
     return false;
@@ -130,7 +166,7 @@ public interface NameplatesConfig extends Config {
       keyName = "friendNameplateDisplayMode",
       name = "Friend nameplate display behaviour",
       description = "Defines when friend nameplates status bars will be visible.",
-      position = 3,
+      position = 9,
       section = NAMEPLATES_SECTION)
   default NameplateDisplayMode friendNameplateDisplayMode() {
     return NameplateDisplayMode.IN_COMBAT;
@@ -142,7 +178,7 @@ public interface NameplatesConfig extends Config {
       description =
           "Still draw friend chat names when nameplate display behaviour is set to hide the"
               + " nameplates.",
-      position = 4,
+      position = 10,
       section = NAMEPLATES_SECTION)
   default boolean alwaysDrawFriendChatNames() {
     return false;
@@ -152,7 +188,7 @@ public interface NameplatesConfig extends Config {
       keyName = "friendChatNameplateDisplayMode",
       name = "Friend chat nameplate display behaviour",
       description = "Defines when friend chat member nameplates status bars will be visible.",
-      position = 4,
+      position = 11,
       section = NAMEPLATES_SECTION)
   default NameplateDisplayMode friendChatNameplateDisplayMode() {
     return NameplateDisplayMode.IN_COMBAT;
@@ -164,7 +200,7 @@ public interface NameplatesConfig extends Config {
       description =
           "Still draw clan member names when nameplate display behaviour is set to hide the"
               + " nameplates.",
-      position = 5,
+      position = 12,
       section = NAMEPLATES_SECTION)
   default boolean alwaysDrawClanNames() {
     return false;
@@ -174,7 +210,7 @@ public interface NameplatesConfig extends Config {
       keyName = "clanNameplateDisplayMode",
       name = "Clan nameplate display behaviour",
       description = "Defines when clan member nameplates status bars will be visible.",
-      position = 5,
+      position = 13,
       section = NAMEPLATES_SECTION)
   default NameplateDisplayMode clanNameplateDisplayMode() {
     return NameplateDisplayMode.IN_COMBAT;
@@ -185,7 +221,7 @@ public interface NameplatesConfig extends Config {
       name = "Always draw player names",
       description =
           "Still draw player names when nameplate display behaviour is set to hide the nameplates.",
-      position = 6,
+      position = 14,
       section = NAMEPLATES_SECTION)
   default boolean alwaysDrawPlayerNames() {
     return false;
@@ -195,7 +231,7 @@ public interface NameplatesConfig extends Config {
       keyName = "playerNameplateDisplayMode",
       name = "Player nameplate display behaviour",
       description = "Defines when player nameplates status bars will be visible.",
-      position = 6,
+      position = 15,
       section = NAMEPLATES_SECTION)
   default NameplateDisplayMode playerNameplateDisplayMode() {
     return NameplateDisplayMode.IN_COMBAT;
@@ -206,7 +242,7 @@ public interface NameplatesConfig extends Config {
       name = "Always draw NPC names",
       description =
           "Still draw NPC names when nameplate display behaviour is set to hide the nameplates.",
-      position = 7,
+      position = 16,
       section = NAMEPLATES_SECTION)
   default boolean alwaysDrawNPCNames() {
     return false;
@@ -216,7 +252,7 @@ public interface NameplatesConfig extends Config {
       keyName = "npcNameplateDisplayMode",
       name = "NPC nameplate display behaviour",
       description = "Defines when NPC nameplates status bars will be visible.",
-      position = 7,
+      position = 17,
       section = NAMEPLATES_SECTION)
   default NameplateDisplayMode npcNameplateDisplayMode() {
     return NameplateDisplayMode.IN_COMBAT;
@@ -227,7 +263,7 @@ public interface NameplatesConfig extends Config {
       name = "NPC IDs allowlist",
       description =
           "ALWAYS draw nameplates or names for NPCs whose IDs are in this comma-separated list.",
-      position = 8,
+      position = 18,
       section = NAMEPLATES_SECTION)
   default String npcIdsAllowlist() {
     return "";
@@ -239,7 +275,7 @@ public interface NameplatesConfig extends Config {
       description =
           "ALWAYS draw nameplates or names for NPCs whose names are in this comma-separated list."
               + " Case-insensitive.",
-      position = 8,
+      position = 19,
       section = NAMEPLATES_SECTION)
   default String npcNamesAllowlist() {
     return "";
@@ -250,7 +286,7 @@ public interface NameplatesConfig extends Config {
       name = "NPC IDs denylist",
       description =
           "NEVER draw nameplates or names for NPCs whose IDs are in this comma-separated list.",
-      position = 9,
+      position = 20,
       section = NAMEPLATES_SECTION)
   default String npcIdsDenylist() {
     return "";
@@ -262,7 +298,7 @@ public interface NameplatesConfig extends Config {
       description =
           "NEVER draw nameplates or names for NPCs whose names are in this comma-separated list."
               + " Case-insensitive.",
-      position = 9,
+      position = 21,
       section = NAMEPLATES_SECTION)
   default String npcNamesDenylist() {
     return "";
@@ -276,7 +312,7 @@ public interface NameplatesConfig extends Config {
               + " any NPC/player<br>Right-click: Only show when hovering entries in the right"
               + " click menu<br>Busy: Only show when multiple NPC/players are present in the"
               + " right-click menu<br>Busy right-click: Combines Busy and Right-click mode",
-      position = 10,
+      position = 22,
       section = NAMEPLATES_SECTION)
   default HoverIndicatorMode hoverIndicatorMode() {
     return HoverIndicatorMode.BUSY_RIGHT_CLICK;
@@ -289,7 +325,7 @@ public interface NameplatesConfig extends Config {
           "If enabled, NPCs will be tagged as no-loot if a tinted damage hitsplat appears<br>on"
               + " them.<br><br>Disable this if you frequently PVM with your group members"
               + " and the false<br>positive no-loot indicators are bothering you.",
-      position = 13,
+      position = 23,
       section = NAMEPLATES_SECTION)
   default boolean enableNoLootOtherGIMSplats() {
     return true;
