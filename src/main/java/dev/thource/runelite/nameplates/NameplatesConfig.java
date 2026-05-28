@@ -115,21 +115,87 @@ public interface NameplatesConfig extends Config {
   }
 
   @ConfigItem(
+      keyName = "alwaysDrawFriendNames",
+      name = "Always draw friend names",
+      description =
+          "Still draw friend names when nameplate display behaviour is set to hide the"
+              + " nameplates.",
+      position = 3,
+      section = NAMEPLATES_SECTION)
+  default boolean alwaysDrawFriendNames() {
+    return false;
+  }
+
+  @ConfigItem(
+      keyName = "friendNameplateDisplayMode",
+      name = "Friend nameplate display behaviour",
+      description = "Defines when friend nameplates status bars will be visible.",
+      position = 3,
+      section = NAMEPLATES_SECTION)
+  default NameplateDisplayMode friendNameplateDisplayMode() {
+    return NameplateDisplayMode.IN_COMBAT;
+  }
+
+  @ConfigItem(
+      keyName = "alwaysDrawFriendChatNames",
+      name = "Always draw friend chat names",
+      description =
+          "Still draw friend chat names when nameplate display behaviour is set to hide the"
+              + " nameplates.",
+      position = 4,
+      section = NAMEPLATES_SECTION)
+  default boolean alwaysDrawFriendChatNames() {
+    return false;
+  }
+
+  @ConfigItem(
+      keyName = "friendChatNameplateDisplayMode",
+      name = "Friend chat nameplate display behaviour",
+      description = "Defines when friend chat member nameplates status bars will be visible.",
+      position = 4,
+      section = NAMEPLATES_SECTION)
+  default NameplateDisplayMode friendChatNameplateDisplayMode() {
+    return NameplateDisplayMode.IN_COMBAT;
+  }
+
+  @ConfigItem(
+      keyName = "alwaysDrawClanNames",
+      name = "Always draw clan member names",
+      description =
+          "Still draw clan member names when nameplate display behaviour is set to hide the"
+              + " nameplates.",
+      position = 5,
+      section = NAMEPLATES_SECTION)
+  default boolean alwaysDrawClanNames() {
+    return false;
+  }
+
+  @ConfigItem(
+      keyName = "clanNameplateDisplayMode",
+      name = "Clan nameplate display behaviour",
+      description = "Defines when clan member nameplates status bars will be visible.",
+      position = 5,
+      section = NAMEPLATES_SECTION)
+  default NameplateDisplayMode clanNameplateDisplayMode() {
+    return NameplateDisplayMode.IN_COMBAT;
+  }
+
+  @ConfigItem(
       keyName = "alwaysDrawPlayerNames",
       name = "Always draw player names",
       description =
           "Still draw player names when nameplate display behaviour is set to hide the nameplates.",
-      position = 3,
+      position = 6,
       section = NAMEPLATES_SECTION)
   default boolean alwaysDrawPlayerNames() {
-    return true;
+    return false;
   }
 
   @ConfigItem(
       keyName = "playerNameplateDisplayMode",
       name = "Player nameplate display behaviour",
       description = "Defines when player nameplates status bars will be visible.",
-      position = 3,
+      position = 6,
       section = NAMEPLATES_SECTION)
   default NameplateDisplayMode playerNameplateDisplayMode() {
     return NameplateDisplayMode.IN_COMBAT;
@@ -140,17 +206,17 @@ public interface NameplatesConfig extends Config {
       name = "Always draw NPC names",
       description =
           "Still draw NPC names when nameplate display behaviour is set to hide the nameplates.",
-      position = 4,
+      position = 7,
       section = NAMEPLATES_SECTION)
   default boolean alwaysDrawNPCNames() {
-    return true;
+    return false;
   }
 
   @ConfigItem(
       keyName = "npcNameplateDisplayMode",
       name = "NPC nameplate display behaviour",
       description = "Defines when NPC nameplates status bars will be visible.",
-      position = 4,
+      position = 7,
       section = NAMEPLATES_SECTION)
   default NameplateDisplayMode npcNameplateDisplayMode() {
     return NameplateDisplayMode.IN_COMBAT;
@@ -161,7 +227,7 @@ public interface NameplatesConfig extends Config {
       name = "NPC IDs allowlist",
       description =
           "ALWAYS draw nameplates or names for NPCs whose IDs are in this comma-separated list.",
-      position = 5,
+      position = 8,
       section = NAMEPLATES_SECTION)
   default String npcIdsAllowlist() {
     return "";
@@ -173,7 +239,7 @@ public interface NameplatesConfig extends Config {
       description =
           "ALWAYS draw nameplates or names for NPCs whose names are in this comma-separated list."
               + " Case-insensitive.",
-      position = 5,
+      position = 8,
       section = NAMEPLATES_SECTION)
   default String npcNamesAllowlist() {
     return "";
@@ -184,7 +250,7 @@ public interface NameplatesConfig extends Config {
       name = "NPC IDs denylist",
       description =
           "NEVER draw nameplates or names for NPCs whose IDs are in this comma-separated list.",
-      position = 6,
+      position = 9,
       section = NAMEPLATES_SECTION)
   default String npcIdsDenylist() {
     return "";
@@ -196,7 +262,7 @@ public interface NameplatesConfig extends Config {
       description =
           "NEVER draw nameplates or names for NPCs whose names are in this comma-separated list."
               + " Case-insensitive.",
-      position = 6,
+      position = 9,
       section = NAMEPLATES_SECTION)
   default String npcNamesDenylist() {
     return "";
@@ -210,7 +276,7 @@ public interface NameplatesConfig extends Config {
               + " any NPC/player<br>Right-click: Only show when hovering entries in the right"
               + " click menu<br>Busy: Only show when multiple NPC/players are present in the"
               + " right-click menu<br>Busy right-click: Combines Busy and Right-click mode",
-      position = 7,
+      position = 10,
       section = NAMEPLATES_SECTION)
   default HoverIndicatorMode hoverIndicatorMode() {
     return HoverIndicatorMode.BUSY_RIGHT_CLICK;
@@ -223,7 +289,7 @@ public interface NameplatesConfig extends Config {
           "If enabled, NPCs will be tagged as no-loot if a tinted damage hitsplat appears<br>on"
               + " them.<br><br>Disable this if you frequently PVM with your group members"
               + " and the false<br>positive no-loot indicators are bothering you.",
-      position = 10,
+      position = 13,
       section = NAMEPLATES_SECTION)
   default boolean enableNoLootOtherGIMSplats() {
     return true;
