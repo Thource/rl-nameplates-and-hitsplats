@@ -119,7 +119,8 @@ public class StatusText extends Text {
 
     var maxText = String.valueOf(getMax(nameplate));
 
-    if (nameplate instanceof NPCNameplate && ((NPCNameplate) nameplate).getPercentageHealthOverride() > 0) {
+    if (nameplate instanceof NPCNameplate
+        && ((NPCNameplate) nameplate).getPercentageHealthOverride() > 0) {
       maxText = "~" + maxText;
     }
 
