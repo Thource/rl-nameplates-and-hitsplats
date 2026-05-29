@@ -33,6 +33,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
@@ -83,7 +84,16 @@ public class NameplateEditPanel extends JPanel {
     add(buttonContainer);
 
     var cancelButton = new JButton("Cancel");
-    cancelButton.addActionListener(e -> nameplatePanel.editTheme(null, null));
+    cancelButton.addActionListener(
+        e -> {
+          if (NameplatesPlugin.getConfirmation(
+              this,
+              "Any unsaved changes will be lost.",
+              "Confirm cancel",
+              JOptionPane.WARNING_MESSAGE)) {
+            nameplatePanel.editTheme(null, null);
+          }
+        });
     buttonContainer.add(cancelButton);
 
     var saveButton = new JButton("Save");
