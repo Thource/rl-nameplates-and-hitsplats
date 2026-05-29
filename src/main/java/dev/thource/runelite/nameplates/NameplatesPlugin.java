@@ -133,10 +133,9 @@ public class NameplatesPlugin extends Plugin {
   private final List<PluginHitsplat> hitsplatsCreatedThisCycle = new ArrayList<>();
 
   @Getter private final Map<String, NameplateTheme> nameplateThemes = new HashMap<>();
-  @Getter private NameplateTheme activeNameplateThemeForSelf;
-  @Getter private NameplateTheme activeNameplateThemeForParty;
-  @Getter private NameplateTheme activeNameplateThemeForPlayers;
-  @Getter private NameplateTheme activeNameplateThemeForNPCs;
+
+  @Getter
+  private final Map<ActorType, ActorNameplateThemes> activeNameplateThemesMap = new HashMap<>();
 
   @Getter private final Map<String, HitsplatTheme> hitsplatThemes = new HashMap<>();
   @Getter private HitsplatTheme activeHitsplatTheme;
@@ -226,6 +225,7 @@ public class NameplatesPlugin extends Plugin {
 
   @Override
   protected void startUp() {
+    migrateNameplateThemes();
     loadThemes();
 
     migrateAccessLists();
@@ -256,6 +256,25 @@ public class NameplatesPlugin extends Plugin {
     }
 
     renderCallbackManager.register(renderCallback);
+  }
+
+  private void migrateNameplateThemes() {
+    List.of(
+            "activeNameplateThemeForSelfId",
+            "activeNameplateThemeForPartyId",
+            "activeNameplateThemeForPlayersId",
+            "activeNameplateThemeForNPCsId")
+        .forEach(
+            key -> {
+              var themeId = configManager.getConfiguration(NameplatesConfig.CONFIG_GROUP, key);
+              if (themeId != null) {
+                configManager.setConfiguration(
+                    NameplatesConfig.CONFIG_GROUP, key.replace("Id", "InCombatId"), themeId);
+                configManager.setConfiguration(
+                    NameplatesConfig.CONFIG_GROUP, key.replace("Id", "OutOfCombatId"), themeId);
+                configManager.unsetConfiguration(NameplatesConfig.CONFIG_GROUP, key);
+              }
+            });
   }
 
   @Subscribe
@@ -360,18 +379,12 @@ public class NameplatesPlugin extends Plugin {
     nameplateThemes.values().forEach(theme -> theme.setPlugin(this));
     hitsplatThemes.values().forEach(theme -> theme.setPlugin(this));
 
-    activeNameplateThemeForSelf =
-        nameplateThemes.getOrDefault(
-            config.activeNameplateThemeForSelfId(), nameplateThemes.get(FlatDarkTheme.ID));
-    activeNameplateThemeForParty =
-        nameplateThemes.getOrDefault(
-            config.activeNameplateThemeForPartyId(), nameplateThemes.get(FlatDarkTheme.ID));
-    activeNameplateThemeForPlayers =
-        nameplateThemes.getOrDefault(
-            config.activeNameplateThemeForPlayersId(), nameplateThemes.get(FlatDarkTheme.ID));
-    activeNameplateThemeForNPCs =
-        nameplateThemes.getOrDefault(
-            config.activeNameplateThemeForNPCsId(), nameplateThemes.get(FlatDarkTheme.ID));
+    activeNameplateThemesMap.clear();
+    Arrays.stream(ActorType.values())
+        .forEach(
+            type ->
+                activeNameplateThemesMap.put(
+                    type, new ActorNameplateThemes(configManager, nameplateThemes, type)));
 
     activeHitsplatTheme =
         hitsplatThemes.getOrDefault(
@@ -898,15 +911,15 @@ public class NameplatesPlugin extends Plugin {
       }
 
       var player = (Player) actor;
-      if (player.isFriend() && config.alwaysDrawFriendNames()) {
+      if (player.isFriend()) {
         return config.friendNameplateDisplayMode();
       }
 
-      if (player.isFriendsChatMember() && config.alwaysDrawFriendChatNames()) {
+      if (player.isFriendsChatMember()) {
         return config.friendChatNameplateDisplayMode();
       }
 
-      if (player.isClanMember() && config.alwaysDrawClanNames()) {
+      if (player.isClanMember()) {
         return config.clanNameplateDisplayMode();
       }
 
@@ -1045,46 +1058,48 @@ public class NameplatesPlugin extends Plugin {
   public void addNameplateTheme(NameplateTheme theme) {
     nameplateThemes.put(theme.getId(), theme);
 
-    if (activeNameplateThemeForSelf.getId().equals(theme.getId())) {
-      activeNameplateThemeForSelf = theme;
-    }
-    if (activeNameplateThemeForParty.getId().equals(theme.getId())) {
-      activeNameplateThemeForParty = theme;
-    }
-    if (activeNameplateThemeForPlayers.getId().equals(theme.getId())) {
-      activeNameplateThemeForPlayers = theme;
-    }
-    if (activeNameplateThemeForNPCs.getId().equals(theme.getId())) {
-      activeNameplateThemeForNPCs = theme;
-    }
+    activeNameplateThemesMap.values().forEach(themes -> themes.onThemeAdded(theme));
   }
 
   public void deleteNameplateTheme(String id) {
     configManager.unsetConfiguration(NameplatesConfig.CONFIG_GROUP, "themes.nameplates." + id);
+    var theme = nameplateThemes.remove(id);
+
+    activeNameplateThemesMap
+        .values()
+        .forEach(
+            themes -> {
+              if (themes.getInCombatTheme().getId().equals(id)) {
+                setActiveNameplateTheme(
+                    themes.getActorType(), true, nameplateThemes.get(FlatDarkTheme.ID));
+              }
+
+              if (themes.getOutOfCombatTheme().getId().equals(id)) {
+                setActiveNameplateTheme(
+                    themes.getActorType(), false, nameplateThemes.get(FlatDarkTheme.ID));
+              }
+            });
   }
 
-  public void setActiveNameplateThemeForSelf(NameplateTheme theme) {
-    configManager.setConfiguration(
-        NameplatesConfig.CONFIG_GROUP, "activeNameplateThemeForSelfId", theme.getId());
-    activeNameplateThemeForSelf = theme;
+  public NameplateTheme getActiveNameplateTheme(ActorType actorType, boolean inCombat) {
+    var themes = activeNameplateThemesMap.get(actorType);
+
+    return inCombat ? themes.getInCombatTheme() : themes.getOutOfCombatTheme();
   }
 
-  public void setActiveNameplateThemeForParty(NameplateTheme theme) {
-    configManager.setConfiguration(
-        NameplatesConfig.CONFIG_GROUP, "activeNameplateThemeForPartyId", theme.getId());
-    activeNameplateThemeForParty = theme;
-  }
+  public void setActiveNameplateTheme(ActorType actorType, boolean inCombat, NameplateTheme theme) {
+    var themes = activeNameplateThemesMap.get(actorType);
+    if (inCombat) {
+      themes.setInCombatTheme(theme);
+      configManager.setConfiguration(
+          NameplatesConfig.CONFIG_GROUP, themes.getInCombatConfigId(), theme.getId());
 
-  public void setActiveNameplateThemeForPlayers(NameplateTheme theme) {
-    configManager.setConfiguration(
-        NameplatesConfig.CONFIG_GROUP, "activeNameplateThemeForPlayersId", theme.getId());
-    activeNameplateThemeForPlayers = theme;
-  }
+      return;
+    }
 
-  public void setActiveNameplateThemeForNPCs(NameplateTheme theme) {
+    themes.setOutOfCombatTheme(theme);
     configManager.setConfiguration(
-        NameplatesConfig.CONFIG_GROUP, "activeNameplateThemeForNPCsId", theme.getId());
-    activeNameplateThemeForNPCs = theme;
+        NameplatesConfig.CONFIG_GROUP, themes.getOutOfCombatConfigId(), theme.getId());
   }
 
   public void setActiveHitsplatTheme(HitsplatTheme theme) {

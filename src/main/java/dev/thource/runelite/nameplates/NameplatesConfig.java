@@ -27,42 +27,6 @@ public interface NameplatesConfig extends Config {
   String NAMEPLATES_SECTION = "Nameplates";
 
   @ConfigItem(
-      keyName = "activeNameplateThemeForSelfId",
-      name = "Active nameplate theme for self ID",
-      description = "The ID of the active nameplate theme for self.",
-      hidden = true)
-  default String activeNameplateThemeForSelfId() {
-    return "flatDarkTheme";
-  }
-
-  @ConfigItem(
-      keyName = "activeNameplateThemeForPartyId",
-      name = "Active nameplate theme for party ID",
-      description = "The ID of the active nameplate theme for party members.",
-      hidden = true)
-  default String activeNameplateThemeForPartyId() {
-    return "flatDarkTheme";
-  }
-
-  @ConfigItem(
-      keyName = "activeNameplateThemeForPlayersId",
-      name = "Active nameplate theme for players ID",
-      description = "The ID of the active nameplate theme for players.",
-      hidden = true)
-  default String activeNameplateThemeForPlayersId() {
-    return "flatDarkTheme";
-  }
-
-  @ConfigItem(
-      keyName = "activeNameplateThemeForNPCsId",
-      name = "Active nameplate theme for NPCs ID",
-      description = "The ID of the active nameplate theme for NPCs.",
-      hidden = true)
-  default String activeNameplateThemeForNPCsId() {
-    return "flatDarkTheme";
-  }
-
-  @ConfigItem(
       keyName = "activeHitsplatThemeId",
       name = "Active hitsplat theme ID",
       description = "The ID of the active hitsplat theme.",

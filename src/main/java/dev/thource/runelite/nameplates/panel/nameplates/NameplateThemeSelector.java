@@ -8,7 +8,6 @@ import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.EXPORT
 import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.IMPORT_ICON;
 import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.MOVE_DOWN_ICON;
 import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.MOVE_UP_ICON;
-import static dev.thource.runelite.nameplates.panel.NameplatesPluginPanel.SET_ACTIVE_ICON;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
@@ -30,11 +29,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
 
 public class NameplateThemeSelector extends ListSelector<NameplateTheme> {
   private final NameplatesPlugin plugin;
@@ -64,21 +60,12 @@ public class NameplateThemeSelector extends ListSelector<NameplateTheme> {
           public Component getListCellRendererComponent(
               JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             var name = ((NameplateTheme) value).getName();
-            var activeFor = "";
-            if (plugin.getActiveNameplateThemeForSelf() == value) {
-              activeFor += "S";
-            }
-            if (plugin.getActiveNameplateThemeForParty() == value) {
-              activeFor += "P";
-            }
-            if (plugin.getActiveNameplateThemeForPlayers() == value) {
-              activeFor += "O";
-            }
-            if (plugin.getActiveNameplateThemeForNPCs() == value) {
-              activeFor += "N";
-            }
-            if (!activeFor.isBlank()) {
-              name = "[" + activeFor + "] " + name;
+            if (plugin.getActiveNameplateThemesMap().values().stream()
+                .anyMatch(
+                    themes ->
+                        themes.getInCombatTheme() == value
+                            || themes.getOutOfCombatTheme() == value)) {
+              name = "* " + name;
             }
 
             return super.getListCellRendererComponent(list, name, index, isSelected, cellHasFocus);
@@ -140,64 +127,6 @@ public class NameplateThemeSelector extends ListSelector<NameplateTheme> {
 
     if (sel != null) {
       addButton(
-          "Set active theme",
-          SET_ACTIVE_ICON,
-          () -> {
-            var popupMenu = new JPopupMenu();
-
-            var allButton = new JMenuItem("Set active for all");
-            allButton.addActionListener(
-                e -> {
-                  plugin.setActiveNameplateThemeForSelf(sel);
-                  plugin.setActiveNameplateThemeForParty(sel);
-                  plugin.setActiveNameplateThemeForPlayers(sel);
-                  plugin.setActiveNameplateThemeForNPCs(sel);
-                  updateValues();
-                });
-            popupMenu.add(allButton);
-
-            var selfButton = new JMenuItem("Set active for self");
-            selfButton.addActionListener(
-                e -> {
-                  plugin.setActiveNameplateThemeForSelf(sel);
-                  updateValues();
-                });
-            popupMenu.add(selfButton);
-
-            var partyButton = new JMenuItem("Set active for party members");
-            partyButton.addActionListener(
-                e -> {
-                  plugin.setActiveNameplateThemeForParty(sel);
-                  updateValues();
-                });
-            popupMenu.add(partyButton);
-
-            var playersButton = new JMenuItem("Set active for other players");
-            playersButton.addActionListener(
-                e -> {
-                  plugin.setActiveNameplateThemeForPlayers(sel);
-                  updateValues();
-                });
-            popupMenu.add(playersButton);
-
-            var npcsButton = new JMenuItem("Set active for NPCs");
-            npcsButton.addActionListener(
-                e -> {
-                  plugin.setActiveNameplateThemeForNPCs(sel);
-                  updateValues();
-                });
-            popupMenu.add(npcsButton);
-
-            popupMenu.show(this, 0, getHeight());
-            SwingUtilities.invokeLater(
-                () -> {
-                  int x = getWidth() - popupMenu.getWidth();
-                  popupMenu.setLocation(
-                      getLocationOnScreen().x + x, getLocationOnScreen().y + getHeight());
-                });
-          });
-
-      addButton(
           "Export theme (copy to clipboard)",
           EXPORT_ICON,
           () -> {
@@ -225,9 +154,9 @@ public class NameplateThemeSelector extends ListSelector<NameplateTheme> {
                       + "\"?\nThis cannot be undone.",
                   "Confirm deletion",
                   JOptionPane.WARNING_MESSAGE)) {
-                themes.remove(sel.getId());
                 plugin.deleteNameplateTheme(sel.getId());
                 updateValues();
+                this.selectValue(this.values.get(0));
               }
             });
       }

@@ -1,6 +1,7 @@
 package dev.thource.runelite.nameplates.panel.nameplates;
 
 import com.google.gson.Gson;
+import dev.thource.runelite.nameplates.ActorType;
 import dev.thource.runelite.nameplates.NameplateHeadIcon;
 import dev.thource.runelite.nameplates.NameplateSkullIcon;
 import dev.thource.runelite.nameplates.NameplatesPlugin;
@@ -20,6 +21,8 @@ import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -27,6 +30,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EmptyBorder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.runelite.api.Point;
 import net.runelite.client.plugins.itemstats.StatChange;
@@ -34,23 +38,34 @@ import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
 
 public class NameplatePanel extends JPanel {
+  @RequiredArgsConstructor
+  @Getter
+  private static class ActiveThemeCheckbox {
+    private final ActorType actorType;
+    private final boolean inCombat;
+    private final CheckboxInput checkbox;
+  }
+
   private final NameplateThemeSelector themeListSelector;
   private final NameplateEditPanel editPanel;
   private final NameplatesPlugin plugin;
   private final PreviewPanel preview;
   private NameplateTheme previewTheme;
+  private final List<ActiveThemeCheckbox> activeThemeCheckboxes = new ArrayList<>();
 
   void editTheme(NameplateTheme theme, Gson gson) {
     if (theme != null && theme.isEditable() && theme instanceof CustomNameplateTheme) {
       editPanel.editTheme((CustomNameplateTheme) theme, gson);
 
       themeListSelector.setVisible(false);
+      activeThemeCheckboxes.forEach(atc -> atc.checkbox.setVisible(false));
       editPanel.setVisible(true);
 
       return;
     }
 
     themeListSelector.setVisible(true);
+    activeThemeCheckboxes.forEach(atc -> atc.checkbox.setVisible(true));
     editPanel.setVisible(false);
     editPanel.editTheme(null, null);
   }
@@ -69,7 +84,7 @@ public class NameplatePanel extends JPanel {
     this.plugin = plugin;
 
     var themes = plugin.getNameplateThemes();
-    previewTheme = plugin.getActiveNameplateThemeForSelf();
+    previewTheme = plugin.getActiveNameplateTheme(ActorType.SELF, true);
 
     setBorder(new EmptyBorder(0, 0, 0, 0));
     setBackground(ColorScheme.DARK_GRAY_COLOR);
@@ -358,19 +373,71 @@ public class NameplatePanel extends JPanel {
             });
     previewOptions.addToPanel(vengeanceInput);
 
+    for (ActorType type : ActorType.values()) {
+      List.of(true, false)
+          .forEach(
+              inCombat -> {
+                activeThemeCheckboxes.add(
+                    new ActiveThemeCheckbox(
+                        type,
+                        inCombat,
+                        new CheckboxInput(
+                            "Active for "
+                                + type.getDescription()
+                                + (inCombat ? " (in combat)" : " (out of combat)"),
+                            plugin.getActiveNameplateTheme(type, inCombat) == previewTheme,
+                            value -> {
+                              if (value) {
+                                this.setActiveTheme(type, inCombat);
+                              }
+                            })));
+              });
+    }
+
     themeListSelector =
         new NameplateThemeSelector(
-            plugin,
-            previewTheme,
-            preview,
-            themes,
-            (theme) -> previewTheme = theme,
-            this::editTheme);
+            plugin, previewTheme, preview, themes, this::setPreviewTheme, this::editTheme);
     scrollPanel.add(themeListSelector);
+
+    activeThemeCheckboxes.forEach(atc -> scrollPanel.add(atc.checkbox));
 
     editPanel = new NameplateEditPanel(this, plugin, preview);
     editPanel.setVisible(false);
     scrollPanel.add(editPanel);
+
+    resetActiveCheckboxes();
+  }
+
+  private void setPreviewTheme(NameplateTheme nameplateTheme) {
+    previewTheme = nameplateTheme;
+
+    resetActiveCheckboxes();
+  }
+
+  private void resetActiveCheckboxes() {
+    activeThemeCheckboxes.forEach(
+        atc ->
+            resetActiveCheckbox(
+                atc.checkbox,
+                plugin.getActiveNameplateTheme(atc.getActorType(), atc.isInCombat())
+                    == previewTheme));
+  }
+
+  private void resetActiveCheckbox(CheckboxInput checkbox, boolean isActive) {
+    checkbox.setValue(isActive);
+    checkbox.getInput().setEnabled(!isActive);
+
+    if (themeListSelector != null) {
+      themeListSelector.repaint();
+    }
+  }
+
+  private void setActiveTheme(ActorType actorType, boolean inCombat) {
+    plugin.setActiveNameplateTheme(actorType, inCombat, previewTheme);
+
+    if (themeListSelector != null) {
+      themeListSelector.repaint();
+    }
   }
 
   private class PreviewPanel extends JPanel {
