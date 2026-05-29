@@ -486,21 +486,38 @@ public class NameplatesOverlay extends Overlay {
     hoveredActor = null;
   }
 
-  public NameplateTheme getActiveNameplateThemeForNameplate(Nameplate nameplate) {
+  private ActorType getActorType(Nameplate nameplate) {
     var actor = nameplate.getActor();
     if (actor instanceof Player) {
       if (nameplate.getActor() == client.getLocalPlayer()) {
-        return plugin.getActiveNameplateThemeForSelf();
+        return ActorType.SELF;
       }
 
       if (nameplate.getPartyData() != null) {
-        return plugin.getActiveNameplateThemeForParty();
+        return ActorType.PARTY;
       }
 
-      return plugin.getActiveNameplateThemeForPlayers();
+      var player = (Player) actor;
+      if (player.isFriend()) {
+        return ActorType.FRIEND;
+      }
+
+      if (player.isFriendsChatMember()) {
+        return ActorType.FRIEND_CHAT;
+      }
+
+      if (player.isClanMember()) {
+        return ActorType.CLAN;
+      }
+
+      return ActorType.PLAYER;
     }
 
-    return plugin.getActiveNameplateThemeForNPCs();
+    return ActorType.NPC;
+  }
+
+  public NameplateTheme getActiveNameplateThemeForNameplate(Nameplate nameplate) {
+    return plugin.getActiveNameplateTheme(getActorType(nameplate), nameplate.isInCombat(client));
   }
 
   public void renderNameplate(

@@ -25,10 +25,12 @@ public class ListSelector<T extends Nameable> extends LabelledInput {
 
   protected final JList<T> list;
   protected final JPanel buttonContainer;
+  protected List<T> values;
 
   public ListSelector(String name, T defaultValue, List<T> values) {
     super(name, true);
 
+    this.values = values;
     @SuppressWarnings("unchecked")
     var array = (T[]) values.toArray(new Nameable[0]);
     list = new JList<>(array);
@@ -53,13 +55,14 @@ public class ListSelector<T extends Nameable> extends LabelledInput {
 
     buttonContainer = new JPanel();
     buttonContainer.setLayout(new BoxLayout(buttonContainer, BoxLayout.X_AXIS));
-    buttonContainer.setBorder(new EmptyBorder(0, 0, 0, 0));
+    buttonContainer.setBorder(new EmptyBorder(0, 0, 4, 0));
     inputPanel.add(buttonContainer, BorderLayout.SOUTH);
   }
 
   public void setValues(List<T> values) {
     var selected = list.getSelectedValue();
 
+    this.values = values;
     @SuppressWarnings("unchecked")
     var array = (T[]) values.toArray(new Nameable[0]);
     list.setListData(array);
