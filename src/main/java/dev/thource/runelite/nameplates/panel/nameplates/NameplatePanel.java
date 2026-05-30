@@ -376,22 +376,21 @@ public class NameplatePanel extends JPanel {
     for (ActorType type : ActorType.values()) {
       List.of(true, false)
           .forEach(
-              inCombat -> {
-                activeThemeCheckboxes.add(
-                    new ActiveThemeCheckbox(
-                        type,
-                        inCombat,
-                        new CheckboxInput(
-                            "Active for "
-                                + type.getDescription()
-                                + (inCombat ? " (in combat)" : " (out of combat)"),
-                            plugin.getActiveNameplateTheme(type, inCombat) == previewTheme,
-                            value -> {
-                              if (value) {
-                                this.setActiveTheme(type, inCombat);
-                              }
-                            })));
-              });
+              inCombat ->
+                  activeThemeCheckboxes.add(
+                      new ActiveThemeCheckbox(
+                          type,
+                          inCombat,
+                          new CheckboxInput(
+                              "Active for "
+                                  + type.getDescription()
+                                  + (inCombat ? " (in combat)" : " (out of combat)"),
+                              plugin.getActiveNameplateTheme(type, inCombat) == previewTheme,
+                              value -> {
+                                if (value) {
+                                  this.setActiveTheme(type, inCombat);
+                                }
+                              }))));
     }
 
     themeListSelector =
@@ -435,9 +434,7 @@ public class NameplatePanel extends JPanel {
   private void setActiveTheme(ActorType actorType, boolean inCombat) {
     plugin.setActiveNameplateTheme(actorType, inCombat, previewTheme);
 
-    if (themeListSelector != null) {
-      themeListSelector.repaint();
-    }
+    resetActiveCheckboxes();
   }
 
   private class PreviewPanel extends JPanel {
