@@ -120,12 +120,12 @@ public abstract class Text extends Element {
         new DropdownInput<>(
             "Text font",
             Fonts.getFontFamilies().stream()
-                .filter(f -> f.getValue().equals(getFontFamily()))
+                .filter(f -> f.getName().equals(getFontFamily()))
                 .findFirst()
                 .orElse(Fonts.getFontFamilies().get(0)),
             Fonts.getFontFamilies().toArray(new FontFamily[0]),
             fontFamily -> {
-              this.fontFamily = fontFamily.getValue();
+              this.fontFamily = fontFamily.getName();
               font = null;
             }));
 

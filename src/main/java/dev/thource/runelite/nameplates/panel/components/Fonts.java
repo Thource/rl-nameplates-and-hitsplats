@@ -12,11 +12,10 @@ public class Fonts {
     var rsSmall = FontManager.getRunescapeSmallFont();
     var rs = FontManager.getRunescapeFont();
 
-    fontFamilies.add(new FontFamily(rsSmall.getFamily(), rsSmall.getFamily()));
-    fontFamilies.add(new FontFamily(rs.getFamily(), rs.getFamily()));
-    fontFamilies.add(new FontFamily("RuneScape Bold", "RuneScape Bold"));
+    fontFamilies.add(new FontFamily(rsSmall.getFamily()));
+    fontFamilies.add(new FontFamily(rs.getFamily()));
 
-    FontManager.getCustomFonts().forEach((name) -> fontFamilies.add(new FontFamily(name, name)));
-    FontManager.getSystemFonts().forEach((name) -> fontFamilies.add(new FontFamily(name, name)));
+    FontManager.getCustomFonts().forEach((name) -> fontFamilies.add(new FontFamily(name)));
+    FontManager.getSystemFonts().forEach((name) -> fontFamilies.add(new FontFamily(name)));
   }
 }
