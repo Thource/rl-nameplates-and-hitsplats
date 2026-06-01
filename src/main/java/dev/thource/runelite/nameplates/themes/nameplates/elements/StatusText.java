@@ -18,7 +18,6 @@ import lombok.Builder;
 import lombok.experimental.SuperBuilder;
 import net.runelite.client.plugins.itemstats.StatChange;
 import net.runelite.client.plugins.itemstats.stats.Stats;
-import net.runelite.client.ui.FontManager;
 
 @SuperBuilder
 public class StatusText extends Text {
@@ -220,6 +219,10 @@ public class StatusText extends Text {
       return;
     }
 
+    if (font == null) {
+      loadFont();
+    }
+
     var text = textWithoutConsumableDelta;
     if (consumableDeltaText != null && !consumableDeltaText.isEmpty()) {
       var consumableTextColor = consumablePositiveColor;
@@ -232,7 +235,7 @@ public class StatusText extends Text {
 
       text += " " + consumableDeltaText;
       var attributedString = new AttributedString(text);
-      attributedString.addAttribute(TextAttribute.FONT, FontManager.getRunescapeSmallFont());
+      attributedString.addAttribute(TextAttribute.FONT, font);
       attributedString.addAttribute(
           TextAttribute.FOREGROUND,
           consumableTextColor,
@@ -246,7 +249,8 @@ public class StatusText extends Text {
           xPositionProvider,
           yPositionProvider,
           attributedString.getIterator(),
-          getColor(nameplate));
+          getColor(nameplate),
+          font);
       return;
     }
 
@@ -257,6 +261,7 @@ public class StatusText extends Text {
         xPositionProvider,
         yPositionProvider,
         textWithoutConsumableDelta,
-        getColor(nameplate));
+        getColor(nameplate),
+        font);
   }
 }
