@@ -7,6 +7,5 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class FontFamily implements Nameable {
-  private final String value;
   private final String name;
 }
