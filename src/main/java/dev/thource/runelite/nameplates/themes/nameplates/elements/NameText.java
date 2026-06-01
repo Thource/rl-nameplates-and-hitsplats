@@ -13,7 +13,6 @@ import javax.swing.SwingUtilities;
 import lombok.Builder;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import net.runelite.client.ui.FontManager;
 
 @SuperBuilder
 public class NameText extends Text {
@@ -34,8 +33,12 @@ public class NameText extends Text {
       return;
     }
 
+    if (font == null) {
+      loadFont();
+    }
+
     if (maxWidth > 0) {
-      graphics.setFont(FontManager.getRunescapeSmallFont());
+      graphics.setFont(font);
       var fontMetrics = graphics.getFontMetrics();
       text =
           SwingUtilities.layoutCompoundLabel(
@@ -52,7 +55,7 @@ public class NameText extends Text {
               0);
     }
 
-    draw(graphics, x, y, xPositionProvider, yPositionProvider, text, getColor(nameplate));
+    draw(graphics, x, y, xPositionProvider, yPositionProvider, text, getColor(nameplate), font);
   }
 
   @Override
