@@ -513,6 +513,10 @@ public class NameplatesOverlay extends Overlay {
       return ActorType.PLAYER;
     }
 
+    if (nameplate.isBoss()) {
+      return ActorType.BOSS;
+    }
+
     return ActorType.NPC;
   }
 

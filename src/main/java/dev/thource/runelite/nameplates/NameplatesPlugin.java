@@ -926,6 +926,10 @@ public class NameplatesPlugin extends Plugin {
       return config.playerNameplateDisplayMode();
     }
 
+    if (nameplate.isBoss()) {
+      return config.bossNameplateDisplayMode();
+    }
+
     return config.npcNameplateDisplayMode();
   }
 
@@ -953,6 +957,10 @@ public class NameplatesPlugin extends Plugin {
       }
 
       return config.alwaysDrawPlayerNames();
+    }
+
+    if (nameplate.isBoss()) {
+      return config.alwaysDrawBossNames();
     }
 
     return config.alwaysDrawNPCNames();

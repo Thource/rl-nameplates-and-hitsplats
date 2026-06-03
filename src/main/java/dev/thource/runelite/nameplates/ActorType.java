@@ -12,6 +12,7 @@ public enum ActorType {
   FRIEND_CHAT("FriendChat", "friends chat members"),
   CLAN("Clan", "clan members"),
   PLAYER("Players", "other players"),
+  BOSS("Bosses", "bosses"),
   NPC("NPCs", "NPCs");
 
   private final String key;
