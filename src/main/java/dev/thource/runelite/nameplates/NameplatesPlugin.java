@@ -60,6 +60,7 @@ import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.PlayerDespawned;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.NpcID;
 import net.runelite.api.gameval.VarPlayerID;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.Widget;
@@ -146,14 +147,31 @@ public class NameplatesPlugin extends Plugin {
   private Set<Integer> npcIdDenylist = new HashSet<>();
   private Set<String> npcNameDenylist = new HashSet<>();
 
+  // This is a hardcoded list of NPCs that should be excluded from the hp cache and nameplate system
+  // because they have non-standard overhead drawing, like the vale totem's leaf icon, for example.
+  private final Set<Integer> excludedNpcIds =
+      new HashSet<>(
+          List.of(
+              NpcID.ENT_TOTEMS_SITE_ICON, // Draws a leaf icon overhead
+              NpcID.GATHERING_EVENT_SAPLING_NPC_HPBAR_1X1, // Draws 2 bars, green + blue (potentially supportable)
+              NpcID.GATHERING_EVENT_SAPLING_NPC_HPBAR_2X2));
+
   private boolean isCheckingShouldDraw;
   private final RenderCallback renderCallback =
       new RenderCallback() {
         @Override
         public boolean addEntity(Renderable renderable, boolean ui) {
-          return isCheckingShouldDraw
-              || !ui
-              || (!(renderable instanceof Player) && !(renderable instanceof NPC));
+          if (isCheckingShouldDraw || !ui) {
+            return true;
+          }
+
+          if (renderable instanceof NPC) {
+            var npc = (NPC) renderable;
+
+            return excludedNpcIds.contains(npc.getId());
+          }
+
+          return !(renderable instanceof Player);
         }
       };
 
@@ -473,7 +491,9 @@ public class NameplatesPlugin extends Plugin {
   }
 
   private void updateHpCache(Actor actor) {
-    if (actor.isDead() || client.getLocalPlayer() == actor) {
+    if (actor.isDead()
+        || client.getLocalPlayer() == actor
+        || (actor instanceof NPC && excludedNpcIds.contains(((NPC) actor).getId()))) {
       return;
     }
 
@@ -515,11 +535,17 @@ public class NameplatesPlugin extends Plugin {
   }
 
   private PluginActor instantiateActor(Actor actor) {
+    if (actor instanceof NPC && excludedNpcIds.contains(((NPC) actor).getId())) {
+      return null;
+    }
+
     Nameplate nameplate;
     if (actor instanceof Player) {
       nameplate = new PlayerNameplate(this, (Player) actor);
-    } else {
+    } else if (actor instanceof NPC) {
       nameplate = new NPCNameplate(this, (NPC) actor);
+    } else {
+      return null;
     }
 
     var pluginActor = new PluginActor(actor, nameplate);
@@ -539,7 +565,12 @@ public class NameplatesPlugin extends Plugin {
 
     Nameplate nameplate = getNameplateForActor(actor);
     if (nameplate == null) {
-      nameplate = instantiateActor(actor).getNameplate();
+      var pluginActor = instantiateActor(actor);
+      if (pluginActor == null) {
+        return;
+      }
+
+      nameplate = pluginActor.getNameplate();
     }
 
     int hp;
