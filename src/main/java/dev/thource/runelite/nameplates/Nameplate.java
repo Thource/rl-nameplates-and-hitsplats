@@ -134,4 +134,8 @@ public abstract class Nameplate {
   public PartyData getPartyData() {
     return null;
   }
+
+  public boolean isBoss() {
+    return false;
+  }
 }

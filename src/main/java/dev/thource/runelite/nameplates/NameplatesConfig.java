@@ -202,11 +202,32 @@ public interface NameplatesConfig extends Config {
   }
 
   @ConfigItem(
+      keyName = "alwaysDrawBossNames",
+      name = "Always draw boss names",
+      description =
+          "Still draw boss names when nameplate display behaviour is set to hide the nameplates.",
+      position = 16,
+      section = NAMEPLATES_SECTION)
+  default boolean alwaysDrawBossNames() {
+    return false;
+  }
+
+  @ConfigItem(
+      keyName = "bossNameplateDisplayMode",
+      name = "Boss nameplate display behaviour",
+      description = "Defines when boss nameplates status bars will be visible.",
+      position = 17,
+      section = NAMEPLATES_SECTION)
+  default NameplateDisplayMode bossNameplateDisplayMode() {
+    return NameplateDisplayMode.ALWAYS;
+  }
+
+  @ConfigItem(
       keyName = "alwaysDrawNPCNames",
       name = "Always draw NPC names",
       description =
           "Still draw NPC names when nameplate display behaviour is set to hide the nameplates.",
-      position = 16,
+      position = 18,
       section = NAMEPLATES_SECTION)
   default boolean alwaysDrawNPCNames() {
     return false;
@@ -216,7 +237,7 @@ public interface NameplatesConfig extends Config {
       keyName = "npcNameplateDisplayMode",
       name = "NPC nameplate display behaviour",
       description = "Defines when NPC nameplates status bars will be visible.",
-      position = 17,
+      position = 19,
       section = NAMEPLATES_SECTION)
   default NameplateDisplayMode npcNameplateDisplayMode() {
     return NameplateDisplayMode.IN_COMBAT;
@@ -227,7 +248,7 @@ public interface NameplatesConfig extends Config {
       name = "NPC IDs allowlist",
       description =
           "ALWAYS draw nameplates or names for NPCs whose IDs are in this comma-separated list.",
-      position = 18,
+      position = 20,
       section = NAMEPLATES_SECTION)
   default String npcIdsAllowlist() {
     return "";
@@ -239,7 +260,7 @@ public interface NameplatesConfig extends Config {
       description =
           "ALWAYS draw nameplates or names for NPCs whose names are in this comma-separated list."
               + " Case-insensitive.",
-      position = 19,
+      position = 21,
       section = NAMEPLATES_SECTION)
   default String npcNamesAllowlist() {
     return "";
@@ -250,7 +271,7 @@ public interface NameplatesConfig extends Config {
       name = "NPC IDs denylist",
       description =
           "NEVER draw nameplates or names for NPCs whose IDs are in this comma-separated list.",
-      position = 20,
+      position = 22,
       section = NAMEPLATES_SECTION)
   default String npcIdsDenylist() {
     return "";
@@ -262,7 +283,7 @@ public interface NameplatesConfig extends Config {
       description =
           "NEVER draw nameplates or names for NPCs whose names are in this comma-separated list."
               + " Case-insensitive.",
-      position = 21,
+      position = 23,
       section = NAMEPLATES_SECTION)
   default String npcNamesDenylist() {
     return "";
@@ -276,7 +297,7 @@ public interface NameplatesConfig extends Config {
               + " any NPC/player<br>Right-click: Only show when hovering entries in the right"
               + " click menu<br>Busy: Only show when multiple NPC/players are present in the"
               + " right-click menu<br>Busy right-click: Combines Busy and Right-click mode",
-      position = 22,
+      position = 24,
       section = NAMEPLATES_SECTION)
   default HoverIndicatorMode hoverIndicatorMode() {
     return HoverIndicatorMode.BUSY_RIGHT_CLICK;
@@ -289,7 +310,7 @@ public interface NameplatesConfig extends Config {
           "If enabled, NPCs will be tagged as no-loot if a tinted damage hitsplat appears<br>on"
               + " them.<br><br>Disable this if you frequently PVM with your group members"
               + " and the false<br>positive no-loot indicators are bothering you.",
-      position = 23,
+      position = 25,
       section = NAMEPLATES_SECTION)
   default boolean enableNoLootOtherGIMSplats() {
     return true;
