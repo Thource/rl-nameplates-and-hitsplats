@@ -250,7 +250,8 @@ public class StatusText extends Text {
           yPositionProvider,
           attributedString.getIterator(),
           getColor(nameplate),
-          font);
+          font,
+          dropShadow);
       return;
     }
 
@@ -262,6 +263,7 @@ public class StatusText extends Text {
         yPositionProvider,
         textWithoutConsumableDelta,
         getColor(nameplate),
-        font);
+        font,
+        dropShadow);
   }
 }

@@ -2,6 +2,7 @@ package dev.thource.runelite.nameplates.themes.nameplates.elements;
 
 import dev.thource.runelite.nameplates.Nameplate;
 import dev.thource.runelite.nameplates.NameplatesPlugin;
+import dev.thource.runelite.nameplates.panel.components.CheckboxInput;
 import dev.thource.runelite.nameplates.panel.components.DropdownInput;
 import dev.thource.runelite.nameplates.panel.components.FontFamily;
 import dev.thource.runelite.nameplates.panel.components.FontStyleInput;
@@ -24,6 +25,7 @@ public abstract class Text extends Element {
   @Builder.Default protected String fontFamily = FontManager.getRunescapeSmallFont().getFamily();
   @Builder.Default protected int fontSize = FontManager.getRunescapeSmallFont().getSize();
   @Builder.Default protected int fontStyle = 0;
+  @Builder.Default protected boolean dropShadow = true;
   protected transient Font font;
 
   protected abstract String getText(Nameplate nameplate);
@@ -56,7 +58,16 @@ public abstract class Text extends Element {
       return;
     }
 
-    draw(graphics, x, y, xPositionProvider, yPositionProvider, text, getColor(nameplate), font);
+    draw(
+        graphics,
+        x,
+        y,
+        xPositionProvider,
+        yPositionProvider,
+        text,
+        getColor(nameplate),
+        font,
+        dropShadow);
   }
 
   public static void draw(
@@ -67,7 +78,8 @@ public abstract class Text extends Element {
       PositionProvider yPositionProvider,
       String text,
       Color color,
-      Font font) {
+      Font font,
+      boolean dropShadow) {
     if (text.trim().isEmpty()) {
       return;
     }
@@ -75,11 +87,15 @@ public abstract class Text extends Element {
     graphics.setFont(font);
     var fontMetrics = graphics.getFontMetrics();
     var textBounds = fontMetrics.getStringBounds(text, graphics);
+    var textX = x + xPositionProvider.get((int) textBounds.getWidth());
+    var textY =
+        y + (int) textBounds.getHeight() + yPositionProvider.get((int) textBounds.getHeight());
+    if (dropShadow) {
+      drawDropShadow(graphics, text, textX, textY);
+    }
+
     graphics.setColor(color);
-    graphics.drawString(
-        text,
-        x + xPositionProvider.get((int) textBounds.getWidth()),
-        y + (int) textBounds.getHeight() + yPositionProvider.get((int) textBounds.getHeight()));
+    graphics.drawString(text, textX, textY);
   }
 
   public static void draw(
@@ -90,7 +106,8 @@ public abstract class Text extends Element {
       PositionProvider yPositionProvider,
       AttributedCharacterIterator attributedCharacterIterator,
       Color color,
-      Font font) {
+      Font font,
+      boolean dropShadow) {
     graphics.setFont(font);
     var textBounds =
         graphics
@@ -105,11 +122,29 @@ public abstract class Text extends Element {
       return;
     }
 
+    var textX = x + xPositionProvider.get((int) textBounds.getWidth());
+    var textY =
+        y + (int) textBounds.getHeight() + yPositionProvider.get((int) textBounds.getHeight());
+
+    if (dropShadow) {
+      var textBuilder = new StringBuilder();
+      for (char c = attributedCharacterIterator.first();
+          c != AttributedCharacterIterator.DONE;
+          c = attributedCharacterIterator.next()) {
+        textBuilder.append(c);
+      }
+      var text = textBuilder.toString();
+
+      drawDropShadow(graphics, text, textX, textY);
+    }
+
     graphics.setColor(color);
-    graphics.drawString(
-        attributedCharacterIterator,
-        x + xPositionProvider.get((int) textBounds.getWidth()),
-        y + (int) textBounds.getHeight() + yPositionProvider.get((int) textBounds.getHeight()));
+    graphics.drawString(attributedCharacterIterator, textX, textY);
+  }
+
+  protected static void drawDropShadow(Graphics2D graphics, String text, int textX, int textY) {
+    graphics.setColor(Color.BLACK);
+    graphics.drawString(text, textX + 1, textY + 1);
   }
 
   @Override
@@ -148,6 +183,8 @@ public abstract class Text extends Element {
               fontStyle = val;
               font = null;
             }));
+
+    inputs.add(new CheckboxInput("Drop shadow", dropShadow, val -> dropShadow = val));
 
     return inputs;
   }

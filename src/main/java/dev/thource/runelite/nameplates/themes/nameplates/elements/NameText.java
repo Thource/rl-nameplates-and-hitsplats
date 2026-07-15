@@ -55,7 +55,16 @@ public class NameText extends Text {
               0);
     }
 
-    draw(graphics, x, y, xPositionProvider, yPositionProvider, text, getColor(nameplate), font);
+    draw(
+        graphics,
+        x,
+        y,
+        xPositionProvider,
+        yPositionProvider,
+        text,
+        getColor(nameplate),
+        font,
+        dropShadow);
   }
 
   @Override
