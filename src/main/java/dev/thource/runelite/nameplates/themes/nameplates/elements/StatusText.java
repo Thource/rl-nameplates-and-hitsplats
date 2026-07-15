@@ -131,13 +131,19 @@ public class StatusText extends Text {
       return null;
     }
 
-    var percentage = Math.ceil((float) getCurrent(nameplate) / getMax(nameplate) * 1000f) / 10f;
+    var decimals = nameplate.getPlugin().getConfig().nameplatePercentageDecimals();
+    var multiplier = (float) Math.pow(10, decimals + 2);
+    var percentage =
+        Math.ceil((float) getCurrent(nameplate) / getMax(nameplate) * multiplier)
+            / Math.pow(10, decimals);
+    @SuppressWarnings("MalformedFormatString")
+    var percentageStr = String.format("%." + decimals + "f%%", percentage);
 
     if (!forced && (showCurrent || showMax)) {
-      return "(" + percentage + "%)";
+      return "(" + percentageStr + ")";
     }
 
-    return percentage + "%";
+    return percentageStr;
   }
 
   protected String getTextForConsumableDelta(Nameplate nameplate) {
