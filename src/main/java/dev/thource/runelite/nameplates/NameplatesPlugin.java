@@ -153,8 +153,12 @@ public class NameplatesPlugin extends Plugin {
       new HashSet<>(
           List.of(
               NpcID.ENT_TOTEMS_SITE_ICON, // Draws a leaf icon overhead
-              NpcID.GATHERING_EVENT_SAPLING_NPC_HPBAR_1X1, // Draws 2 bars, green + blue (potentially supportable)
-              NpcID.GATHERING_EVENT_SAPLING_NPC_HPBAR_2X2));
+              NpcID.GATHERING_EVENT_SAPLING_NPC_HPBAR_1X1, // 2 bars, green + blue
+              NpcID.GATHERING_EVENT_SAPLING_NPC_HPBAR_2X2,
+              NpcID.YAMA_VOIDFLARE, // single yellow bar
+              NpcID.RAIDS_ICEDEMON_NONCOMBAT, // single blue/green bar
+              NpcID.DOM_BOSS // single yellow bar
+              ));
 
   private boolean isCheckingShouldDraw;
   private final RenderCallback renderCallback =
