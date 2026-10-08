@@ -50,6 +50,7 @@ import net.runelite.api.Player;
 import net.runelite.api.Prayer;
 import net.runelite.api.Renderable;
 import net.runelite.api.Skill;
+import net.runelite.api.WorldType;
 import net.runelite.api.WorldView;
 import net.runelite.api.events.ActorDeath;
 import net.runelite.api.events.ClientTick;
@@ -100,7 +101,11 @@ import net.runelite.client.util.Text;
     description = "Adds nameplates to NPCs.",
     tags = {"nameplates", "health", "npcs"})
 public class NameplatesPlugin extends Plugin {
+  private static final java.util.EnumSet<WorldType> COMBAT_WORLDS =
+      java.util.EnumSet.of(
+          WorldType.PVP, WorldType.DEADMAN, WorldType.PVP_ARENA, WorldType.LAST_MAN_STANDING);
   private static final int NORMAL_HP_REGEN_TICKS = 100;
+
   @Getter @Inject private Client client;
   @Getter @Inject private Gson gson;
   @Getter @Inject private ClientThread clientThread;
@@ -160,6 +165,7 @@ public class NameplatesPlugin extends Plugin {
               NpcID.DOM_BOSS // single yellow bar
               ));
 
+  private boolean inPvpArea;
   private boolean isCheckingShouldDraw;
   private final RenderCallback renderCallback =
       new RenderCallback() {
@@ -175,7 +181,11 @@ public class NameplatesPlugin extends Plugin {
             return excludedNpcIds.contains(npc.getId());
           }
 
-          return !(renderable instanceof Player);
+          if (renderable instanceof Player) {
+            return !inPvpArea;
+          }
+
+          return true;
         }
       };
 
@@ -604,8 +614,7 @@ public class NameplatesPlugin extends Plugin {
   public void onGameStateChanged(GameStateChanged gameStateChanged) {
     var newState = gameStateChanged.getGameState();
 
-    if (newState == GameState.HOPPING
-        || newState == GameState.LOGIN_SCREEN) {
+    if (newState == GameState.HOPPING || newState == GameState.LOGIN_SCREEN) {
       ticksSinceHPRegen = -2; // For some reason this makes this accurate
 
       hpCache.clear();
@@ -644,6 +653,22 @@ public class NameplatesPlugin extends Plugin {
 
       cacheCleaningTick = 0;
     }
+
+    inPvpArea = checkIsInPvpArea();
+  }
+
+  private boolean checkIsInPvpArea() {
+    if (client.getVarbitValue(VarbitID.INSIDE_WILDERNESS) == 1) {
+      return true;
+    }
+
+    for (WorldType t : client.getWorldType()) {
+      if (COMBAT_WORLDS.contains(t)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   @Subscribe
