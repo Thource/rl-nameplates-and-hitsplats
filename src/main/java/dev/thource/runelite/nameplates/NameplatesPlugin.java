@@ -602,17 +602,15 @@ public class NameplatesPlugin extends Plugin {
 
   @Subscribe
   public void onGameStateChanged(GameStateChanged gameStateChanged) {
-    if (gameStateChanged.getGameState() == GameState.HOPPING
-        || gameStateChanged.getGameState() == GameState.LOGIN_SCREEN) {
+    var newState = gameStateChanged.getGameState();
+
+    if (newState == GameState.HOPPING
+        || newState == GameState.LOGIN_SCREEN) {
       ticksSinceHPRegen = -2; // For some reason this makes this accurate
-    }
 
-    if (gameStateChanged.getGameState() != GameState.LOGGED_IN) {
-      return;
+      hpCache.clear();
+      actors.clear();
     }
-
-    hpCache.clear();
-    actors.clear();
   }
 
   @Subscribe
