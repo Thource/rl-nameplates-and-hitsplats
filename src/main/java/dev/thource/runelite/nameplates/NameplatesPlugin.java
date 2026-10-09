@@ -182,6 +182,10 @@ public class NameplatesPlugin extends Plugin {
           }
 
           if (renderable instanceof Player) {
+            if (renderable == client.getLocalPlayer()) {
+              return false;
+            }
+
             return inPvpArea;
           }
 
@@ -190,6 +194,10 @@ public class NameplatesPlugin extends Plugin {
       };
 
   boolean shouldDrawOverlay(Actor actor) {
+    if (actor instanceof Player && inPvpArea && actor != client.getLocalPlayer()) {
+      return false;
+    }
+
     isCheckingShouldDraw = true;
     var draw = hooks.draw(actor, true);
     isCheckingShouldDraw = false;
