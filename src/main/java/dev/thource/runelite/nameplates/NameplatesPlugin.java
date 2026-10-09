@@ -182,7 +182,7 @@ public class NameplatesPlugin extends Plugin {
           }
 
           if (renderable instanceof Player) {
-            return !inPvpArea;
+            return inPvpArea;
           }
 
           return true;
