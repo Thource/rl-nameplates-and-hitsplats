@@ -18,8 +18,10 @@ import net.runelite.client.plugins.itemstats.stats.Stats;
 @Setter
 @SuperBuilder
 public class HealthBar extends Bar {
+  protected static final Color DEFAULT_POISON_DAMAGE_COLOR = new Color(30, 90, 20);
+
   @Builder.Default HealthBarColorProvider barColorProvider = new HealthBarColorProvider();
-  @Builder.Default protected Color poisonDamageColor = new Color(30, 90, 20);
+  @Builder.Default protected Color poisonDamageColor = DEFAULT_POISON_DAMAGE_COLOR;
 
   @Override
   public boolean shouldDraw(Nameplate nameplate) {
@@ -74,8 +76,12 @@ public class HealthBar extends Bar {
         y + borderSize,
         poisonDamageWidth,
         innerHeight,
-        poisonDamageColor,
+        getPoisonDamageColor(),
         cornerRadius - borderSize);
+  }
+
+  public Color getPoisonDamageColor() {
+    return poisonDamageColor == null ? DEFAULT_POISON_DAMAGE_COLOR : poisonDamageColor;
   }
 
   @Override
@@ -84,7 +90,7 @@ public class HealthBar extends Bar {
 
     inputs.add(
         new ColorInput(
-            "Poison damage color", poisonDamageColor, this::setPoisonDamageColor, plugin));
+            "Poison damage color", getPoisonDamageColor(), this::setPoisonDamageColor, plugin));
 
     return inputs;
   }

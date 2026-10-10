@@ -19,7 +19,9 @@ public class IntInput extends LabelledInput {
       String unit) {
     super(name);
 
-    var model = new SpinnerNumberModel(defaultValue, minValue, maxValue, 1);
+    var model =
+        new SpinnerNumberModel(
+            Math.max(minValue, Math.min(maxValue, defaultValue)), minValue, maxValue, 1);
     input = new JSpinner(model);
     JFormattedTextField inputEditor = (JFormattedTextField) input.getEditor().getComponent(0);
     input.addChangeListener(e -> onChange.accept((Integer) input.getValue()));

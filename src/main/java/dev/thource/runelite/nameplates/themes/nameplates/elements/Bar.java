@@ -18,17 +18,26 @@ import net.runelite.client.plugins.itemstats.StatChange;
 @Setter
 @SuperBuilder
 public abstract class Bar extends Element {
+  protected static final Color DEFAULT_BORDER_COLOR = new Color(0.1f, 0.1f, 0.1f);
+  protected static final Color DEFAULT_BACKGROUND_COLOR = new Color(0.3f, 0.3f, 0.3f);
+  protected static final Color DEFAULT_CONSUMABLE_POSITIVE_COLOR = new Color(60, 120, 60);
+  protected static final Color DEFAULT_CONSUMABLE_CAPPED_POSITIVE_COLOR = new Color(100, 80, 0);
+  protected static final Color DEFAULT_CONSUMABLE_NEGATIVE_COLOR = new Color(80, 30, 20);
+
   @Builder.Default protected int width = 120;
   @Builder.Default protected int height = 14;
   @Builder.Default protected int heightAddedWhenDrawn = 14;
   @Builder.Default protected int cornerRadius = 0;
   @Builder.Default protected int borderSize = 2;
-  @Builder.Default protected Color borderColor = new Color(0.1f, 0.1f, 0.1f);
-  @Builder.Default protected Color backgroundColor = new Color(0.3f, 0.3f, 0.3f);
+  @Builder.Default protected Color borderColor = DEFAULT_BORDER_COLOR;
+  @Builder.Default protected Color backgroundColor = DEFAULT_BACKGROUND_COLOR;
   @Builder.Default protected boolean drawConsumableIndicator = true;
-  @Builder.Default protected Color consumablePositiveColor = new Color(60, 120, 60);
-  @Builder.Default protected Color consumableCappedPositiveColor = new Color(100, 80, 0);
-  @Builder.Default protected Color consumableNegativeColor = new Color(80, 30, 20);
+  @Builder.Default protected Color consumablePositiveColor = DEFAULT_CONSUMABLE_POSITIVE_COLOR;
+
+  @Builder.Default
+  protected Color consumableCappedPositiveColor = DEFAULT_CONSUMABLE_CAPPED_POSITIVE_COLOR;
+
+  @Builder.Default protected Color consumableNegativeColor = DEFAULT_CONSUMABLE_NEGATIVE_COLOR;
 
   public boolean shouldDraw(Nameplate nameplate) {
     return nameplate.getPlugin().shouldDrawBars(nameplate);
@@ -56,20 +65,20 @@ public abstract class Bar extends Element {
     var y = plateY + yPositionProvider.get(height);
 
     if (borderSize > 0) {
-      Rect.draw(graphics, x, y, width, height, borderColor, cornerRadius);
+      Rect.draw(graphics, x, y, width, height, getBorderColor(), cornerRadius);
     }
 
     var innerWidth = width - borderSize * 2;
     var innerHeight = height - borderSize * 2;
 
-    if (backgroundColor.getAlpha() > 0) {
+    if (getBackgroundColor().getAlpha() > 0) {
       Rect.draw(
           graphics,
           x + borderSize,
           y + borderSize,
           innerWidth,
           innerHeight,
-          backgroundColor,
+          getBackgroundColor(),
           cornerRadius - borderSize);
     }
 
@@ -85,8 +94,8 @@ public abstract class Bar extends Element {
               + fillWidth,
           innerHeight,
           statChange.getRelative() != statChange.getTheoretical()
-              ? consumableCappedPositiveColor
-              : consumablePositiveColor,
+              ? getConsumableCappedPositiveColor()
+              : getConsumablePositiveColor(),
           cornerRadius - borderSize);
     }
 
@@ -108,9 +117,35 @@ public abstract class Bar extends Element {
           y + borderSize,
           consumableWidth,
           innerHeight,
-          consumableNegativeColor,
+          getConsumableNegativeColor(),
           cornerRadius - borderSize);
     }
+  }
+
+  public Color getBorderColor() {
+    return borderColor == null ? DEFAULT_BORDER_COLOR : borderColor;
+  }
+
+  public Color getBackgroundColor() {
+    return backgroundColor == null ? DEFAULT_BACKGROUND_COLOR : backgroundColor;
+  }
+
+  public Color getConsumablePositiveColor() {
+    return consumablePositiveColor == null
+        ? DEFAULT_CONSUMABLE_POSITIVE_COLOR
+        : consumablePositiveColor;
+  }
+
+  public Color getConsumableCappedPositiveColor() {
+    return consumableCappedPositiveColor == null
+        ? DEFAULT_CONSUMABLE_CAPPED_POSITIVE_COLOR
+        : consumableCappedPositiveColor;
+  }
+
+  public Color getConsumableNegativeColor() {
+    return consumableNegativeColor == null
+        ? DEFAULT_CONSUMABLE_NEGATIVE_COLOR
+        : consumableNegativeColor;
   }
 
   @Override
@@ -130,26 +165,26 @@ public abstract class Bar extends Element {
     editInputs.add(
         new IntInput("Corner radius", cornerRadius, 0, 999, this::setCornerRadius, "px"));
     editInputs.add(new IntInput("Border size", borderSize, 0, 999, this::setBorderSize, "px"));
-    editInputs.add(new ColorInput("Border color", borderColor, this::setBorderColor, plugin));
+    editInputs.add(new ColorInput("Border color", getBorderColor(), this::setBorderColor, plugin));
     editInputs.add(
-        new ColorInput("Background color", backgroundColor, this::setBackgroundColor, plugin));
+        new ColorInput("Background color", getBackgroundColor(), this::setBackgroundColor, plugin));
 
     editInputs.add(
         new ColorInput(
             "Consumable positive color",
-            consumablePositiveColor,
+            getConsumablePositiveColor(),
             this::setConsumablePositiveColor,
             plugin));
     editInputs.add(
         new ColorInput(
             "Consumable positive capped color",
-            consumableCappedPositiveColor,
+            getConsumableCappedPositiveColor(),
             this::setConsumableCappedPositiveColor,
             plugin));
     editInputs.add(
         new ColorInput(
             "Consumable negative color",
-            consumableNegativeColor,
+            getConsumableNegativeColor(),
             this::setConsumableNegativeColor,
             plugin));
 
