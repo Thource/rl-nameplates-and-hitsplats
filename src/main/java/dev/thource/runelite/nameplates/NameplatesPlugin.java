@@ -102,8 +102,7 @@ import net.runelite.client.util.Text;
     tags = {"nameplates", "health", "npcs"})
 public class NameplatesPlugin extends Plugin {
   private static final java.util.EnumSet<WorldType> COMBAT_WORLDS =
-      java.util.EnumSet.of(
-          WorldType.PVP, WorldType.DEADMAN, WorldType.PVP_ARENA, WorldType.LAST_MAN_STANDING);
+      java.util.EnumSet.of(WorldType.PVP, WorldType.DEADMAN, WorldType.PVP_ARENA);
   private static final int NORMAL_HP_REGEN_TICKS = 100;
 
   @Getter @Inject private Client client;
@@ -670,13 +669,15 @@ public class NameplatesPlugin extends Plugin {
       return true;
     }
 
-    for (WorldType t : client.getWorldType()) {
+    var worldTypes = client.getWorldType();
+    for (WorldType t : worldTypes) {
       if (COMBAT_WORLDS.contains(t)) {
         return true;
       }
     }
 
-    return false;
+    return worldTypes.contains(WorldType.LAST_MAN_STANDING)
+        && client.getVarbitValue(VarbitID.BR_INGAME) == 1;
   }
 
   @Subscribe
