@@ -69,6 +69,9 @@ public abstract class Element implements Nameable {
       case "StatusText":
         clazz = StatusText.class;
         break;
+      case "Rect":
+        clazz = Rect.class;
+        break;
       // add other subclasses here
       default:
         throw new IllegalArgumentException("Unknown elementType: " + type);
